@@ -7,10 +7,8 @@
 
 
 import telebot #библиотека для котроля бота
-import time # для функции sleep() - боремся косвенно с флудом input_message и output
-
 import pandas as pd #для сохранение логов 
-import numpy as np #для генерации рандомных чисел (совместно с библиотекой time)
+import numpy as np #для генерации рандомных чисел
 
 
 # # Загрузка бота
@@ -63,14 +61,12 @@ url_list_temp = []
 
 @bot.message_handler(commands=['start','начать','привет','hello'])
 def start_bot(message):
-    time.sleep(np.random.uniform(0,2))
     bot.send_message(message.chat.id, f'Здравствуй, {message.from_user.username}! Я подручный бот Нефтезнайка версии 0.2')
     bot.send_photo(message.chat.id, 'https://zamanilka.ru/wp-content/uploads/2022/05/smeshariki-kartinki-96.jpg')
     bot.send_message(message.chat.id, 'В данной версии реализована возможность пользоваться цифровой библиотекой (еще не полная).    Если хочешь начать, но не знаешь как, то напиши /help или /помоги и ознакомься с набором доступных команд')
 
 @bot.message_handler(commands=['ask','спросить']) #костыль для работы бота в группах
 def ask_bot(message):
-    time.sleep(np.random.uniform(0,3))
     print(f'/ask: {message.from_user.id} | {message.chat.id} | {message.text}')
     bot.send_message(message.chat.id, f'Напишите слово') 
     bot.register_next_step_handler(message, ask_run)
@@ -91,24 +87,20 @@ def admin_bot(message):
     
 @bot.message_handler(commands=['help','помоги'])
 def help_bot(message):
-    time.sleep(np.random.uniform(0,3))
     bot.send_message(message.chat.id, 'Список доступных команд: /пример или /example - показывает как спросить определение любого термина у бота | /словарь или /dict - показать случайные термины из словаря | /дополнить или /update - предложить собственный термин и определение для бота    | /example2 или /пример2 - как обращаться к боту в общем чате | /ask или /спросить - спросить у бота термин к слову')
     
 @bot.message_handler(commands=['example2','пример2'])
 def example2_bot(message):
-    time.sleep(np.random.uniform(0,3))
     bot.send_message(message.chat.id, f'Чтобы обращаться к боту в общем чате пишите в тексте "бот" или "@DigitalLibraryForNeftegazBot"')
     bot.send_message(message.chat.id, f'Команды из списка /help в групповом чате работают аналогично личному чату')
 
 @bot.message_handler(commands=['example','пример'])
 def example_bot(message):
-    time.sleep(np.random.uniform(0,3))
     bot.send_message(message.chat.id, 'Для запроса к боту достаточно написать любой термин. К примеру напиши в любом регистре вот это:') #случайное слово из словаря для примера
     bot.send_message(message.chat.id, f'{keys_list_global[np.random.randint(0,len(keys_list_global))]}') #случайное слово из словаря для примера
     
 @bot.message_handler(commands=['dict','словарь'])
 def dict_bot(message):
-    time.sleep(np.random.uniform(1,3))
     a = np.random.randint(0,len(keys_list_global))
     b = a+5
     if b >= len(keys_list_global):
@@ -117,7 +109,6 @@ def dict_bot(message):
     
 @bot.message_handler(commands=['update','дополнить'])
 def update_bot(message):
-    time.sleep(np.random.uniform(1,3)) #что-бы не создавать флуда
     count = len(keys_list_temp)
     print(f'{count} - кол-во запросов на обновление словаря')
     if count == 1 or count == 30 or count == 100 or count == 300 or count == 490:
@@ -136,7 +127,7 @@ def update_bot(message):
 # In[7]:
 
 
-list_ask_bot = ['бот', 'Бот', 'БОТ', 'БоТ', 'боТ', ',jn', 'BOT','bot', 'boT', 'Bot','BoT','@DigitalLibraryForNeftegazBot']
+# list_ask_bot = ['бот', 'Бот', 'БОТ', 'БоТ', 'боТ', ',jn', 'BOT','bot', 'boT', 'Bot','BoT','@DigitalLibraryForNeftegazBot']
 @bot.message_handler(content_types=['text'])
 def get_text_messages(message):
     if message.chat.id == message.from_user.id: #личные сообщения
@@ -144,13 +135,13 @@ def get_text_messages(message):
         search_in_dict(text_for_bot, message)
         print(f'ЛС: {message.from_user.id} | {message.text}')
         
-    elif message.chat.id != message.from_user.id: #общий чат
-        for i in list_ask_bot: #перебираем варианты обращения к боту
-            if i in message.text:
-                text_for_bot = message.text.lower()
-                text_for_bot = message.text.replace(i, '')
-                print('Проверка 01')
-                search_in_dict(text_for_bot, message)
+    # elif message.chat.id != message.from_user.id: #общий чат
+    #     for i in list_ask_bot: #перебираем варианты обращения к боту
+    #         if i in message.text:
+    #             text_for_bot = message.text.lower()
+    #             text_for_bot = message.text.replace(i, '')
+    #             print('Проверка 01')
+    #             search_in_dict(text_for_bot, message)
 
 
 # # Поиск термина в словаре
