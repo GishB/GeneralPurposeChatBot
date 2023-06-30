@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
-
-
 import telebot
 from main import bot
 
@@ -15,9 +12,6 @@ def handler(event, _):
         'statusCode': 200,
         'body': '!',
     }
-
-
-# In[ ]:
 
 
 

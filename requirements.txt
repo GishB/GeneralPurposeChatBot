@@ -1,0 +1,9 @@
+requests==2.31
+numpy==1.25
+pandas==2.0.3
+html_to_json==2.0.0
+matplotlib==3.7.1
+babel==2.12.1
+telebot==0.0.5
+boto3==1.26
+pyTelegramBotAPI==4.12.0
