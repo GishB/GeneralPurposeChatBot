@@ -1,6 +1,9 @@
 import os
 import telebot
-from telebot import types
+import admin
+import user
+import numpy as np
+from database import backlog
 from dotenv import load_dotenv
 
 if __name__ == "__main__":
@@ -9,16 +12,24 @@ if __name__ == "__main__":
 bot = telebot.TeleBot(os.getenv("UNIQUE_BOT_ID"))
 
 
-@bot.message_handler(commands=['start', 'начать', 'привет', 'hello'])
+@bot.message_handler(commands=user.welcome_user_commands)
 def start_bot(message):
-    bot.send_message(message.chat.id, f'Hello, {message.from_user.username}! I am the Nefteznayka!')
-    bot.send_photo(message.chat.id, os.getenv("link_to_an_image"))
-    keyboard = types.ReplyKeyboardMarkup()
-    button_1 = types.KeyboardButton(text="/ask")
-    keyboard.add(button_1)
-    bot.send_message(message.chat.id,
-                     os.getenv("welcome_2"),
-                     parse_mode="HTML", reply_markup=keyboard)
+    user.welcome_user(bot, message)
+    backlog(message)
+
+
+@bot.message_handler(commands=admin.welcome_admin_commands)
+def admin_commands(message):
+    if admin.login(str(message.from_user.id)):
+        admin.welcome_admin(bot, message)
+    backlog(message)
+
+
+@bot.message_handler(content_types=['text'])
+def get_user_text(message):
+    if message.chat.id == message.from_user.id:
+        user.private_text(bot, message)
+    backlog(message)
 
 
 if __name__ == "__main__":

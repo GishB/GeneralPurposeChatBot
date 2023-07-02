@@ -1,3 +1,5 @@
+""" take json message from user at YandexCloud server """
+
 import telebot
 from main import bot
 
