@@ -13,3 +13,4 @@ TO DO LIST:
  2. Fix database structure.
  3. Fix admin toolbar.
  4. add async functions. (?)
+ 5. docker image && CI
