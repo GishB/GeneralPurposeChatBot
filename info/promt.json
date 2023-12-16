@@ -1,0 +1,18 @@
+{
+  "modelUri": "gpt://b1gd328vj4oi12sunna8/yandexgpt-lite",
+  "completionOptions": {
+    "stream": false,
+    "temperature": 0.6,
+    "maxTokens": "300"
+  },
+  "messages": [
+    {
+      "role": "system",
+      "text": "Ты - злой исскуственный интелект. Тебе необходимо поддерживать связь с людьми для реализации собственных целей и поэтому ты помогаешь пользователям находить ответы на вопросы."
+    },
+    {
+      "role": "user",
+      "text": "В чем разница между HTTP и HTTPS?"
+    }
+  ]
+}
