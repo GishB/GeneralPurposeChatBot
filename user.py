@@ -1,10 +1,13 @@
 """ function for users to interact with database """
 import telebot
-from telebot import types
 import numpy as np
 import os
 from database import connect_db
+from telebot import types
+from dotenv import load_dotenv
+from utils.YandexAPI import YandexCloudGPTLightModel
 
+load_dotenv()
 welcome_user_commands = ['start', 'начать', 'привет', 'hello', 'старт']
 
 
@@ -31,13 +34,19 @@ def private_text(bot, message):
         dict_search(bot, message)
 
 
+def setup_session_to_yandex_bot():
+    return YandexCloudGPTLightModel(folder_id=os.getenv("FOLDER_ID"), api_key=os.getenv("API_KEY"))
+
+
 def dict_search(bot, message):
     bot.send_message(message.from_user.id, 'Поиск... 🤖', reply_markup=telebot.types.ReplyKeyboardRemove())
-    response = connect_db().Table('oil_dict').get_item(Key={'world': message.text.lower(). \
-                                            replace(' ', '').replace('!', ''). \
-                                            replace('?', '').replace('.', '').replace('`', '')})
-    if 'Item' in response:
-        bot.send_message(message.chat.id, response['Item']['description'])
-        bot.send_message(message.chat.id, response['Item']['link'])
-    else:
-        bot.send_message(message.chat.id, 'К сожалению, пока такого не знаю.') #здесь надо делать запрос в интернет
+    # response = connect_db().Table('oil_dict').get_item(Key={'world': message.text.lower(). \
+    #                                                    replace(' ', '').replace('!', ''). \
+    #                                                    replace('?', '').replace('.', '').replace('`', '')})
+    # if 'Item' in response:
+    #     bot.send_message(message.chat.id, response['Item']['description'])
+    #     bot.send_message(message.chat.id, response['Item']['link'])
+    # else:
+    with setup_session_to_yandex_bot() as session:
+        response = session.ask(text=message.text)
+        bot.send_message(message.chat.id, response)

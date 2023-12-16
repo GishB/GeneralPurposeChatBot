@@ -63,7 +63,7 @@ class YandexCloudGPTLightModel:
             ]
         })
 
-    async def ask(self, text) -> str:
+    def ask(self, text) -> str:
         response = requests.post(url=self.url, headers=self.setup_header(), data=self.setup_data(text=text))
         if response.status_code == 200:
             dict_response = json.loads(response.content)

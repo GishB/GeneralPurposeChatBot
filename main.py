@@ -2,7 +2,6 @@ import os
 import telebot
 import admin
 import user
-import numpy as np
 from database import backlog
 from dotenv import load_dotenv
 
