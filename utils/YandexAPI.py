@@ -1,6 +1,7 @@
 import requests
 import json
 
+
 class YandexCloudGPTLightModel:
     def __init__(self,
                  temperature: float = 0.6,
