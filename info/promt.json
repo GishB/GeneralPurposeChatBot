@@ -1,5 +1,5 @@
 {
-  "modelUri": "gpt://b1gd328vj4oi12sunna8/yandexgpt-lite",
+  "modelUri": "gpt://<FOLDER_ID>/yandexgpt-lite",
   "completionOptions": {
     "stream": false,
     "temperature": 0.6,
