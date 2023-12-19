@@ -7,7 +7,7 @@ from datetime import datetime
 def connect_db() -> boto3.resource:
     """simple connection to database on yandexcloud"""
     return boto3.resource \
-        (
+            (
             'dynamodb',
             endpoint_url=os.getenv("ENDPOINT_URL"),
             region_name=os.getenv("REGION_NAME"),
@@ -16,20 +16,22 @@ def connect_db() -> boto3.resource:
         )
 
 
-def backlog(message) -> str:
-    """save all user messages in a private chat"""
-    time = datetime.now()
-    connect_db().Table('user_messages_db').put_item\
-    (
+def all_messages_db(message, time, out) -> str:
+    connect_db().Table('user_messages_db').put_item \
+        (
             Item={
-                'unique_message_id': str(message.message_id) + str(message.from_user.id),
+                'unique_message_id': str(message.message_id),
                 'user_id': str(message.from_user.id),
                 'text': str(message.text),
-                'time-daily': time.strftime("%H:%M:%S"),
-                'time-year': time.strftime("%Y-%m-%d"),
+                'model_outputs': out,
+                'time': time,
             }
-    )
+        )
     return "200"
 
-# if __name__ == "__main__":
-#     backlog("200")
+
+def backlog(message, out: str = None) -> str:
+    """save all user messages at your boto3 database"""
+    time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    all_messages_db(message, time, out)
+    return "200"
