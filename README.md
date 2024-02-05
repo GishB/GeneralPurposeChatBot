@@ -1,10 +1,10 @@
 # Telegram Bot - PersonalJesus
-© Sberbank (Kadinsky 3.0 generative model)
+© Sberbank (Kadinsky 3.0 generative img model)
 
 ![image](https://github.com/GishB/TelegramBot-project-Summer-2022/assets/90556084/50fc9bd6-a0a2-4c37-a9e2-bd3fb011eb29)
 
 
- This is a telegram bot which can interact with AI models via YandexCloud API. Baseline idea is to help user find world description based on few words.
+ This is a telegram bot which can interact with AI models via YandexCloud API. Baseline idea is to help user find world description based on few words. It is powered by ***YandexGPT*** model.
 
 tg link:
 > https://t.me/SimulationMindBot
