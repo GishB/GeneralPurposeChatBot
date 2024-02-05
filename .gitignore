@@ -5,4 +5,5 @@ Images
 instruction.txt
 .idea
 .env
-experiments/.ipynb_checkpoints
+venv/
+.ipynb_checkpoints/
