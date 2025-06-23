@@ -1,24 +1,21 @@
 """ function for users to interact with database """
-import telebot
-import numpy as np
 import os
-from database import connect_db
 from telebot import types
 from dotenv import load_dotenv
 from typing import Union
-from utils.YandexAPI import YandexCloudGPTLightModel
+from utils.YandexModelAPI import YandexCloudGPTAPI
 
 load_dotenv()
 welcome_user_commands = ['start', 'начать', 'привет', 'hello', 'старт']
 
 
 def welcome_user(bot, message):
-    bot.send_message(message.chat.id, f'Приветствую, {message.from_user.username}! Меня зовут PersonalJesus!')
+    bot.send_message(message.chat.id, f'Приветствую, {message.from_user.username}!')
     keyboard = types.ReplyKeyboardMarkup()
     button_1 = types.KeyboardButton(text="Согласен передавать и обрабатывать свои мета данные для улучшения качества "
-                                         "работы модели YandexGPT2-light.")
+                                         "работы LLM?")
     button_2 = types.KeyboardButton(text="Выражаю несогласие передавать и обрабатывать свои мета данные для улучшения "
-                                         "качества работы модели YandexGPT2-light.")
+                                         "качества работы LLM?")
     keyboard.add(button_1)
     keyboard.add(button_2)
     bot.send_message(message.chat.id,
