@@ -1,11 +1,8 @@
 """ function for users to interact with database """
-import os
-from telebot import types
-from dotenv import load_dotenv
-from typing import Union
-from utils.YandexModelAPI import YandexCloudGPTAPI
 
-load_dotenv()
+from telebot import types
+from typing import Union
+
 welcome_user_commands = ['start', 'начать', 'привет', 'hello', 'старт']
 
 
@@ -19,12 +16,16 @@ def welcome_user(bot, message):
     keyboard.add(button_1)
     keyboard.add(button_2)
     bot.send_message(message.chat.id,
-                     os.getenv("start_info"),
-                     parse_mode="HTML", reply_markup=keyboard)
+                     "Хорошо, ответ принят!",
+                     parse_mode="HTML",
+                     reply_markup=keyboard)
 
 
-def private_chat(bot, message) -> Union[str, None]:
-    response = YandexCloudGPTLightModel(folder_id=os.getenv("FOLDER_ID"),
-                                        api_key=os.getenv("API_KEY")).ask(text=message.text)
+def private_chat(bot, message, client, prompt, collection_name) -> Union[str, None]:
+    response = client.ask(text=message.text,
+                          prompt=prompt,
+                          user_id=message.chat_id,
+                          collection_name=collection_name
+                          )
     bot.send_message(message.chat.id, response)
     return response
