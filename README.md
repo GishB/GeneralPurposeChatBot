@@ -25,6 +25,7 @@ tg link:
  - [x] ChromaDB for RAG system (ChromaAdapter class)
  - [x] RerankingAPI for selected documents.
  - [x] ChatHistoryManager (based on Redis).
+ - [ ] QueryHelpManager (rewrite or modify user query in case of problems with query)
  - [ ] Transform Audio request and model output to audio\text to interact with user.
  - [ ] Docker Image
  - [ ] github workflow for CI.
