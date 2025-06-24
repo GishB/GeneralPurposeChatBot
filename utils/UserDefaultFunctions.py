@@ -7,24 +7,18 @@ welcome_user_commands = ['start', 'начать', 'привет', 'hello', 'ст
 
 
 def welcome_user(bot, message):
-    bot.send_message(message.chat.id, f'Приветствую, {message.from_user.username}!')
-    keyboard = types.ReplyKeyboardMarkup()
-    button_1 = types.KeyboardButton(text="Согласен передавать и обрабатывать свои мета данные для улучшения качества "
-                                         "работы LLM?")
-    button_2 = types.KeyboardButton(text="Выражаю несогласие передавать и обрабатывать свои мета данные для улучшения "
-                                         "качества работы LLM?")
-    keyboard.add(button_1)
-    keyboard.add(button_2)
-    bot.send_message(message.chat.id,
-                     "Хорошо, ответ принят!",
-                     parse_mode="HTML",
-                     reply_markup=keyboard)
+    bot.send_message(message.chat.id, f'Приветствую, {message.from_user.username}!\n'
+                                      f'Что-бы начать чат напиши свой вопрос. К примеру, начни свой вопрос с диалога:'
+                                      f'"Привет, бот! Я бы хотел, что-бы ты мне помог разобраться в структуре коллективного договора'
+                                      f'на предприятии."'
+                                      f'"Сколько положений выделено в коллективном договоре на предприятии? '
+                     )
 
 
 def private_chat(bot, message, client, prompt, collection_name) -> Union[str, None]:
-    response = client.ask(text=message.text,
+    response = client.ask(query=message.text,
                           prompt=prompt,
-                          user_id=message.chat_id,
+                          user_id=message.from_user.id,
                           collection_name=collection_name
                           )
     bot.send_message(message.chat.id, response)
