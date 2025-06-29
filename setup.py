@@ -11,7 +11,7 @@ with open('README.md', 'r', encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='driller',
+    name='UnionChatBot',
     version=__version__,
     python_requires='>=3.10.0',
     url='https://github.com/GishB/GeneralPurposeTelegramBOT',
