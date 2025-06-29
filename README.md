@@ -9,6 +9,14 @@ tg link:
  - To start interact you need just to type /start or /начать.
  - If you want just to know something just start to type and you easily find out your answer.
 
+ ## How to Start?
+   0. You have to define API credentials for Telegram and YandexAPI at **.env** file! As well you will have to fill chromadb COLLECTION_NAME.
+   1. `` git clone https://github.com/GishB/GeneralPurposeTelegramBOT ``
+   2. `` pip install -e .``
+   3. `` sudo docker run -d -p 6379:6379 redis/redis-stack:latest``
+   4. `` sudo docker run -v ./chroma-data:/data -p 32000:8000 -d chromadb/chroma`` 
+   5. `` cd ./src/UnionChatBot | python3 main.py``
+
  ## Ideal chatbot functions:
  
   1. Interact with user via text and keep in memory all chat history.
