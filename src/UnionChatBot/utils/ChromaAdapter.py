@@ -1,8 +1,8 @@
 import chromadb
 
 from typing import List, Dict, Any
-from utils.EmbeddingAPI import MyEmbeddingFunction
-from utils.RerankerAPI import BM25Reranker
+from UnionChatBot.utils.EmbeddingAPI import MyEmbeddingFunction
+from UnionChatBot.utils.RerankerAPI import BM25Reranker
 
 class ChromaAdapter:
     def __init__(

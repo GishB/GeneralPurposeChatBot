@@ -1,8 +1,8 @@
-from utils.ChatHistoryManager import ChatHistoryManager
-from utils.ChromaAdapter import ChromaAdapter
-from utils.EmbeddingAPI import MyEmbeddingFunction
-from utils.RedisAdapters import SemanticRedisCache
-from utils.YandexModelAPI import MyYandexModel
+from UnionChatBot.utils.ChatHistoryManager import ChatHistoryManager
+from UnionChatBot.utils.ChromaAdapter import ChromaAdapter
+from UnionChatBot.utils.EmbeddingAPI import MyEmbeddingFunction
+from UnionChatBot.utils.RedisAdapters import SemanticRedisCache
+from UnionChatBot.utils.YandexModelAPI import MyYandexModel
 
 def setting_up(folder_id: str,
                api_key: str,

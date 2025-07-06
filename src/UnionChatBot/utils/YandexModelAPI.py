@@ -1,10 +1,10 @@
 import json
 import requests
 
-from utils.EmbeddingAPI import MyEmbeddingFunction
-from utils.ChromaAdapter import ChromaAdapter
-from utils.RedisAdapters import SemanticRedisCache
-from utils.ChatHistoryManager import ChatHistoryManager
+from UnionChatBot.utils.EmbeddingAPI import MyEmbeddingFunction
+from UnionChatBot.utils.ChromaAdapter import ChromaAdapter
+from UnionChatBot.utils.RedisAdapters import SemanticRedisCache
+from UnionChatBot.utils.ChatHistoryManager import ChatHistoryManager
 
 class MyYandexModel:
     def __init__(self,
