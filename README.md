@@ -20,6 +20,29 @@ tg link:
    6. `` cd ./src/UnionChatBot``
    7. `` python3 main.py``
 
+**Docker setup**
+
+1. Build docker image from root of the project.
+```commandline
+ docker build -t union-chatbot --platform linux/amd64 .
+```
+
+2. Check that image has been build.
+```commandline
+docker images | grep union-chatbot
+```
+
+3. Run docker image.
+```commandline
+docker run -d \
+  --name chatbot \
+  --cpus=2 \
+  --memory=2g \
+  --restart unless-stopped \
+  -p 8000:8000 \
+  union-chatbot
+```
+
  ## Ideal chatbot functions:
  
   1. Interact with user via text and keep in memory all chat history.

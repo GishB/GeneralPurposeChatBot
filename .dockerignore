@@ -1,0 +1,27 @@
+# Игнорируем конфигурационные файлы
+.env
+.env.*
+!.env.example
+
+# Игнорируем системные файлы
+.git
+.gitignore
+.dockerignore
+
+# Игнорируем временные файлы IDE
+.idea
+.vscode
+*.swp
+*~
+
+# Игнорируем кэш Python
+__pycache__/
+*.py[cod]
+*.so
+.python-version
+
+# Игнорируем виртуальные окружения
+venv/
+.venv/
+env/
+ENV/

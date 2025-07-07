@@ -9,3 +9,4 @@ venv/
 .ipynb_checkpoints/
 __pycache__/
 UnionChatBot.egg-info
+.env.prod

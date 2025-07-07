@@ -4,7 +4,6 @@ from pydantic import BaseModel
 from typing import Optional
 from UnionChatBot.utils.SessionAdapter import setting_up, get_prompt
 from concurrent.futures import ThreadPoolExecutor
-from pathlib import Path
 from dotenv import load_dotenv
 import re
 
@@ -22,7 +21,7 @@ class ChatRequest(BaseModel):
 
 
 # Конфигурация
-DEFAULT_PROMPT = (Path(__file__).parent / os.getenv("DEFAULT_PROMPT_FILE")).read_text(encoding="utf-8")
+DEFAULT_PROMPT = os.getenv("DEFAULT_PROMPT_FILE")
 DEFAULT_COLLECTION = os.getenv("COLLECTION_NAME")
 
 # Инициализация компонентов (замените на ваши реальные классы)
