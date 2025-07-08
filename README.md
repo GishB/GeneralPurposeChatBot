@@ -1,17 +1,22 @@
-# Telegram Bot - UnionHelperBot
+# UnionHelperBot
 
- This is a telegram bot which can interact with AI models via YandexCloud API.
- Baseline idea is to help workers find related info from documents. It is powered by ***YandexGPTAPI***.
+ This is a repo for general purpose chatbot which can interact with AI models via YandexCloud API.
+ Baseline idea is to help user find related info from documents. It is powered by ***YandexGPTAPI***, Redis and ChromaDB.
 
-tg link:
+If you would like to check this bot go to tg link (sometimes i will run this for tests):
 > https://t.me/HelperUnionBot
  
  - To start interact you need just to type /start or /начать.
  - If you want just to know something just start to type and you easily find out your answer.
 
- ## How to Start?
+ ### Who use this ChatBot template?
+
+ This backend logic used at a local WorkerUnion organization.
+ ### How to Start?
 
 **Developer guide**
+
+``This is useful if you would like to test telegram API.``
    1. You have to define API credentials for Telegram and YandexAPI at **.env** file! As well to feed data into chromadb COLLECTION_NAME.
    2. `` git clone https://github.com/GishB/GeneralPurposeTelegramBOT ``
    3. `` pip install -e .``
@@ -22,7 +27,9 @@ tg link:
 
 **Docker Compose setting up**
 
-Minimum setup from docker-compose file:
+``If you would like just to start you own chatbot API based on this solution.``
+
+Minimum setup from docker-compose file (can be changed by user manually):
  - 3 CPU
  - 6 GB
 
@@ -41,14 +48,20 @@ curl -X 'POST' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -d '{
-  "query": "Какой коллективный договор действует на предприятии? Хочу знать общую информацию по КД.",
+  "query": "Hello! How are you? What the latest news you know about workerunion life?",
   "user_id": "0",
   "request_id": "md5hash"
 }'
-
 ```
 
- ## Ideal chatbot functions:
+If you woild like to change default prompt you will have 3 options.
+
+1. The first option is to add to POST request your own prompt!
+2. The second option is to change default prompt file when you build your own image for chat-bot.
+3. The third option is to change .env.prod default name file which you would like to use by default. (the problem here you will need to build image from scratch)
+
+
+ ### Ideal chatbot functions:
  
   1. Interact with user via text and keep in memory all chat history.
   2. Interact with user via audio and return result as well in audio text.
@@ -58,7 +71,7 @@ curl -X 'POST' \
   6. Provide links for users for any answers
   7. ??
 
-## **TO DO LIST:**
+### **TO DO LIST:**
  - [x] Adapater for YandexGPTAPI.
  - [x] Redis Caching (Redis Adapter class)
  - [x] ChromaDB for RAG system (ChromaAdapter class)
@@ -66,7 +79,7 @@ curl -X 'POST' \
  - [x] ChatHistoryManager (based on Redis).
  - [ ] QueryHelpManager (rewrite or modify user query in case of problems with query)
  - [ ] Transform Audio request and model output to audio\text to interact with user.
- - [ ] Docker Image
- - [ ] github workflow for CI.
- - [ ] README setup locally .
- - [ ] Async libraries to interact with users instead of telegrambotapi.
+ - [x] Docker Image
+ - [ ] github workflow for CI/CD.
+ - [X] README setup locally .
+ - [X] Async libraries to interact with users instead of telegrambotapi.
