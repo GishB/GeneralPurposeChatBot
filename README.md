@@ -1,7 +1,7 @@
-# UnionHelperBot
+# QueryHelperBot
 
  This is a repo for general purpose chatbot which can interact with AI models via YandexCloud API.
- Baseline idea is to help user find related info from documents. It is powered by ***YandexGPTAPI***, Redis and ChromaDB.
+ Baseline idea is to help developers to create ChatBotAPI + RAG for users who like to find related info from documents. It is powered by ***YandexGPTAPI***, Redis and ChromaDB.
 
 If you would like to check this bot go to tg link (sometimes i will run this for tests):
 > https://t.me/HelperUnionBot
@@ -83,3 +83,4 @@ If you woild like to change default prompt you will have 3 options.
  - [ ] github workflow for CI/CD.
  - [X] README setup locally .
  - [X] Async libraries to interact with users instead of telegrambotapi.
+ - [ ] Add options to use user defined prompt files via mount if we use Docker Compose? 
