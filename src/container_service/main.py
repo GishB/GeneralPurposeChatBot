@@ -20,7 +20,7 @@ class ChatRequest(BaseModel):
     collection_name: Optional[str] = None
 
 
-# Конфигурация
+# Конфигурация базовая
 DEFAULT_PROMPT = os.getenv("DEFAULT_PROMPT_FILE")
 DEFAULT_COLLECTION = os.getenv("COLLECTION_NAME")
 
@@ -28,7 +28,11 @@ DEFAULT_COLLECTION = os.getenv("COLLECTION_NAME")
 client_yandex = setting_up(
                             folder_id=os.getenv("FOLDER_ID"),
                             api_key=os.getenv("API_KEY"),
-                            embeding_api=os.getenv("EMBEDDING_API")
+                            embeding_api=os.getenv("EMBEDDING_API"),
+                            host_vector_db=os.getenv("CHROMA_HOST"),
+                            port_vector_db=os.getenv("CHROMA_PORT"),
+                            redis_port=os.getenv("REDIS_PORT"),
+                            redis_host=os.getenv("REDIS_HOST")
                           )
 
 def is_specific_error(text: str) -> bool:

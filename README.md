@@ -12,7 +12,7 @@ tg link:
  ## How to Start?
 
 **Developer guide**
-   1. You have to define API credentials for Telegram and YandexAPI at **.env** file! As well you will have to fill chromadb COLLECTION_NAME.
+   1. You have to define API credentials for Telegram and YandexAPI at **.env** file! As well to feed data into chromadb COLLECTION_NAME.
    2. `` git clone https://github.com/GishB/GeneralPurposeTelegramBOT ``
    3. `` pip install -e .``
    4. `` sudo docker run -d -p 6379:6379 redis/redis-stack:latest``
@@ -20,27 +20,32 @@ tg link:
    6. `` cd ./src/UnionChatBot``
    7. `` python3 main.py``
 
-**Docker setup**
+**Docker Compose setting up**
 
-1. Build docker image from root of the project.
+Minimum setup from docker-compose file:
+ - 3 CPU
+ - 6 GB
+
+1. You have to define API credentials for YandexAPI at **.env.prod** file! As well you will have to feed data into chromadb COLLECTION_NAME.
+
+
+2. Start docker images.
 ```commandline
- docker build -t union-chatbot --platform linux/amd64 .
+ sudo docker compose up -d
 ```
 
-2. Check that image has been build.
+3. HERE WE GO!
 ```commandline
-docker images | grep union-chatbot
-```
+curl -X 'POST' \
+  'http://127.0.0.1:8000/chat' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "query": "Какой коллективный договор действует на предприятии? Хочу знать общую информацию по КД.",
+  "user_id": "0",
+  "request_id": "md5hash"
+}'
 
-3. Run docker image.
-```commandline
-docker run -d \
-  --name chatbot \
-  --cpus=2 \
-  --memory=2g \
-  --restart unless-stopped \
-  -p 8000:8000 \
-  union-chatbot
 ```
 
  ## Ideal chatbot functions:
