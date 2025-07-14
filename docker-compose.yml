@@ -72,9 +72,16 @@ services:
     ports:
       - "443:443"  # HTTPS
     volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d  # Конфиги для HTTP/HTTPS
-      - ./nginx/ssl:/etc/nginx/ssl        # SSL-сертификаты
-      - ./nginx/tokens:/etc/nginx/tokens  # Файл с токенами
+      # Основные конфиги
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf  # Главный конфиг
+      - ./nginx/conf.d:/etc/nginx/conf.d          # Доп. конфиги (app.conf)
+
+      # SSL и токены
+      - ./nginx/ssl:/etc/nginx/ssl                # Сертификаты
+      - ./nginx/tokens:/etc/nginx/tokens          # Файлы с токенами
+
+      # Логи
+      - ./nginx/logs:/var/log/nginx               # Логи access/error
     depends_on:
       - chatbot
       - redis

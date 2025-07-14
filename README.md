@@ -56,6 +56,11 @@ curl -k -X 'POST' \
 }'
 ```
 
+The answer will be -->
+```
+{"status":"success","response":"Hello! I'm doing well, thank you. Regarding the latest news about the worker union life at AO \"Nevinnomysskiy Azot\", the collective agreement currently in force covers the period from 2024 to 2026. The agreement can be extended for a period of up to three years, provided that the decision to extend is made no later than three months before the current agreement expires.","user_id":"0","request_id":"md5hash"}
+```
+
 If you woild like to change default prompt you will have 3 options.
 
 1. The first option is to add to POST request your own prompt!
