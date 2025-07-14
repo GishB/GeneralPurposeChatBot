@@ -1,10 +1,19 @@
 version: '3.8'
 
 services:
+  # Основные сервисы (теперь без публикации портов на хосте)
   chatbot:
     image: union-chatbot:latest
-    ports:
-      - "8000:8000"
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+    expose:
+      - "8000"  # Только для внутренней сети
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
@@ -12,30 +21,11 @@ services:
       - CHROMA_PORT=8000
     env_file:
       - .env.prod
-    depends_on:
-      - redis
-      - chromadb
-    restart: always
     networks:
       - app-network
-    deploy:
-      resources:
-        limits:
-          cpus: '2.0'
-          memory: 2G
-        reservations:
-          cpus: '1'
-          memory: 1G
 
   redis:
     image: redis:latest
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    restart: always
-    networks:
-      - app-network
     deploy:
       resources:
         limits:
@@ -44,16 +34,15 @@ services:
         reservations:
           cpus: '0.5'
           memory: 1G
+    expose:
+      - "6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - app-network
 
   chromadb:
     image: chromadb/chroma:latest
-    ports:
-      - "8001:8000"
-    volumes:
-      - chroma_data:/data
-    restart: always
-    networks:
-      - app-network
     deploy:
       resources:
         limits:
@@ -62,6 +51,36 @@ services:
         reservations:
           cpus: '0.5'
           memory: 1G
+    expose:
+      - "8000"
+    volumes:
+      - chroma_data:/data
+    networks:
+      - app-network
+
+  # NGINX с проверкой токена
+  nginx:
+    image: nginx:1.23-alpine
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'    # Максимум 1 ядро
+          memory: '512M'  # Жёсткий лимит памяти
+        reservations:
+          cpus: '0.2'     # Гарантированные 20% CPU
+          memory: '256M'  # Минимум памяти
+    ports:
+      - "443:443"  # HTTPS
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d  # Конфиги для HTTP/HTTPS
+      - ./nginx/ssl:/etc/nginx/ssl        # SSL-сертификаты
+      - ./nginx/tokens:/etc/nginx/tokens  # Файл с токенами
+    depends_on:
+      - chatbot
+      - redis
+      - chromadb
+    networks:
+      - app-network
 
 volumes:
   redis_data:

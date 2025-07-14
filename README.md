@@ -30,11 +30,12 @@ If you would like to check this bot go to tg link (sometimes i will run this for
 ``If you would like just to start you own chatbot API based on this solution.``
 
 Minimum setup from docker-compose file (can be changed by user manually):
- - 3 CPU
- - 6 GB
+ - 4 CPU
+ - 6.5 GB
+
+0. Create SSL hosted certificate and your token to access all with HTTPS. (Nginx requires for basic defence)
 
 1. You have to define API credentials for YandexAPI at **.env.prod** file! As well you will have to feed data into chromadb COLLECTION_NAME.
-
 
 2. Start docker images.
 ```commandline
@@ -80,6 +81,7 @@ If you woild like to change default prompt you will have 3 options.
  - [ ] QueryHelpManager (rewrite or modify user query in case of problems with query)
  - [ ] Transform Audio request and model output to audio\text to interact with user.
  - [x] Docker Image
+ - [ ] Nginx to control interactions.
  - [ ] github workflow for CI/CD.
  - [X] README setup locally .
  - [X] Async libraries to interact with users instead of telegrambotapi.
