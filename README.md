@@ -33,10 +33,10 @@ Minimum setup from docker-compose file (can be changed by user manually):
  - 4 CPU
  - 6.5 GB
 
-0. Create SSL hosted certificate and your token to access all with HTTPS. (Nginx requires for basic defence)
-
 1. You have to define API credentials for YandexAPI at **.env.prod** file! As well you will have to feed data into chromadb COLLECTION_NAME.
-
+ 
+ - YandexCloud tutorial: https://yandex.cloud/en/docs/iam/quickstart-sa
+ - Here is a python script which will feed data into COLLECTION_NAME (ADD)
 2. Start docker images.
 ```commandline
  sudo docker compose up -d
@@ -44,10 +44,11 @@ Minimum setup from docker-compose file (can be changed by user manually):
 
 3. HERE WE GO!
 ```commandline
-curl -X 'POST' \
-  'http://127.0.0.1:8000/chat' \
+curl -k -X 'POST' \
+  'https://localhost/chat' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
+  -H 'X-API-Token: QweuqqwQEW312eqwewWEWEEADAsd-WEQQ1231273787' \
   -d '{
   "query": "Hello! How are you? What the latest news you know about workerunion life?",
   "user_id": "0",
@@ -81,7 +82,7 @@ If you woild like to change default prompt you will have 3 options.
  - [ ] QueryHelpManager (rewrite or modify user query in case of problems with query)
  - [ ] Transform Audio request and model output to audio\text to interact with user.
  - [x] Docker Image
- - [ ] Nginx to control interactions.
+ - [X] Nginx to control interactions.
  - [ ] github workflow for CI/CD.
  - [X] README setup locally .
  - [X] Async libraries to interact with users instead of telegrambotapi.
