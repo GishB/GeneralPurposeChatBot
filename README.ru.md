@@ -48,12 +48,13 @@
 
 3. Теперь можем тестировать работу!
 ```commandline
-curl -X 'POST' \
-  'http://127.0.0.1:8000/chat' \
+curl -k -X 'POST' \
+  'https://localhost/chat' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
+  -H 'X-API-Token: QweuqqwQEW312eqwewWEWEEADAsd-WEQQ1231273787' \
   -d '{
-  "query": "Привет! Как дела? Какие последние новости ты знаешь о профсоюзной жизни",
+  "query": "Привет! У меня вопрос по коллективному договору. Какие льготы положены работникам по выслуги лет?",
   "user_id": "0",
   "request_id": "md5hash"
 }'
