@@ -82,16 +82,28 @@ services:
 
       # Логи
       - ./nginx/logs:/var/log/nginx               # Логи access/error
+
+      # Scripts for IP blocking
+      - ./nginx/scripts:/etc/nginx/scripts:ro
+
+      # Blocked IPs with proper permissions
+      - ./nginx/blocked_ips:/etc/nginx/blocked_ips
+
+      # Для старта cronjob
+      - ./nginx/scripts/entrypoint.sh:/entrypoint.sh:ro
     depends_on:
       - chatbot
       - redis
       - chromadb
     networks:
       - app-network
+    init: true
+    command: ["/entrypoint.sh"]
 
 volumes:
   redis_data:
   chroma_data:
+  blocked_ips_data:
 
 networks:
   app-network:
