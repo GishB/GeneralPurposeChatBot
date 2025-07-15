@@ -1,5 +1,0 @@
-2025/07/15 12:41:06 [error] 22#22: *5 limiting requests, excess: 1.349 by zone "auth_banned", client: 172.19.0.1, server: localhost, request: "POST /chat HTTP/1.1", host: "localhost"
-2025/07/15 12:41:25 [error] 23#23: *6 limiting requests, excess: 1.033 by zone "auth_banned", client: 172.19.0.1, server: localhost, request: "POST /chat HTTP/1.1", host: "localhost"
-2025/07/15 12:42:08 [error] 25#25: *9 limiting requests, excess: 1.350 by zone "auth_banned", client: 172.19.0.1, server: localhost, request: "POST /chat HTTP/1.1", host: "localhost"
-2025/07/15 12:42:10 [error] 27#27: *10 limiting requests, excess: 1.319 by zone "auth_banned", client: 172.19.0.1, server: localhost, request: "POST /chat HTTP/1.1", host: "localhost"
-2025/07/15 14:41:21 [emerg] 1#1: invalid rate "rate=1r/5m" in /etc/nginx/nginx.conf:16

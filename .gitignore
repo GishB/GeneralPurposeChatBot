@@ -10,3 +10,4 @@ venv/
 __pycache__/
 UnionChatBot.egg-info
 .env.prod
+*.log
