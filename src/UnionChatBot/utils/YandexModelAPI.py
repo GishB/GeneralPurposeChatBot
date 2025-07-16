@@ -11,6 +11,22 @@ from UnionChatBot.utils.ChatHistoryManager import ChatHistoryManager
 
 
 class MyYandexModel:
+    """Центральный класс позволяющий реализовать логику работы чат-бота.
+
+    Args:
+        temperature: температура с которой генерируются ответы модели.
+        stream: необходимость возвращать ответ посимвольно.
+        maxTokens: ограничение на кол-во токенов для модели суммарно генерация + ответ.
+        folder_id: секрет принадлежащий сервисному аккаунту Yandex GPT API.
+        api_key: секрет принадлежащий сервисному аккаунту Yandex GPT API.
+        url: ссылка на YandexGPTAPI inference.
+        model_name: модель используемая для генерации ответа.
+        embedding_function: объект класса отвечающий за векторизацию текста.
+        chroma_adapter: объект класса отвечающий за взаимодействие с векторной БД.
+        redis_cache: объект класса отвечающий за взаимодействие с горячей БД Redis.
+        chat_manager: объект класса отвечающий за контроль истории пользователя при общении с чат-ботом.
+    """
+
     def __init__(
         self,
         temperature: float = 0.3,
@@ -38,9 +54,14 @@ class MyYandexModel:
         self.folder_id = folder_id if folder_id else os.environ["FOLDER_ID"]
         self.api_key = api_key if api_key else os.environ["API_KEY"]
 
-        if folder_id is None or api_key is None:
+        if self.folder_id is None or self.api_key is None:
             raise ValueError(
-                "FOLDER_ID or API_KEY hasn`t been defined! This is important parameters for YandexCloud API!"
+                "FOLDER_ID or API_KEY hasn`t been defined at ENV! This is important parameters for YandexCloud API!"
+            )
+
+        if self.url is None:
+            raise ValueError(
+                "YANDEXGPT_API url hasn`t been defined at ENV! How you are going to inference at all???"
             )
 
         if maxTokens >= 8001:
@@ -52,6 +73,11 @@ class MyYandexModel:
             )
 
     def setup_header(self) -> dict:
+        """Генерируем классический Header запроса.
+
+        Return:
+            Требуемого вида JSON объект в виде словаря, для корректной аунтификации на endpoint.
+        """
         return {
             "Content-Type": "application/json",
             "Authorization": "Api-Key " + self.api_key,
@@ -60,6 +86,15 @@ class MyYandexModel:
         }
 
     def setup_data(self, text: str, prompt: str) -> json.dumps:
+        """Генерируем полное тело запроса для последующей генерации ответа модели.
+
+        Args:
+            text: Запрос пользователя (может быть в сыром виде);
+            prompt: Дополнительная информация для генерации правильного ответа моделью.
+
+        Return:
+            Полное тело запроса для Yandex GPT endpoint.
+        """
         return json.dumps(
             {
                 "modelUri": f"gpt://{self.folder_id}/{self.model_name}",
@@ -78,10 +113,16 @@ class MyYandexModel:
     def modify_system_prompt(
         self, query: str, prompt: str, data: dict, history_data: str
     ) -> str:
-        """Apply modification for system prompt based on DB info.
+        """Модифицируем системный промт исходя из ответов из базы данных.
 
-        Note:
-            This function based on query to modify prompt.
+        Args:
+            query: вопрос пользователя.
+            prompt: системый промт по умолчанию.
+            history_data: история диалога для текущего пользователя.
+            data: словарь с релевантной информацией из БД.
+
+        Return:
+            Модифицированный системный промт исходя из дополнительной информации из БД и истории диалога.
         """
         context = (
             " ".join(
@@ -108,6 +149,17 @@ class MyYandexModel:
         return prompt
 
     def ask(self, query: str, collection_name: str, prompt: str, user_id: str) -> str:
+        """Инициализация диалога с чат-ботом.
+
+        Args:
+            query: вопрос пользователя & сообщение.
+            collection_name: название коллекции к которой необходимо обратиться в ChromaDB.
+            prompt: Системный промт, который определит поведение модели по умолчанию.
+            user_id: уникальный идентификатор пользователя.
+
+        Return:
+            Текстовый ответ модели для пользователя.
+        """
         query_embedding = (
             self.embedding_function(query) if self.embedding_function else None
         )
