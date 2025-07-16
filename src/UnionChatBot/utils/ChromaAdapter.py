@@ -1,6 +1,8 @@
+import os
+
 import chromadb
 
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from UnionChatBot.utils.EmbeddingAPI import MyEmbeddingFunction
 from UnionChatBot.utils.RerankerAPI import BM25Reranker
 
@@ -14,10 +16,10 @@ class ChromaAdapter:
             similarity_filter: float = 1.5,
             embedding_model: str = "all-MiniLM-L6-v2",
             reranker_type: str = "bm25",
-            api_key: str = None,
-            folder_id: str = None,
-            text_type: str = "doc"
-
+            api_key: Optional[str] = None,
+            folder_id: Optional[str] = None,
+            text_type: str = "doc",
+            api_url: Optional[str] = None
     ):
         self.reranker_type = reranker_type
         if reranker_type == "bm25":
@@ -34,15 +36,16 @@ class ChromaAdapter:
         self._tokenizer = None
         self._reranker_model = None
 
-        self.api_key = api_key
-        self.folder_id = folder_id
+        self.api_key = api_key if api_key else os.environ["API_KEY"]
+        self.api_url = api_url if api_url else os.environ["URL_TO_TEXT_EMBEDDER"]
+        self.folder_id = folder_id if folder_id else os.environ["FOLDER_ID"]
         self.text_type = text_type
 
     @property
     def embedding_function(self):
         if self._embedding_function is None:
             self._embedding_function = MyEmbeddingFunction(
-                api_url="https://llm.api.cloud.yandex.net:443/foundationModels/v1/textEmbedding",
+                api_url=self.api_url,
                 folder_id=self.folder_id,
                 iam_token=self.api_key,
                 text_type=self.text_type
