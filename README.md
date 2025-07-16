@@ -17,13 +17,15 @@ If you would like to check this bot go to tg link (sometimes i will run this for
 **Developer guide**
 
 ``This is useful if you would like to test telegram API.``
-   1. You have to define API credentials for Telegram and YandexAPI at **.env** file! As well to feed data into chromadb COLLECTION_NAME.
-   2. `` git clone https://github.com/GishB/GeneralPurposeTelegramBOT ``
-   3. `` pip install -e .``
-   4. `` sudo docker run -d -p 6379:6379 redis/redis-stack:latest``
-   5. `` sudo docker run -v ./chroma-data:/data -p 32000:8000 -d chromadb/chroma`` 
-   6. `` cd ./src/UnionChatBot``
-   7. `` python3 main.py``
+   1. You have to define API credentials for Telegram and YandexAPI at **.env** file!
+      - YandexCloud tutorial: https://yandex.cloud/en/docs/iam/quickstart-sa
+   2. `` sudo docker run -v ./chroma-data:/data -p 32000:8000 -d chromadb/chroma`` 
+   3. `` git clone https://github.com/GishB/GeneralPurposeTelegramBOT ``
+   4. `` pip install -e .``
+   5. Here is a python script which will feed data into COLLECTION_NAME (ADD)
+   6. `` sudo docker run -d -p 6379:6379 redis/redis-stack:latest``
+   7. `` cd ./src/UnionChatBot``
+   8. `` python3 main.py``
 
 **Docker Compose setting up**
 
@@ -37,7 +39,7 @@ Minimum setup from docker-compose file (can be changed by user manually):
  
  - YandexCloud tutorial: https://yandex.cloud/en/docs/iam/quickstart-sa
  - Here is a python script which will feed data into COLLECTION_NAME (ADD)
-2. Start docker images.
+2. Start docker images from project dir.
 ```commandline
  sudo docker compose up -d
 ```
