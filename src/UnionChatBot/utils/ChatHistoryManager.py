@@ -20,7 +20,7 @@ class ChatHistoryManager:
             redis_db: номер базы данных Redis
         """
         self.max_history_length = max_history_length if max_history_length else os.environ["MAX_HISTORY_USER_LENGTH"]
-        self.history_ttl_days = history_ttl_days if history_ttl_days else os.environ["HISTORY_TTL_DAYS"]
+        self.history_ttl_days = history_ttl_days if history_ttl_days else os.environ["HISTORY_USER_TTL_DAYS"]
         self.redis_client = redis.StrictRedis(
             host=redis_host,
             port=redis_port,
