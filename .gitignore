@@ -12,3 +12,4 @@ UnionChatBot.egg-info
 .env.prod
 *.log
 /build/
+*.md

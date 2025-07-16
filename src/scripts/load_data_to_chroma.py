@@ -1,0 +1,41 @@
+import argparse
+import os
+from pathlib import Path
+
+from UnionChatBot.processors.markdown_processor import MarkdownProcessor
+from UnionChatBot.storage.chroma_storage import ChromaStorage
+from UnionChatBot.readers.file_reader import LocalFileReader
+from UnionChatBot.services.ingestion_service import IngestionService
+from UnionChatBot.models.document import ProcessingConfig
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Заполняем векторную базу данных исходя из MarkDown документов"
+    )
+    parser.add_argument(
+        "--source-dir", type=Path, default=Path(__file__).parent.parent / "data"
+    )
+    parser.add_argument(
+        "--collection",
+        type=str,
+        default=os.getenv("COLLECTION_NAME", "default_collection"),
+    )
+    parser.add_argument(
+        "--chroma-host", type=str, default=os.getenv("CHROMA_HOST", "localhost")
+    )
+    parser.add_argument(
+        "--chroma-port", type=int, default=int(os.getenv("CHROMA_PORT", "8000"))
+    )
+    args = parser.parse_args()
+
+    config = ProcessingConfig.from_env()
+    processor = MarkdownProcessor(config)
+    storage = ChromaStorage(host=args.chroma_host, port=args.chroma_port)
+    reader = LocalFileReader()
+    service = IngestionService(reader, processor, storage, args.collection)
+    service.ingest_directory(args.source_dir)
+
+
+if __name__ == "__main__":
+    main()
