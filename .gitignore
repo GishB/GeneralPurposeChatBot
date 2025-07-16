@@ -11,3 +11,4 @@ __pycache__/
 UnionChatBot.egg-info
 .env.prod
 *.log
+/build/

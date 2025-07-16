@@ -7,7 +7,8 @@
 .git
 .gitignore
 .dockerignore
-build/
+/build/
+/nginx/
 
 # Игнорируем временные файлы IDE
 .idea
