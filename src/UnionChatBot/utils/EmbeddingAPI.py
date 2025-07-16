@@ -4,16 +4,17 @@ import time
 
 from chromadb import Documents, EmbeddingFunction, Embeddings
 
+
 class MyEmbeddingFunction(EmbeddingFunction):
     def __init__(
-            self,
-            api_url: str,
-            folder_id: str,
-            iam_token: str,
-            doc_model_uri: str = None,
-            query_model_uri: str = None,
-            text_type: str = None,
-            time_sleep: float = 0.01
+        self,
+        api_url: str,
+        folder_id: str,
+        iam_token: str,
+        doc_model_uri: str = None,
+        query_model_uri: str = None,
+        text_type: str = None,
+        time_sleep: float = 0.01,
     ):
         """
         Initialize the embedding function with Yandex GPT API credentials.
@@ -32,15 +33,19 @@ class MyEmbeddingFunction(EmbeddingFunction):
         self.headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {iam_token}",
-            "x-folder-id": folder_id
+            "x-folder-id": folder_id,
         }
         # set default text type doc if not provided
         self.text_type = text_type or "doc"
         self.time_sleep = time_sleep
 
         # Set default model URIs if not provided
-        self.doc_model_uri = doc_model_uri or f"emb://{folder_id}/text-search-doc/latest"
-        self.query_model_uri = query_model_uri or f"emb://{folder_id}/text-search-query/latest"
+        self.doc_model_uri = (
+            doc_model_uri or f"emb://{folder_id}/text-search-doc/latest"
+        )
+        self.query_model_uri = (
+            query_model_uri or f"emb://{folder_id}/text-search-query/latest"
+        )
 
     def _get_single_embedding(self, text: str) -> np.ndarray:
         """
@@ -53,12 +58,11 @@ class MyEmbeddingFunction(EmbeddingFunction):
         Returns:
             numpy.ndarray: Embedding vector
         """
-        model_uri = self.doc_model_uri if self.text_type == "doc" else self.query_model_uri
+        model_uri = (
+            self.doc_model_uri if self.text_type == "doc" else self.query_model_uri
+        )
 
-        data = {
-            "modelUri": model_uri,
-            "text": text
-        }
+        data = {"modelUri": model_uri, "text": text}
         time.sleep(self.time_sleep)
         response = requests.post(self.api_url, json=data, headers=self.headers)
         response.raise_for_status()

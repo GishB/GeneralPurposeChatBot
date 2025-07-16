@@ -4,13 +4,16 @@ import redis
 from datetime import datetime, timedelta
 from typing import Optional
 
+
 class ChatHistoryManager:
-    def __init__(self,
-                 redis_host: str = 'localhost',
-                 redis_port: int = 6379,
-                 redis_db: int = 1,
-                 history_ttl_days: Optional[int] = None,
-                 max_history_length: Optional[int] = None):
+    def __init__(
+        self,
+        redis_host: str = "localhost",
+        redis_port: int = 6379,
+        redis_db: int = 1,
+        history_ttl_days: Optional[int] = None,
+        max_history_length: Optional[int] = None,
+    ):
         """
         Инициализация менеджера истории чата.
 
@@ -19,13 +22,21 @@ class ChatHistoryManager:
             redis_port: порт Redis
             redis_db: номер базы данных Redis
         """
-        self.max_history_length = max_history_length if max_history_length else os.environ["MAX_HISTORY_USER_LENGTH"]
-        self.history_ttl_days = history_ttl_days if history_ttl_days else os.environ["HISTORY_USER_TTL_DAYS"]
+        self.max_history_length = (
+            max_history_length
+            if max_history_length
+            else os.environ["MAX_HISTORY_USER_LENGTH"]
+        )
+        self.history_ttl_days = (
+            history_ttl_days
+            if history_ttl_days
+            else os.environ["HISTORY_USER_TTL_DAYS"]
+        )
         self.redis_client = redis.StrictRedis(
             host=redis_host,
             port=redis_port,
             db=redis_db,
-            decode_responses=True  # Автоматически декодируем из bytes в str
+            decode_responses=True,  # Автоматически декодируем из bytes в str
         )
         self.history_ttl_days = history_ttl_days
 
@@ -61,7 +72,7 @@ class ChatHistoryManager:
         history_key = self._get_history_key(user_id)
 
         # Добавляем сообщение с временной меткой
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         formatted_message = f"[{timestamp}] {message}"
 
         # Добавляем в начало списка и ограничиваем длину

@@ -6,20 +6,21 @@ from typing import List, Dict, Any, Optional
 from UnionChatBot.utils.EmbeddingAPI import MyEmbeddingFunction
 from UnionChatBot.utils.RerankerAPI import BM25Reranker
 
+
 class ChromaAdapter:
     def __init__(
-            self,
-            host: str = "localhost",
-            port: int = 32000,
-            max_rag_documents: int = 20,
-            topk_documents: int = 3,
-            similarity_filter: float = 1.5,
-            embedding_model: str = "all-MiniLM-L6-v2",
-            reranker_type: str = "bm25",
-            api_key: Optional[str] = None,
-            folder_id: Optional[str] = None,
-            text_type: str = "doc",
-            api_url: Optional[str] = None
+        self,
+        host: str = "localhost",
+        port: int = 32000,
+        max_rag_documents: int = 20,
+        topk_documents: int = 3,
+        similarity_filter: float = 1.5,
+        embedding_model: str = "all-MiniLM-L6-v2",
+        reranker_type: str = "bm25",
+        api_key: Optional[str] = None,
+        folder_id: Optional[str] = None,
+        text_type: str = "doc",
+        api_url: Optional[str] = None,
     ):
         self.reranker_type = reranker_type
         if reranker_type == "bm25":
@@ -48,29 +49,26 @@ class ChromaAdapter:
                 api_url=self.api_url,
                 folder_id=self.folder_id,
                 iam_token=self.api_key,
-                text_type=self.text_type
+                text_type=self.text_type,
             )
         return self._embedding_function
 
     def get_info_from_db(
-            self,
-            query: str,
-            collection_name: str,
-            n_results: int = 30,
-            **kwargs
+        self, query: str, collection_name: str, n_results: int = 30, **kwargs
     ) -> Dict[str, Any]:
         collection = self.client.get_collection(
-            name=collection_name,
-            embedding_function=self.embedding_function
+            name=collection_name, embedding_function=self.embedding_function
         )
         return collection.query(
             query_texts=[query],
             n_results=n_results,
-            include=["documents", "metadatas", "distances"]
+            include=["documents", "metadatas", "distances"],
         )
 
     def get_filtered_documents(self, data_raw: Dict[str, Any]) -> dict:
-        distances = data_raw["distances"][0]  # Берем первый элемент, так как query_texts=[query]
+        distances = data_raw["distances"][
+            0
+        ]  # Берем первый элемент, так как query_texts=[query]
         documents = data_raw["documents"][0]
         metadatas = data_raw["metadatas"][0]
 
@@ -84,7 +82,8 @@ class ChromaAdapter:
                 metadatas[idx]
                 for idx, dist in enumerate(distances)
                 if dist < self.similarity_filter
-            ]}
+            ],
+        }
 
     def get_pairs(self, query: str, documents: List[str]) -> List[List[str]]:
         return [[query, doc] for doc in documents]
@@ -100,7 +99,7 @@ class ChromaAdapter:
         data_raw = self.get_info_from_db(
             query=query,
             collection_name=collection_name,
-            n_results=self.max_rag_documents
+            n_results=self.max_rag_documents,
         )
         filtered_documents = self.get_filtered_documents(data_raw)
 
@@ -109,13 +108,19 @@ class ChromaAdapter:
                 "documents": [],
                 "metadatas": [],
                 "query": query,
-                "collection_name": collection_name
+                "collection_name": collection_name,
             }
 
-        idx_relevant_documents = self.apply_reranker(query=query, documents=filtered_documents["documents"])
+        idx_relevant_documents = self.apply_reranker(
+            query=query, documents=filtered_documents["documents"]
+        )
         return {
-            "documents": [filtered_documents["documents"][idx] for idx in idx_relevant_documents],
-            "metadatas": [filtered_documents["metadatas"][idx] for idx in idx_relevant_documents],
+            "documents": [
+                filtered_documents["documents"][idx] for idx in idx_relevant_documents
+            ],
+            "metadatas": [
+                filtered_documents["metadatas"][idx] for idx in idx_relevant_documents
+            ],
             "query": query,
-            "collection_name": collection_name
+            "collection_name": collection_name,
         }
