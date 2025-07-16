@@ -37,7 +37,7 @@ class ChromaAdapter:
         self._reranker_model = None
 
         self.api_key = api_key if api_key else os.environ["API_KEY"]
-        self.api_url = api_url if api_url else os.environ["URL_TO_TEXT_EMBEDDER"]
+        self.api_url = api_url if api_url else os.environ["EMBEDDING_API"]
         self.folder_id = folder_id if folder_id else os.environ["FOLDER_ID"]
         self.text_type = text_type
 

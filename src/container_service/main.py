@@ -55,7 +55,8 @@ def is_specific_error(text: str) -> bool:
 @app.on_event("startup")
 async def startup_event():
     """Ставим ограничение на кол-во параллельных потоков которые могут быть запущенны сервисом"""
-    app.state.executor = ThreadPoolExecutor(max_workers=10)  # <- Ограничение!
+    app.state.executor = ThreadPoolExecutor(
+        max_workers=os.environ["MAX_FASTAPI_THREADS"] if os.environ["MAX_FASTAPI_THREADS"] else 4)
 
 @app.post("/chat")
 def chat_with_bot(request: ChatRequest):

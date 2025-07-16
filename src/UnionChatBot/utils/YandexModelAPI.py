@@ -1,4 +1,7 @@
 import json
+import os
+from typing import Optional
+
 import requests
 
 from UnionChatBot.utils.EmbeddingAPI import MyEmbeddingFunction
@@ -11,9 +14,9 @@ class MyYandexModel:
                  temperature: float = 0.3,
                  stream: bool = False,
                  maxTokens: int = 2000,
-                 folder_id: str = None,
-                 api_key: str = None,
-                 url: str = None,
+                 folder_id: Optional[str] = None,
+                 api_key: Optional[str] = None,
+                 url: Optional[str] = None,
                  model_name: str = "deepseek-r1-distill-qwen-32b",
                  embedding_function: MyEmbeddingFunction = None,
                  chroma_adapter: ChromaAdapter = None,
@@ -23,28 +26,26 @@ class MyYandexModel:
         self.temperature = temperature
         self.stream = stream
         self.maxTokens = maxTokens
-        self.url = url
         self.model_name = model_name
         self.embedding_function = embedding_function
         self.redis_cache = redis_cache
         self.chroma_adapter = chroma_adapter
         self.chat_manager = chat_manager
 
-        if url is None:
-            self.url = "https://llm.api.cloud.yandex.net/foundationModels/v1/completion"
+        self.url = url if url else os.environ["YANDEXGPT_API"]
+        self.folder_id = folder_id if folder_id else os.environ["FOLDER_ID"]
+        self.api_key = api_key if api_key else os.environ["API_KEY"]
+
 
         if folder_id is None or api_key is None:
             raise ValueError(
                 "FOLDER_ID or API_KEY hasn`t been defined! This is important parameters for YandexCloud API!")
-        else:
-            self.folder_id = folder_id
-            self.api_key = api_key
 
         if maxTokens >= 8001:
             raise Warning("It is not recommended to set more than 8000 tokens!")
 
-        if maxTokens >= 32001:
-            raise Warning("You set limited maxTokens rate based on YandexAPI")
+        if maxTokens >= 32000:
+            raise Warning("You set limited maxTokens rate based on YandexAPI docs at 2025!")
 
     def setup_header(self) -> dict:
         return {
