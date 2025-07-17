@@ -97,12 +97,12 @@ If you woild like to change default prompt you will have 3 options.
  - [x] RerankingAPI for selected documents.
  - [x] ChatHistoryManager (based on Redis).
  - [ ] QueryHelpManager (rewrite or modify user query in case of problems with query)
- - [ ] Transform Audio request and model output to audio\text to interact with user.
+ - [ ] InternetSearchManager (surfing internet if no data available)
  - [x] Docker Image
  - [X] Nginx to control interactions.
  - [X] github workflow for CI/CD.
  - [X] README setup locally .
  - [X] Async libraries to interact with users instead of telegrambotapi.
- - [ ] Add options to use user defined prompt files via mount if we use Docker Compose? 
- -  [ ] Fix Reranker logic.
- -  [ ] Baseline checker for generated text.
+ - [ ] Add options to use manual prompt files. Maybe mount option if we use Docker Compose? 
+-  [ ] Fix Reranker logic.
+-  [ ] Baseline checker for generated text.
