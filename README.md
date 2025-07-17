@@ -1,4 +1,4 @@
-# QueryHelperBot
+# GeneralPurposeChatBot
 
  This is a repo for general purpose chatbot which can interact with AI models via YandexCloud API.
  Baseline idea is to help developers to create ChatBotAPI + RAG for users who like to find related info from documents. It is powered by ***YandexGPTAPI***, Redis and ChromaDB.
@@ -9,42 +9,52 @@ If you would like to check this bot go to tg link (sometimes i will run this for
  - To start interact you need just to type /start or /начать.
  - If you want just to know something just start to type and you easily find out your answer.
 
- ### Who use this ChatBot template?
-
- This backend logic used at a local WorkerUnion organization.
  ### How to Start?
 
 **Developer guide**
 
-``This is useful if you would like to test telegram API.``
+``This is useful if you would like to test telegram API.
+You will up two DataBases for this (Redis and ChromaDB).``
    1. You have to define API credentials for Telegram and YandexAPI at **.env** file!
       - YandexCloud tutorial: https://yandex.cloud/en/docs/iam/quickstart-sa
    2. `` sudo docker run -v ./chroma-data:/data -p 32000:8000 -d chromadb/chroma`` 
    3. `` git clone https://github.com/GishB/GeneralPurposeTelegramBOT ``
-   4. `` pip install -e .``
-   5. Here is a python script which will feed data into COLLECTION_NAME (ADD)
-   6. `` sudo docker run -d -p 6379:6379 redis/redis-stack:latest``
-   7. `` cd ./src/UnionChatBot``
-   8. `` python3 main.py``
+   4. Load your *.md files into dir data -> ./src/data
+   5.  `` pip install .``
+   6. Load .env file -> `` source .env``
+   7. `` cd src/scripts | python3 load_data_to_chroma.py``
+   8. `` sudo docker run -d -p 6379:6379 redis/redis-stack:latest``
+   9. `` cd ./src/telegram | python3 main.py``
 
 **Docker Compose setting up**
 
-``If you would like just to start you own chatbot API based on this solution.``
+``If you would like just to start you own chatbot API based on my solution.``
 
 Minimum setup from docker-compose file (can be changed by user manually):
  - 4 CPU
  - 6.5 GB
 
-1. You have to define API credentials for YandexAPI at **.env.prod** file! As well you will have to feed data into chromadb COLLECTION_NAME.
+1. You have to define API credentials for YandexAPI at **.env.prod** file! 
  
  - YandexCloud tutorial: https://yandex.cloud/en/docs/iam/quickstart-sa
- - Here is a python script which will feed data into COLLECTION_NAME (ADD)
+
 2. Start docker images from project dir.
 ```commandline
  sudo docker compose up -d
 ```
 
-3. HERE WE GO!
+3. Load your *.md files into dir data -> ./src/data
+```commandline
+wget from somewhere!
+```
+
+4. Feed data into ChromaDB <COLLECTION_NAME>.
+
+```commandline
+cd src/scripts
+python3 load_data_to_chroma.py
+```
+5. HERE WE GO!
 ```commandline
 curl -k -X 'POST' \
   'https://localhost/chat' \
@@ -90,7 +100,7 @@ If you woild like to change default prompt you will have 3 options.
  - [ ] Transform Audio request and model output to audio\text to interact with user.
  - [x] Docker Image
  - [X] Nginx to control interactions.
- - [ ] github workflow for CI/CD.
+ - [X] github workflow for CI/CD.
  - [X] README setup locally .
  - [X] Async libraries to interact with users instead of telegrambotapi.
  - [ ] Add options to use user defined prompt files via mount if we use Docker Compose? 
