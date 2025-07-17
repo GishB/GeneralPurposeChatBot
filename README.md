@@ -104,3 +104,5 @@ If you woild like to change default prompt you will have 3 options.
  - [X] README setup locally .
  - [X] Async libraries to interact with users instead of telegrambotapi.
  - [ ] Add options to use user defined prompt files via mount if we use Docker Compose? 
+ -  [ ] Fix Reranker logic.
+ -  [ ] Baseline checker for generated text.
