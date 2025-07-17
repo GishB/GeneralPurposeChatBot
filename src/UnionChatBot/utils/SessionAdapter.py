@@ -17,6 +17,7 @@ def setting_up(
     similarity_threshold: float = 0.95,
     topk_documents: int = 4,
     max_history_length: int = 5,
+    history_ttl_days: int = 10,
     **kwargs,
 ) -> MyYandexModel:
     """Setting up new session for all services.
@@ -49,6 +50,7 @@ def setting_up(
         redis_host=redis_host,
         redis_port=redis_port,
         redis_db=1,
+        history_ttl_days=history_ttl_days,
         max_history_length=max_history_length,
     )
     return MyYandexModel(

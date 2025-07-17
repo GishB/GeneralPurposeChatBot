@@ -30,9 +30,11 @@ client_yandex = setting_up(
     api_key=os.getenv("API_KEY"),
     embeding_api=os.getenv("EMBEDDING_API"),
     host_vector_db=os.getenv("CHROMA_HOST"),
-    port_vector_db=os.getenv("CHROMA_PORT"),
-    redis_port=os.getenv("REDIS_PORT"),
+    port_vector_db=int(os.getenv("CHROMA_PORT")),
+    redis_port=int(os.getenv("REDIS_PORT")),
     redis_host=os.getenv("REDIS_HOST"),
+    history_ttl_days=int(os.getenv("HISTORY_USER_TTL_DAYS")),
+    max_history_length=int(os.getenv("MAX_HISTORY_USER_LENGTH")),
 )
 
 
