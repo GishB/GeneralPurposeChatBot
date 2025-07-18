@@ -89,7 +89,7 @@ services:
       - ./nginx/logs:/var/log/nginx               # Логи access/error
 
       # Scripts for IP blocking
-      - ./nginx/scripts:/etc/nginx/scripts:ro
+      - ./nginx/scripts:/etc/nginx/scripts:rw
 
       # Blocked IPs with proper permissions
       - ./nginx/blocked_ips:/etc/nginx/blocked_ips
