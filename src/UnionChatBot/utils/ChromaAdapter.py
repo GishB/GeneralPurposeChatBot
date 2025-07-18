@@ -8,6 +8,13 @@ from UnionChatBot.utils.RerankerAPI import BM25Reranker
 
 
 class ChromaAdapter:
+    """Класс позволяющий по http провести взаимодействие с ChromaDB.
+
+    Notes:
+        1. Позволяет искать информацию в векторной базе данных исходя из запроса пользователя (RAG).
+        2. Позволяет сортировать документы по лексической похожести к запросу пользователя (Rerank)
+    """
+
     def __init__(
         self,
         host: str = "localhost",
@@ -25,6 +32,10 @@ class ChromaAdapter:
         self.reranker_type = reranker_type
         if reranker_type == "bm25":
             self.reranker = BM25Reranker()
+        else:
+            NotImplementedError(
+                "Других моделей для задач сортировки документов не существует!"
+            )
 
         self.max_rag_documents = max_rag_documents
         self.similarity_filter = similarity_filter
@@ -90,9 +101,8 @@ class ChromaAdapter:
 
     def apply_reranker(self, query, documents):
         if self.reranker_type == "bm25":
-            # First fit the documents, then rerank
             self.reranker.fit(documents)
-            return self.reranker.rerank(query, self.topk_documents)
+            return self.reranker.rerank(query=query, top_k=self.topk_documents)
         return None
 
     def get_info(self, query: str, collection_name: str) -> dict[str, list[Any] | str]:

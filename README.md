@@ -97,12 +97,19 @@ If you woild like to change default prompt you will have 3 options.
  - [x] RerankingAPI for selected documents.
  - [x] ChatHistoryManager (based on Redis).
  - [ ] QueryHelpManager (rewrite or modify user query in case of problems with query)
- - [ ] InternetSearchManager (surfing internet if no data available)
  - [x] Docker Image
+ - [X] Docker-Compose for test and prod.
  - [X] Nginx to control interactions.
- - [X] github workflow for CI/CD.
+ - [X] github workflow for CI
  - [X] README setup locally .
  - [X] Async libraries to interact with users instead of telegrambotapi.
  - [ ] Add options to use manual prompt files. Maybe mount option if we use Docker Compose? 
--  [ ] Fix Reranker logic.
--  [ ] Baseline checker for generated text.
+-  [X] Fix Reranker logic.
+-  [ ] Baseline checker for generated text over baclog info. First check format, second check special questions retrieval.
+-  [ ] CD logic to save images on docker registery server.
+-  [ ] CD logic to deploy new image for chatbot on remote server.
+-  [ ] Backlog logic for all user request throw API calls. (Maybe decorator here?)
+
+### Future:
+-  [ ] Async connections to ChromaDB & Redis?? How to do it with Nginx?
+-  [ ] InternetSearchManager (surfing internet if no data available)
