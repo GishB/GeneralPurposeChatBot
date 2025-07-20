@@ -6,6 +6,7 @@
 # Игнорируем системные файлы
 .git
 .gitignore
+.github
 .dockerignore
 /build/
 /nginx/

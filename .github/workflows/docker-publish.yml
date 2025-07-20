@@ -1,0 +1,60 @@
+name: Build & Push Docker Image
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Ensure tag commit is on main
+        run: |
+          TAG_COMMIT=$(git rev-parse "$GITHUB_SHA")
+          # List branches containing this commit; look for origin/main
+          if ! git branch -r --contains "$TAG_COMMIT" | grep "origin/main" ; then
+            echo "Tag is not on main. Aborting."
+            exit 1
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract Git tag
+        id: tag
+        run: |
+          TAG=${GITHUB_REF##*/}
+          echo "##[set-output name=VERSION;]$TAG"
+
+      - name: Build and Push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/union-chatbot:${{ steps.tag.outputs.VERSION }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/union-chatbot:latest
+
+      - name: Delivery new image to the server and restart docker-compose
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd ${{ secrets.PATH_TO_PROJECT_DIR }}
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/union-chatbot:latest
+            docker-compose -f docker-compose-prod.yml up -d 
