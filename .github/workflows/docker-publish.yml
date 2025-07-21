@@ -44,5 +44,5 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd ${{ secrets.PATH_TO_PROJECT_DIR }}
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/union-chatbot:latest
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/union-chatbot:latest | docker compose stop
             docker-compose -f docker-compose-prod.yml up -d 
