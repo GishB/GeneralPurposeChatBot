@@ -2,7 +2,7 @@ import os
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 from typing import Optional
-from UnionChatBot.utils.SessionAdapter import setting_up
+from UnionChatBot.utils.SessionAdapter import setting_up, read_prompt
 from concurrent.futures import ThreadPoolExecutor
 from dotenv import load_dotenv
 import re
@@ -22,6 +22,7 @@ class ChatRequest(BaseModel):
 
 # Конфигурация базовая
 DEFAULT_PROMPT = os.getenv("DEFAULT_PROMPT_FILE")
+DEFAULT_PROMPT_DIR = os.getenv("DEFAULT_DIR_PROMPT")
 DEFAULT_COLLECTION = os.getenv("COLLECTION_NAME")
 
 # Инициализация компонентов (замените на ваши реальные классы)
@@ -79,7 +80,11 @@ def chat_with_bot(request: ChatRequest):
     """
     try:
         # Используем предоставленные или дефолтные значения
-        prompt = request.prompt if request.prompt else DEFAULT_PROMPT
+        prompt = (
+            request.prompt
+            if request.prompt
+            else read_prompt(prompt_file=DEFAULT_PROMPT, prompt_dir=DEFAULT_PROMPT_DIR)
+        )
         collection_name = (
             request.collection_name if request.collection_name else DEFAULT_COLLECTION
         )

@@ -10,9 +10,9 @@ def setting_up(
     api_key: str,
     embeding_api: str,
     model_name: str = "yandexgpt",
-    host_vector_db: str = "localhost",
-    port_vector_db: int = 32000,
-    redis_host: str = "localhost",
+    host_vector_db: str = "127.0.0.1",
+    port_vector_db: int = 8000,
+    redis_host: str = "127.0.0.1",
     redis_port: int = 6379,
     similarity_threshold: float = 0.95,
     topk_documents: int = 4,
@@ -64,9 +64,6 @@ def setting_up(
     )
 
 
-def get_prompt(path_to_prompts: str = "./prompts") -> str:
-    with open(
-        f"{path_to_prompts}/WorkerUnionDefault.txt", "r", encoding="utf-8"
-    ) as file:
-        text_content = file.read()
-    return text_content
+def read_prompt(prompt_file: str, prompt_dir: str) -> str:
+    with open(prompt_dir + "/" + prompt_file, "r", encoding="utf-8") as file:
+        return file.read()

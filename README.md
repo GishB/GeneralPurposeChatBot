@@ -20,7 +20,7 @@ You will up two DataBases for this (Redis and ChromaDB).``
    2. `` sudo docker run -v ./chroma-data:/data -p 32000:8000 -d chromadb/chroma`` 
    3. `` git clone https://github.com/GishB/GeneralPurposeTelegramBOT ``
    4. Load your *.md files into dir data -> ./src/data
-   5.  `` pip install .``
+   5.  `` pip install -e .``
    6. Load .env file -> `` source .env``
    7. `` cd src/scripts | python3 load_data_to_chroma.py``
    8. `` sudo docker run -d -p 6379:6379 redis/redis-stack:latest``
@@ -97,6 +97,7 @@ If you woild like to change default prompt you will have 3 options.
  - [x] RerankingAPI for selected documents.
  - [x] ChatHistoryManager (based on Redis).
  - [ ] QueryHelpManager (rewrite or modify user query in case of problems with query)
+ - [ ] QueryFilterManager (check that user query are valid for this task)
  - [x] Docker Image
  - [X] Docker-Compose for test and prod.
  - [X] Nginx to control interactions.
@@ -109,6 +110,7 @@ If you woild like to change default prompt you will have 3 options.
 -  [X] CD logic to save images on docker registery server.
 -  [X] CD logic to deploy new image for chatbot on remote server.
 -  [ ] Backlog logic for all user request throw API calls. (Maybe decorator here?)
+-  [ ] Limitation for users to call the API.
 
 ### Future:
 -  [ ] Async connections to ChromaDB & Redis?? How to do it with Nginx?

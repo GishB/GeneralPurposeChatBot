@@ -1,4 +1,4 @@
-# general_info.yaml
+# telegram_info.yaml
 welcome_settings:
   commands: ['start', 'начать', 'привет', 'hello', 'старт']
   welcome_message: |

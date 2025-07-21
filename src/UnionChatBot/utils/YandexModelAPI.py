@@ -110,20 +110,19 @@ class MyYandexModel:
             }
         )
 
-    def modify_system_prompt(
-        self, query: str, prompt: str, data: dict, history_data: str
-    ) -> str:
+    def modify_system_prompt(self, prompt: str, data: dict, user_id: str) -> str:
         """Модифицируем системный промт исходя из ответов из базы данных.
 
         Args:
-            query: вопрос пользователя.
             prompt: системый промт по умолчанию.
-            history_data: история диалога для текущего пользователя.
             data: словарь с релевантной информацией из БД.
+            user_id: уникальный индетефикатор пользователя.
 
         Return:
             Модифицированный системный промт исходя из дополнительной информации из БД и истории диалога.
         """
+        history_data = self.chat_manager.get_formatted_history(user_id=user_id)
+        prompt += "<RAG>"
         context = (
             " ".join(
                 [
@@ -175,9 +174,8 @@ class MyYandexModel:
         data = self.chroma_adapter.get_info(
             query=query, collection_name=collection_name
         )
-        history_data = self.chat_manager.get_formatted_history(user_id=user_id)
         new_prompt = self.modify_system_prompt(
-            query=query, prompt=prompt, data=data, history_data=history_data
+            prompt=prompt, data=data, user_id=user_id
         )
         response = requests.post(
             url=self.url,
@@ -194,7 +192,7 @@ class MyYandexModel:
                 .get("text")
             )
 
-            # Сохраняем в кэш
+            # Сохраняем в кэш ответ пользователю
             if self.redis_cache and query_embedding is not None:
                 self.redis_cache.set(query, query_embedding, out)
                 self.chat_manager.add_message_to_history(user_id=user_id, message=out)

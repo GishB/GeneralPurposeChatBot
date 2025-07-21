@@ -19,7 +19,7 @@ RUN python3.10 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Устанавливаем зависимости через pip
-RUN pip install --no-cache-dir -r requirements.txt && \
+RUN pip install --no-cache-dir -r requirements.prod.txt && \
     pip install --no-cache-dir .
 
 # Загружаем необходимые данные NLTK в доступную папку
@@ -53,8 +53,9 @@ ENV NLTK_DATA="/nltk_data"
 
 # Копируем только необходимые файлы приложения
 COPY --chown=appuser:appuser src/container_service/main.py .
-COPY --chown=appuser:appuser src/UnionChatBot/prompts/WorkerUnionDefault.txt .
-COPY --chown=appuser:appuser .env.example .
+COPY --chown=appuser:appuser prompts/ ./prompts/.
+COPY --chown=appuser:appuser README.md README.md
+COPY --chown=appuser:appuser .env.example .env.example
 
 USER appuser
 

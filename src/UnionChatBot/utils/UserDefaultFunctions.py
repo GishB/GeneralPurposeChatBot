@@ -11,7 +11,7 @@ from aiogram.types import Message
 
 # Загрузка конфигурации из YAML
 def load_config(
-    file_name: str = "general_info.yaml", dir_name: str = "configs"
+    file_name: str = "telegram_info.yaml", dir_name: str = "configs"
 ) -> dict:
     config_path = Path(__file__).parent.parent / dir_name / file_name
     with open(config_path, "r", encoding="utf-8") as f:

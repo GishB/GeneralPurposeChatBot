@@ -22,7 +22,7 @@ class BM25Reranker:
         return token_strings
 
     def fit(self, documents: List[str]):
-        """Обучение модели на корпусе документов."""
+        """Обучение модели на корпусе документов для текущего запроса."""
         tokenized_docs = [self.preprocess(doc) for doc in documents]
         self.bm25 = BM25Okapi(tokenized_docs)
 

@@ -12,6 +12,8 @@ services:
         reservations:
           cpus: '1.0'
           memory: 1G
+    volumes:
+      - ./prompts:/app/prompts
     expose:
       - "8000"  # Только для внутренней сети
     environment:
