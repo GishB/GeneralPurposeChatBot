@@ -57,7 +57,7 @@ jobs:
             
             # Retry stopping containers up to 3 times
             for i in 1 2 3; do
-              docker compose stop && break || sleep 5
+              docker compose down && break || sleep 5
             done
             
             # Retry starting containers up to 3 times
