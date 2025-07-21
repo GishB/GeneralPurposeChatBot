@@ -106,8 +106,8 @@ If you woild like to change default prompt you will have 3 options.
  - [ ] Add options to use manual prompt files. Maybe mount option if we use Docker Compose? 
 -  [X] Fix Reranker logic.
 -  [ ] Baseline checker for generated text over baclog info. First check format, second check special questions retrieval.
--  [ ] CD logic to save images on docker registery server.
--  [ ] CD logic to deploy new image for chatbot on remote server.
+-  [X] CD logic to save images on docker registery server.
+-  [X] CD logic to deploy new image for chatbot on remote server.
 -  [ ] Backlog logic for all user request throw API calls. (Maybe decorator here?)
 
 ### Future:

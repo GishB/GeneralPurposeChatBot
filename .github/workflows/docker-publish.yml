@@ -44,5 +44,24 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd ${{ secrets.PATH_TO_PROJECT_DIR }}
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/union-chatbot:latest | docker compose stop
-            docker-compose -f docker-compose-prod.yml up -d 
+            
+            # Login to Docker Hub to enable pulling private images
+            echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login \
+              --username ${{ secrets.DOCKERHUB_USERNAME }} \
+              --password-stdin
+            
+            # Retry pulling images up to 3 times
+            for i in 1 2 3; do
+              docker compose pull && break || sleep 5
+            done
+            
+            # Retry stopping containers up to 3 times
+            for i in 1 2 3; do
+              docker compose stop && break || sleep 5
+            done
+            
+            # Retry starting containers up to 3 times
+            for i in 1 2 3; do
+              docker-compose -f docker-compose-prod.yml up -d && break || sleep 5
+            done
+
