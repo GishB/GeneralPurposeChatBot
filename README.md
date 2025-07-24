@@ -96,7 +96,7 @@ If you woild like to change default prompt you will have 3 options.
  - [x] ChromaDB for RAG system (ChromaAdapter class)
  - [x] RerankingAPI for selected documents.
  - [x] ChatHistoryManager (based on Redis).
- - [ ] QueryHelpManager (rewrite or modify user query in case of problems with query)
+ - [X] QueryHelpManager (rewrite or modify user query in case of problems with query)
  - [ ] QueryFilterManager (check that user query are valid for this task)
  - [x] Docker Image
  - [X] Docker-Compose for test and prod.
@@ -108,7 +108,7 @@ If you woild like to change default prompt you will have 3 options.
 -  [X] Fix Reranker logic.
 -  [X] CD logic to save images on docker registery server.
 -  [X] CD logic to deploy new image for chatbot on remote server.
--  [ ] Limitation for users to call the API.
+-  [X] Limitation for users to call the API.
 -  [ ] Backlog logic for all user request throw API calls. (Maybe decorator here?)
 -  [ ] Baseline checker for generated text over baclog info. First check format, second check special questions retrieval.
 

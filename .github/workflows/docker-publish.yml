@@ -64,4 +64,7 @@ jobs:
             for i in 1 2 3; do
               docker-compose -f docker-compose-prod.yml up -d && break || sleep 5
             done
+            
+            # pull git updates from main
+            git pull origin main
 
