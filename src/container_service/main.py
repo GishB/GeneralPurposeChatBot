@@ -2,9 +2,10 @@ import os
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 from typing import Optional
-from UnionChatBot.utils.SessionAdapter import setting_up, read_prompt
+from UnionChatBot.utils.SessionAdapter import setting_up
 from concurrent.futures import ThreadPoolExecutor
 from dotenv import load_dotenv
+from pydantic import Field
 import re
 
 app = FastAPI()
@@ -13,30 +14,19 @@ load_dotenv()
 
 # Модели запросов
 class ChatRequest(BaseModel):
-    query: str
-    user_id: str
-    request_id: str
-    prompt: Optional[str] = None
-    collection_name: Optional[str] = None
+    query: str = Field(
+        default="Как долго действует коллективный договор на предпрятии?"
+    )
+    user_id: str = Field(default="0")
+    request_id: str = Field(default="a1b2c3d4e5f67890")
+    collection_name: Optional[str] = Field(default="default_collection")
 
 
 # Конфигурация базовая
-DEFAULT_PROMPT = os.getenv("DEFAULT_PROMPT_FILE")
-DEFAULT_PROMPT_DIR = os.getenv("DEFAULT_DIR_PROMPT")
 DEFAULT_COLLECTION = os.getenv("COLLECTION_NAME")
 
-# Инициализация компонентов (замените на ваши реальные классы)
-client_yandex = setting_up(
-    folder_id=os.getenv("FOLDER_ID"),
-    api_key=os.getenv("API_KEY"),
-    embeding_api=os.getenv("EMBEDDING_API"),
-    host_vector_db=os.getenv("CHROMA_HOST"),
-    port_vector_db=int(os.getenv("CHROMA_PORT")),
-    redis_port=int(os.getenv("REDIS_PORT")),
-    redis_host=os.getenv("REDIS_HOST"),
-    history_ttl_days=int(os.getenv("HISTORY_USER_TTL_DAYS")),
-    max_history_length=int(os.getenv("MAX_HISTORY_USER_LENGTH")),
-)
+# Инициализация компонентов
+client_yandex = setting_up()
 
 
 def is_specific_error(text: str) -> bool:
@@ -79,12 +69,6 @@ def chat_with_bot(request: ChatRequest):
     - collection_name: имя коллекции (опциональное, будет использовано дефолтное)
     """
     try:
-        # Используем предоставленные или дефолтные значения
-        prompt = (
-            request.prompt
-            if request.prompt
-            else read_prompt(prompt_file=DEFAULT_PROMPT, prompt_dir=DEFAULT_PROMPT_DIR)
-        )
         collection_name = (
             request.collection_name if request.collection_name else DEFAULT_COLLECTION
         )
@@ -93,7 +77,6 @@ def chat_with_bot(request: ChatRequest):
         response = client_yandex.ask(
             query=request.query,
             collection_name=collection_name,
-            prompt=prompt,
             user_id=request.user_id,
         )
         if is_specific_error(response):
@@ -138,4 +121,4 @@ async def threadpool_stats(request: Request):
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000, workers=1)
+    uvicorn.run(app, host="0.0.0.0", port=32000, workers=1)

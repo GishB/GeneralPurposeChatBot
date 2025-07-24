@@ -1,3 +1,6 @@
+import os
+from typing import Any
+
 import numpy as np
 import requests
 import time
@@ -6,45 +9,45 @@ from chromadb import Documents, EmbeddingFunction, Embeddings
 
 
 class MyEmbeddingFunction(EmbeddingFunction):
+    api_url = os.getenv(
+        "EMBEDDING_API",
+        "https://llm.api.cloud.yandex.net:443/foundationModels/v1/textEmbedding",
+    )
+    folder_id = os.getenv("FOLDER_ID", None)
+    iam_token = os.getenv("API_KEY", None)
+    time_sleep = float(os.getenv("TIME_SLEEP_RATE_EMBEDDER", 0.01))
+
     def __init__(
         self,
-        api_url: str,
-        folder_id: str,
-        iam_token: str,
         doc_model_uri: str = None,
         query_model_uri: str = None,
         text_type: str = None,
-        time_sleep: float = 0.01,
+        *args: Any,
+        **kwargs: Any,
     ):
         """
         Initialize the embedding function with Yandex GPT API credentials.
 
         Args:
-            api_url: Base URL for the embedding API
-            folder_id: Yandex Cloud folder ID
-            iam_token: IAM token for authentication
             doc_model_uri: Model URI for document embeddings
             query_model_uri: Model URI for query embeddings
             time_sleep: time between each query to yandex api.
         """
-        self.api_url = api_url
-        self.folder_id = folder_id
-        self.iam_token = iam_token
+        super().__init__(*args, **kwargs)
         self.headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {iam_token}",
-            "x-folder-id": folder_id,
+            "Authorization": f"Bearer {self.iam_token}",
+            "x-folder-id": self.folder_id,
         }
         # set default text type doc if not provided
         self.text_type = text_type or "doc"
-        self.time_sleep = time_sleep
 
         # Set default model URIs if not provided
         self.doc_model_uri = (
-            doc_model_uri or f"emb://{folder_id}/text-search-doc/latest"
+            doc_model_uri or f"emb://{self.folder_id}/text-search-doc/latest"
         )
         self.query_model_uri = (
-            query_model_uri or f"emb://{folder_id}/text-search-query/latest"
+            query_model_uri or f"emb://{self.folder_id}/text-search-query/latest"
         )
 
     def _get_single_embedding(self, text: str) -> np.ndarray:

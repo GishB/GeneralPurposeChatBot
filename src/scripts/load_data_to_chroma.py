@@ -22,7 +22,7 @@ def main():
         default=os.getenv("COLLECTION_NAME", "default_collection"),
     )
     parser.add_argument(
-        "--chroma-host", type=str, default=os.getenv("CHROMA_HOST", "localhost")
+        "--chroma-host", type=str, default=os.getenv("CHROMA_HOST", "127.0.0.1")
     )
     parser.add_argument(
         "--chroma-port", type=int, default=int(os.getenv("CHROMA_PORT", "8000"))

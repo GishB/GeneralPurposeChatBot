@@ -2,7 +2,7 @@ import os
 
 import chromadb
 
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from UnionChatBot.utils.EmbeddingAPI import MyEmbeddingFunction
 from UnionChatBot.utils.RerankerAPI import BM25Reranker
 
@@ -15,19 +15,24 @@ class ChromaAdapter:
         2. Позволяет сортировать документы по лексической похожести к запросу пользователя (Rerank)
     """
 
+    api_key = os.getenv("API_KEY", None)
+    api_url = os.getenv(
+        "EMBEDDING_API",
+        "https://llm.api.cloud.yandex.net:443/foundationModels/v1/textEmbedding",
+    )
+    folder_id = os.getenv("FOLDER_ID", None)
+    host = os.getenv("CHROMA_HOST", "127.0.0.1")
+    port = int(os.getenv("CHROMA_PORT", 8000))
+    topk_documents = int(os.getenv("TOP_K_DOCUMENTS", 5))
+    max_rag_documents = int(os.getenv("MAX_RAG_DOCUMENTS", 20))
+
     def __init__(
         self,
-        host: str = "localhost",
-        port: int = 32000,
-        max_rag_documents: int = 20,
-        topk_documents: int = 3,
         similarity_filter: float = 1.5,
         embedding_model: str = "all-MiniLM-L6-v2",
         reranker_type: str = "bm25",
-        api_key: Optional[str] = None,
-        folder_id: Optional[str] = None,
         text_type: str = "doc",
-        api_url: Optional[str] = None,
+        **kwargs,
     ):
         self.reranker_type = reranker_type
         if reranker_type == "bm25":
@@ -37,20 +42,13 @@ class ChromaAdapter:
                 "Других моделей для задач сортировки документов не существует!"
             )
 
-        self.max_rag_documents = max_rag_documents
         self.similarity_filter = similarity_filter
-        self.topk_documents = topk_documents
-        self.client = chromadb.HttpClient(host=host, port=port)
+        self.client = chromadb.HttpClient(host=self.host, port=self.port)
         self.embedding_model_name = embedding_model
         self._embedding_function = None
 
-        # Инициализация модели реранкинга один раз
         self._tokenizer = None
         self._reranker_model = None
-
-        self.api_key = api_key if api_key else os.environ["API_KEY"]
-        self.api_url = api_url if api_url else os.environ["EMBEDDING_API"]
-        self.folder_id = folder_id if folder_id else os.environ["FOLDER_ID"]
         self.text_type = text_type
 
     @property

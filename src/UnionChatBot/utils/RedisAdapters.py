@@ -2,21 +2,26 @@ import redis
 import numpy as np
 import hashlib
 import json
+import os
+
 from sklearn.metrics.pairwise import cosine_similarity
 from typing import Optional
 
 
 class SemanticRedisCache:
+    api_key = os.getenv("API_KEY", None)
+    folder_id = os.getenv("FOLDER_ID", None)
+    host = os.getenv("REDIS_HOST", "127.0.0.1")
+    port = int(os.getenv("REDIS_PORT", 6379))
+
     def __init__(
         self,
-        host="localhost",
-        port=6379,
         db=0,
-        max_entries=100,
+        max_entries=1000,
         expire_time=3600 * 2,
         similarity_threshold=0.9,
     ):
-        self.redis = redis.Redis(host=host, port=port, db=db)
+        self.redis = redis.Redis(host=self.host, port=self.port, db=db)
         self.max_entries = max_entries
         self.expire_time = expire_time
         self.similarity_threshold = similarity_threshold  # порог косинусной схожести

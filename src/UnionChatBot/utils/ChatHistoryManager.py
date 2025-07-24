@@ -6,39 +6,25 @@ from typing import Optional
 
 
 class ChatHistoryManager:
-    def __init__(
-        self,
-        redis_host: str = "localhost",
-        redis_port: int = 6379,
-        redis_db: int = 1,
-        history_ttl_days: Optional[int] = None,
-        max_history_length: Optional[int] = None,
-    ):
+    history_ttl_days = int(os.getenv("HISTORY_USER_TTL_DAYS", 7))
+    max_history_length = int(os.getenv("MAX_HISTORY_USER_LENGTH", 10))
+    redis_host = os.getenv("REDIS_HOST", "127.0.0.1")
+    redis_port = int(os.getenv("REDIS_PORT", 6379))
+
+    def __init__(self, redis_db: int = 1, **kwargs):
         """
         Инициализация менеджера истории чата.
 
         Args:
-            redis_host: хост Redis
-            redis_port: порт Redis
             redis_db: номер базы данных Redis
         """
-        self.max_history_length = (
-            max_history_length
-            if max_history_length
-            else int(os.environ["MAX_HISTORY_USER_LENGTH"])
-        )
-        self.history_ttl_days = (
-            history_ttl_days
-            if history_ttl_days
-            else int(os.environ["HISTORY_USER_TTL_DAYS"])
-        )
+
         self.redis_client = redis.StrictRedis(
-            host=redis_host,
-            port=redis_port,
+            host=self.redis_host,
+            port=self.redis_port,
             db=redis_db,
             decode_responses=True,  # Автоматически декодируем из bytes в str
         )
-        self.history_ttl_days = history_ttl_days
 
     def _get_history_key(self, user_id: str) -> str:
         """Генерирует ключ Redis для хранения истории пользователя."""
