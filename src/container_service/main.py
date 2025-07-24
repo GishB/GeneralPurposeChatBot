@@ -3,6 +3,7 @@ from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 from typing import Optional
 from UnionChatBot.utils.SessionAdapter import setting_up
+from UnionChatBot.utils.RedisAdapters import UserRateLimiter
 from concurrent.futures import ThreadPoolExecutor
 from dotenv import load_dotenv
 from pydantic import Field
@@ -15,18 +16,17 @@ load_dotenv()
 # Модели запросов
 class ChatRequest(BaseModel):
     query: str = Field(
-        default="Как долго действует коллективный договор на предпрятии?"
+        default="Я ваСя ПупкИН! Привет! Мне нравится работать. Как долго действует коллективный договор на предприятии?"
     )
     user_id: str = Field(default="0")
     request_id: str = Field(default="a1b2c3d4e5f67890")
     collection_name: Optional[str] = Field(default="default_collection")
 
 
-# Конфигурация базовая
-DEFAULT_COLLECTION = os.getenv("COLLECTION_NAME")
-
 # Инициализация компонентов
 client_yandex = setting_up()
+rate_limiter = UserRateLimiter()
+DEFAULT_COLLECTION = os.getenv("COLLECTION_NAME")
 
 
 def is_specific_error(text: str) -> bool:
@@ -69,29 +69,42 @@ def chat_with_bot(request: ChatRequest):
     - collection_name: имя коллекции (опциональное, будет использовано дефолтное)
     """
     try:
-        collection_name = (
-            request.collection_name if request.collection_name else DEFAULT_COLLECTION
-        )
+        allowed, current = rate_limiter.check_and_increment(request.user_id)
+        if allowed:
+            collection_name = (
+                request.collection_name
+                if request.collection_name
+                else DEFAULT_COLLECTION
+            )
 
-        # Получаем ответ от модели
-        response = client_yandex.ask(
-            query=request.query,
-            collection_name=collection_name,
-            user_id=request.user_id,
-        )
-        if is_specific_error(response):
-            return {
-                "status": "failed",
-                "response": "Извините, что Ваш вопрос не может быть обработан правильно в силу технических причин "
-                "из-за AI стороннего сервиса."
-                " Попробуйте сформулировать вопрос по теме немного иначе, пожалуйста.",
-                "user_id": request.user_id,
-                "request_id": request.request_id,
-            }
+            # Получаем ответ от модели
+            response = client_yandex.ask(
+                query=request.query,
+                collection_name=collection_name,
+                user_id=request.user_id,
+            )
+            if is_specific_error(response):
+                return {
+                    "status": "failed",
+                    "response": "Извините, что Ваш вопрос не может быть обработан правильно в силу технических причин "
+                    "из-за AI стороннего сервиса. \n"
+                    " Попробуйте сформулировать вопрос по теме немного иначе, пожалуйста.",
+                    "user_id": request.user_id,
+                    "request_id": request.request_id,
+                }
+            else:
+                return {
+                    "status": "success",
+                    "response": response,
+                    "user_id": request.user_id,
+                    "request_id": request.request_id,
+                }
         else:
             return {
                 "status": "success",
-                "response": response,
+                "response": f"Вы достигли лимита запросов к сервису в течении суток. За последние сутки Вы обращались к боту: {current} раз. \n"
+                f" Общее ограничение для каждого пользователя: {int(os.getenv('USER_QUERY_LIMIT_N', 10))} сообщений в сутки. \n"
+                f" Повторите свой вопрос позднее, пожалуйста, или обратитесь в профсоюзную организацию напрямую.",
                 "user_id": request.user_id,
                 "request_id": request.request_id,
             }
@@ -121,4 +134,4 @@ async def threadpool_stats(request: Request):
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=32000, workers=1)
+    uvicorn.run(app, host="0.0.0.0", port=8000, workers=1)

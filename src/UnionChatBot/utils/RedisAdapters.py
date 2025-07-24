@@ -5,25 +5,100 @@ import json
 import os
 
 from sklearn.metrics.pairwise import cosine_similarity
-from typing import Optional
+from typing import Tuple, Optional
+
+
+class UserRateLimiter:
+    """
+    Ограничивает количество событий (сообщений) от конкретного user_id
+    за фиксированное окно времени.
+
+    Использует атомарные команды Redis INCR + EXPIRE[7].
+    """
+
+    USER_QUERY_LIMIT_N = int(os.getenv("USER_QUERY_LIMIT_N", 10))
+    USER_QUERY_LIMIT_TTL_SECONDS = int(
+        os.getenv("USER_QUERY_LIMIT_TTL_SECONDS", 16 * 3600)
+    )
+    REDIS_HOST = str(os.getenv("REDIS_HOST", "127.0.0.1"))
+    REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
+    RATE_LIMIT_TEMPLATE = str(os.getenv("RATE_LIMIT_TEMPLATE", "msg_count:{user_id}"))
+
+    def __init__(self, db: int = 2):
+        self.redis = redis.Redis(
+            host=self.REDIS_HOST,
+            port=self.REDIS_PORT,
+            db=db,
+            decode_responses=True,
+        )
+
+    def check_and_increment(self, user_id: str) -> Tuple[bool, int]:
+        """
+        Инкрементирует счётчик и проверяет, укладывается ли пользователь в лимит.
+
+        Returns
+        -------
+        allowed : bool
+            True, если пользователь ещё не превысил лимит.
+        current : int
+            Текущее значение счётчика после инкремента.
+        """
+        key = self.RATE_LIMIT_TEMPLATE.format(user_id=user_id)
+
+        with self.redis.pipeline(transaction=True) as pipe:
+            # 1) Увеличиваем счётчик на 1 (атомарно по отношению к другим INCR)[7]
+            current = pipe.incr(key)
+
+            pipe.expire(key, self.USER_QUERY_LIMIT_TTL_SECONDS)
+
+            # Выполняем оба запроса
+            current, _ = pipe.execute()
+
+        allowed = current <= self.USER_QUERY_LIMIT_N
+        return allowed, current
+
+    def get_remaining(self, user_id: str) -> int:
+        """
+        Сколько сообщений осталось до лимита. Если ключа нет — возвращает max.
+        """
+        key = self.RATE_LIMIT_TEMPLATE.format(user_id=user_id)
+        value = self.redis.get(key)
+        value = int(value) if value is not None else 0
+        remaining = max(self.USER_QUERY_LIMIT_N - value, 0)
+        return remaining
+
+    def reset_counter(self, user_id: str) -> None:
+        """
+        Принудительно обнуляет счётчик (например, администраторская команда).
+        """
+        key = self.RATE_LIMIT_TEMPLATE.format(user_id=user_id)
+        self.redis.delete(key)
+
+    def ttl(self, user_id: str) -> int:
+        """
+        Возвращает оставшийся TTL ключа или -2 (нет ключа) / -1 (без TTL),
+        как определено в спецификации TTL[1].
+        """
+        key = self.RATE_LIMIT_TEMPLATE.format(user_id=user_id)
+        return self.redis.ttl(key)
 
 
 class SemanticRedisCache:
+    """Позволяет искать семантически похожие запросы за последние expire_time среди ответов пользователей."""
+
     api_key = os.getenv("API_KEY", None)
     folder_id = os.getenv("FOLDER_ID", None)
     host = os.getenv("REDIS_HOST", "127.0.0.1")
     port = int(os.getenv("REDIS_PORT", 6379))
+    max_entries = int(os.getenv("MAX_CACHED_REQUESTS_N", 1000))
+    expire_time = int(os.getenv("EXPIRE_TIME_CACHED_REQUEST_SECONDS", 7200))
 
     def __init__(
         self,
-        db=0,
-        max_entries=1000,
-        expire_time=3600 * 2,
-        similarity_threshold=0.9,
+        db: int = 0,
+        similarity_threshold: float = 0.9,
     ):
         self.redis = redis.Redis(host=self.host, port=self.port, db=db)
-        self.max_entries = max_entries
-        self.expire_time = expire_time
         self.similarity_threshold = similarity_threshold  # порог косинусной схожести
 
     def _generate_hash(self, query: str, type_hash: str) -> str:

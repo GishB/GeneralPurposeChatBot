@@ -100,15 +100,6 @@ class CoreQueryProcessor(BasicManager):
         Return:
             Текстовый ответ модели для пользователя.
         """
-        system_prompt = self.read_prompt(
-            prompt_file=self.core_prompt_file, prompt_dir=self.core_prompt_dir
-        )
-
-        if self.query_rewriter:
-            query, status = self.query_rewriter.rewrite(query=query, user_id=user_id)
-            if status != 200:
-                return query
-
         query_embedding = self.embedding_function(query)
 
         cached = self.redis_cache.get(query, query_embedding)
@@ -117,6 +108,15 @@ class CoreQueryProcessor(BasicManager):
                 user_id=user_id, message=cached["response"]
             )
             return cached["response"]
+
+        system_prompt = self.read_prompt(
+            prompt_file=self.core_prompt_file, prompt_dir=self.core_prompt_dir
+        )
+
+        if self.query_rewriter:
+            query, status = self.query_rewriter.rewrite(query=query, user_id=user_id)
+            if status != 200:
+                return query
 
         data = self.chroma_adapter.get_info(
             query=query, collection_name=collection_name
