@@ -16,11 +16,20 @@ load_dotenv()
 # Модели запросов
 class ChatRequest(BaseModel):
     query: str = Field(
-        default="Я ваСя ПупкИН! Привет! Мне нравится работать. Как долго действует коллективный договор на предприятии?"
+        ...,
+        min_length=2,
+        max_length=500,
+        examples=[
+            "Я ваСя ПупкИН! Привет! Мне нравится работать. Как долго действует коллективный договор на предприятии?"
+        ],
     )
-    user_id: str = Field(default="0")
-    request_id: str = Field(default="a1b2c3d4e5f67890")
-    collection_name: Optional[str] = Field(default="default_collection")
+    user_id: str = Field(..., examples=["0", "123124214"])
+    request_id: str = Field(..., examples=["a1b2c3d4e5f67890"])
+    source_name: str = Field(..., examples=["telegram", "www.profkom-nevazot.ru"])
+    collection_name: Optional[str] = Field(None, examples=["default_collection"])
+
+    class Config:
+        extra = "forbid"
 
 
 # Инициализация компонентов

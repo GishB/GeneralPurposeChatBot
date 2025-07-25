@@ -102,16 +102,16 @@ class CoreQueryProcessor(BasicManager):
         """
         query_embedding = self.embedding_function(query)
 
+        system_prompt = self.read_prompt(
+            prompt_file=self.core_prompt_file, prompt_dir=self.core_prompt_dir
+        )
+
         cached = self.redis_cache.get(query, query_embedding)
         if cached:
             self.chat_manager.add_message_to_history(
                 user_id=user_id, message=cached["response"]
             )
             return cached["response"]
-
-        system_prompt = self.read_prompt(
-            prompt_file=self.core_prompt_file, prompt_dir=self.core_prompt_dir
-        )
 
         if self.query_rewriter:
             query, status = self.query_rewriter.rewrite(query=query, user_id=user_id)
