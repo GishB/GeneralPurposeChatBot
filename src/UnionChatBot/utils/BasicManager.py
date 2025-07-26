@@ -25,7 +25,7 @@ class BasicManager:
     def __init__(
         self,
         model_name: str,
-        maxTokens: str = "8000",
+        maxTokens: int = 8000,
         stream: bool = False,
         temperature: float = 0.3,
         **kwargs,
@@ -44,9 +44,6 @@ class BasicManager:
             raise ValueError(
                 "YANDEXGPT_API url hasn`t been defined at ENV! How you are going to inference at all???"
             )
-
-        if maxTokens >= 8001:
-            raise Warning("It is not recommended to set more than 8000 tokens!")
 
         if maxTokens >= 32000:
             raise Warning(

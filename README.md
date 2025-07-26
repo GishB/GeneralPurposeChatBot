@@ -62,8 +62,8 @@ curl -k -X 'POST' \
   -H 'Content-Type: application/json' \
   -H 'X-API-Token: QweuqqwQEW312eqwewWEWEEADAsd-WEQQ1231273787' \
   -d '{
-  "query": "Hello! How are you? What the latest news you know about workerunion life?",
-  "user_id": "0",
+  "query": "Сколько денег выплачивают в случае смерти работника в 2025?",
+  "user_id": "2",
   "request_id": "md5hash"
 }'
 ```
@@ -113,5 +113,6 @@ If you woild like to change default prompt you will have 3 options.
 -  [ ] Baseline checker for generated text over baclog info. First check format, second check special questions retrieval.
 
 ### Future:
--  [ ] Async connections to ChromaDB & Redis?? How to do it with Nginx?
+-  [ ] Async connections to ChromaDB & Redis?? How to proxy this at Nginx?
 -  [ ] InternetSearchManager (surfing internet if no data available)
+

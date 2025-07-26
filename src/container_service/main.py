@@ -1,7 +1,6 @@
 import os
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
-from typing import Optional
 from UnionChatBot.utils.SessionAdapter import setting_up
 from UnionChatBot.utils.RedisAdapters import UserRateLimiter
 from concurrent.futures import ThreadPoolExecutor
@@ -26,7 +25,6 @@ class ChatRequest(BaseModel):
     user_id: str = Field(..., examples=["0", "123124214"])
     request_id: str = Field(..., examples=["a1b2c3d4e5f67890"])
     source_name: str = Field(..., examples=["telegram", "www.profkom-nevazot.ru"])
-    collection_name: Optional[str] = Field(None, examples=["default_collection"])
 
     class Config:
         extra = "forbid"
@@ -143,4 +141,4 @@ async def threadpool_stats(request: Request):
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000, workers=1)
+    uvicorn.run(app, host="0.0.0.0", port=32000, workers=1)

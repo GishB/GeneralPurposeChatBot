@@ -24,12 +24,12 @@ class CoreQueryProcessor(BasicManager):
 
     core_prompt_file = os.getenv("DEFAULT_PROMPT_FILE", "default_prompt.txt")
     core_prompt_dir = os.getenv("DEFAULT_DIR_PROMPT", "./prompts")
+    maxTokens = int(os.getenv("MAX_TOKENS_DEFAULT_API", 10000))
 
     def __init__(
         self,
         temperature: float = 0.3,
         stream: bool = False,
-        maxTokens: int = 2000,
         model_name: str = "deepseek-r1-distill-qwen-32b",
         embedding_function: MyEmbeddingFunction = None,
         chroma_adapter: ChromaAdapter = None,
@@ -42,7 +42,7 @@ class CoreQueryProcessor(BasicManager):
             model_name=model_name,
             temperature=temperature,
             stream=stream,
-            maxTokens=maxTokens,
+            maxTokens=self.maxTokens,
             **kwargs,
         )
 
