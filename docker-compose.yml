@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # Основные сервисы (теперь без публикации портов на хосте)
   chatbot:
-    image: gishb/union-chatbot:v0.2.1
+    image: gishb/union-chatbot:v0.2.2
     deploy:
       resources:
         limits:

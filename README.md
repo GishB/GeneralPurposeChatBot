@@ -115,4 +115,3 @@ If you woild like to change default prompt you will have 3 options.
 ### Future:
 -  [ ] Async connections to ChromaDB & Redis?? How to proxy this at Nginx?
 -  [ ] InternetSearchManager (surfing internet if no data available)
-

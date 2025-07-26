@@ -16,7 +16,7 @@ load_dotenv()
 class ChatRequest(BaseModel):
     query: str = Field(
         ...,
-        min_length=2,
+        min_length=4,
         max_length=500,
         examples=[
             "Я ваСя ПупкИН! Привет! Мне нравится работать. Как долго действует коллективный договор на предприятии?"
@@ -72,22 +72,13 @@ def chat_with_bot(request: ChatRequest):
     Параметры:
     - query: вопрос пользователя (обязательный)
     - user_id: идентификатор пользователя (обязательный)
-    - prompt: промт (опциональный, будет использован дефолтный)
-    - collection_name: имя коллекции (опциональное, будет использовано дефолтное)
     """
     try:
         allowed, current = rate_limiter.check_and_increment(request.user_id)
         if allowed:
-            collection_name = (
-                request.collection_name
-                if request.collection_name
-                else DEFAULT_COLLECTION
-            )
-
-            # Получаем ответ от модели
             response = client_yandex.ask(
                 query=request.query,
-                collection_name=collection_name,
+                collection_name=DEFAULT_COLLECTION,
                 user_id=request.user_id,
             )
             if is_specific_error(response):
@@ -141,4 +132,4 @@ async def threadpool_stats(request: Request):
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=32000, workers=1)
+    uvicorn.run(app, host="0.0.0.0", port=8000, workers=1)
