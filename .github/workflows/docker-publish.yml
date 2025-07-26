@@ -45,6 +45,9 @@ jobs:
           script: |
             cd ${{ secrets.PATH_TO_PROJECT_DIR }}
             
+            # pull git updates from main
+            git pull origin main
+            
             # Login to Docker Hub to enable pulling private images
             echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login \
               --username ${{ secrets.DOCKERHUB_USERNAME }} \
@@ -64,7 +67,5 @@ jobs:
             for i in 1 2 3; do
               docker-compose -f docker-compose-prod.yml up -d && break || sleep 5
             done
-            
-            # pull git updates from main
-            git pull origin main
+          
 
