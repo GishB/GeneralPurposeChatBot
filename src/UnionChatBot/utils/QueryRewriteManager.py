@@ -11,19 +11,19 @@ from UnionChatBot.utils.ChatHistoryManager import ChatHistoryManager
 class QueryRewriteManager(BasicManager, ChatHistoryManager):
     path_to_prompt = os.getenv("PROMPT_PATH", "./prompts")
     filter_prompt = os.getenv("ASSISTANT_PROMPT_NAME", "assistant_prompt.txt")
+    temperature = float(os.getenv("TEMPERATURE_REWRITE_MANAGER", 0.9))
+    max_tokens = int(os.getenv("MAX_TOKENS_REWRITE_MANAGER", 4000))
 
     def __init__(
         self,
         model_name: str = "yandexgpt",
-        maxTokens: int = 4000,
-        temperature: float = 0.9,
         redis_db=1,
         **kwargs,
     ):
         super().__init__(
-            maxTokens=maxTokens,
+            maxTokens=self.max_tokens,
             model_name=model_name,
-            temperature=temperature,
+            temperature=self.temperature,
             redis_db=redis_db,
             **kwargs,
         )

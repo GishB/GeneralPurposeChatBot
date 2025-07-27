@@ -111,7 +111,7 @@ If you woild like to change default prompt you will have 3 options.
 -  [X] CD logic to deploy new image for chatbot on remote server.
 -  [X] Limitation for users to call the API.
 -  [X] Backlog logic for all user request throw API calls. (Maybe decorator here?)
--  [ ] Baseline checker for generated text over baclog info. First check format, second check special questions retrieval.
+-  [ ] Baseline checker for generated text over backlog info. First check format, second check special questions retrieval.
 
 ### Future:
 -  [ ] Async connections to ChromaDB & Redis?? How to proxy this at Nginx?

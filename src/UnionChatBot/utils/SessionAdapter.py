@@ -3,6 +3,7 @@ from UnionChatBot.utils.ChatHistoryManager import ChatHistoryManager
 from UnionChatBot.utils.ChromaAdapter import ChromaAdapter
 from UnionChatBot.utils.EmbeddingAPI import MyEmbeddingFunction
 from UnionChatBot.utils.RedisAdapters import SemanticRedisCache
+from UnionChatBot.utils.QueryRewriteManager import QueryRewriteManager
 
 
 def setting_up(
@@ -30,10 +31,14 @@ def setting_up(
     chat_manager = ChatHistoryManager(
         redis_db=1,
     )
+
+    query_rewriter = QueryRewriteManager(model_name=model_name)
+
     return CoreQueryProcessor(
         model_name=model_name,
         embedding_function=embedding_function,
         redis_cache=semantic_cache,
         chroma_adapter=chroma_adapter,
         chat_manager=chat_manager,
+        query_rewriter=query_rewriter,
     )
