@@ -2,11 +2,13 @@ import argparse
 import os
 from pathlib import Path
 
-from UnionChatBot.processors.markdown_processor import MarkdownProcessor
-from UnionChatBot.storage.chroma_storage import ChromaStorage
-from UnionChatBot.readers.file_reader import LocalFileReader
-from UnionChatBot.services.ingestion_service import IngestionService
-from UnionChatBot.models.document import ProcessingConfig
+from UnionChatBot.utils.save_script.processors.markdown_processor import (
+    MarkdownProcessor,
+)
+from UnionChatBot.utils.save_script.storage.chroma_storage import ChromaStorage
+from UnionChatBot.utils.save_script.readers.file_reader import LocalFileReader
+from UnionChatBot.utils.save_script.services.ingestion_service import IngestionService
+from UnionChatBot.utils.save_script.models.document import ProcessingConfig
 
 
 def main():

@@ -1,57 +1,21 @@
 import os
 from fastapi import FastAPI, HTTPException, Request
-from pydantic import BaseModel
 from UnionChatBot.utils.SessionAdapter import setting_up
 from UnionChatBot.utils.RedisAdapters import UserRateLimiter
+from UnionChatBot.utils.PostgresAdapter import AuditLogger
+from UnionChatBot.schemas.services import ChatRequest, ChatResponse
+from UnionChatBot.utils.timers import ExecutionTimer
+from UnionChatBot.utils.error_handlers import is_specific_error
 from concurrent.futures import ThreadPoolExecutor
 from dotenv import load_dotenv
-from pydantic import Field
-import re
 
 app = FastAPI()
 load_dotenv()
 
-
-# Модели запросов
-class ChatRequest(BaseModel):
-    query: str = Field(
-        ...,
-        min_length=4,
-        max_length=500,
-        examples=[
-            "Я ваСя ПупкИН! Привет! Мне нравится работать. Как долго действует коллективный договор на предприятии?"
-        ],
-    )
-    user_id: str = Field(..., examples=["0", "123124214"])
-    request_id: str = Field(..., examples=["a1b2c3d4e5f67890"])
-    source_name: str = Field(..., examples=["telegram", "www.profkom-nevazot.ru"])
-
-    class Config:
-        extra = "forbid"
-
-
 # Инициализация компонентов
 client_yandex = setting_up()
 rate_limiter = UserRateLimiter()
-DEFAULT_COLLECTION = os.getenv("COLLECTION_NAME")
-
-
-def is_specific_error(text: str) -> bool:
-    """Обрабатывает случаи, когда ответ на запрос пользователя это заглушка Яндекса.
-
-    Args:
-        text: генерация YandexGPT модели после обработки вопроса.
-
-    Returns:
-        bool: Если True, то этот ответ пользователю не показываем.
-    """
-    # Регулярное выражение для поиска ссылок на Яндекс
-    pattern = r"\b(?:https?://)?(?:[a-z0-9-]+\.)*yandex\.(?:ru|com|ua|by|kz)(?:/\S*)?\b"
-
-    # Игнорируем регистр для поиска
-    if re.search(pattern, text, re.IGNORECASE):
-        return True
-    return False
+audit_logger = AuditLogger(os.getenv("POSTGRES_DSN"))
 
 
 @app.on_event("startup")
@@ -64,7 +28,7 @@ async def startup_event():
     )
 
 
-@app.post("/chat")
+@app.post("/chat", response_model=ChatResponse)
 def chat_with_bot(request: ChatRequest):
     """
     Основной эндпоинт для взаимодействия с чат-ботом
@@ -73,17 +37,19 @@ def chat_with_bot(request: ChatRequest):
     - query: вопрос пользователя (обязательный)
     - user_id: идентификатор пользователя (обязательный)
     """
+    timer = ExecutionTimer()
+    time_in = timer.get_msk_time()
     try:
         allowed, current = rate_limiter.check_and_increment(request.user_id)
         if allowed:
             response = client_yandex.ask(
                 query=request.query,
-                collection_name=DEFAULT_COLLECTION,
+                collection_name=os.getenv("COLLECTION_NAME"),
                 user_id=request.user_id,
             )
             if is_specific_error(response):
-                return {
-                    "status": "failed",
+                out = {
+                    "status": "error",
                     "response": "Извините, что Ваш вопрос не может быть обработан правильно в силу технических причин "
                     "из-за AI стороннего сервиса. \n"
                     " Попробуйте сформулировать вопрос по теме немного иначе, пожалуйста.",
@@ -91,14 +57,14 @@ def chat_with_bot(request: ChatRequest):
                     "request_id": request.request_id,
                 }
             else:
-                return {
+                out = {
                     "status": "success",
                     "response": response,
                     "user_id": request.user_id,
                     "request_id": request.request_id,
                 }
         else:
-            return {
+            out = {
                 "status": "success",
                 "response": f"Вы достигли лимита запросов к сервису в течении суток. За последние сутки Вы обращались к боту: {current} раз. \n"
                 f" Общее ограничение для каждого пользователя: {int(os.getenv('USER_QUERY_LIMIT_N', 10))} сообщений в сутки. \n"
@@ -106,8 +72,31 @@ def chat_with_bot(request: ChatRequest):
                 "user_id": request.user_id,
                 "request_id": request.request_id,
             }
+        audit_logger.log(
+            time_in=time_in,
+            time_out=timer.get_msk_time(),
+            user_id=request.user_id,
+            source_name=request.source_name,
+            request_id=request.request_id,
+            query_in=request.query,
+            response_out=out.get("response"),
+            status=out.get("status"),
+            execution_time=timer.execution_time,
+        )
+        return out
 
     except Exception as e:
+        audit_logger.log(
+            time_in=time_in,
+            time_out=timer.get_msk_time(),
+            user_id=request.user_id,
+            source_name=request.source_name,
+            request_id=request.request_id,
+            query_in=request.query,
+            response_out=str(e),
+            status="failed",
+            execution_time=timer.execution_time,
+        )
         raise HTTPException(
             status_code=500, detail=f"Произошла ошибка при обработке запроса: {str(e)}"
         )

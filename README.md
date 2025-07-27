@@ -107,7 +107,7 @@ If you woild like to change default prompt you will have 3 options.
  - [X] Async libraries to interact with users instead of telegrambotapi.
  - [X] Add options to use manual prompt files. Maybe mount option if we use Docker Compose? 
 -  [X] Fix Reranker logic.
--  [X] CD logic to save images on docker registery server.
+-  [X] CD logic to save images at docker registery server.
 -  [X] CD logic to deploy new image for chatbot on remote server.
 -  [X] Limitation for users to call the API.
 -  [ ] Backlog logic for all user request throw API calls. (Maybe decorator here?)

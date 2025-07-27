@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # Основные сервисы (теперь без публикации портов на хосте)
   chatbot:
     image: gishb/union-chatbot:latest
     deploy:
@@ -15,7 +14,7 @@ services:
     volumes:
       - ./prompts:/app/prompts
     expose:
-      - "32000"  # Только для внутренней сети
+      - "8000"  # Только для внутренней сети
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
@@ -89,23 +88,12 @@ services:
 
       # Логи
       - /etc/nginx/logs:/var/log/nginx               # Логи access/error
-
-      # Scripts for IP blocking
-      - /etc/nginx/scripts:/etc/nginx/scripts:rw
-
-      # Blocked IPs with proper permissions
-      - /etc/nginx/blocked_ips:/etc/nginx/blocked_ips
-
-      # Для старта cronjob
-      - /etc/nginx/scripts/entrypoint.sh:/entrypoint.sh:rw
     depends_on:
       - chatbot
       - redis
       - chromadb
     networks:
       - app-network
-    init: true
-    command: ["/entrypoint.sh"]
 
 volumes:
   redis_data:

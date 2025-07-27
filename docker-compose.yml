@@ -90,27 +90,31 @@ services:
       # Логи
       - ./nginx/logs:/var/log/nginx               # Логи access/error
 
-      # Scripts for IP blocking
-      - ./nginx/scripts:/etc/nginx/scripts:rw
-
-      # Blocked IPs with proper permissions
-      - ./nginx/blocked_ips:/etc/nginx/blocked_ips
-
-      # Для старта cronjob
-      - ./nginx/scripts/entrypoint.sh:/entrypoint.sh:rw
     depends_on:
       - chatbot
       - redis
       - chromadb
     networks:
       - app-network
-    init: true
-    command: ["/entrypoint.sh"]
+
+  postgres_test:
+    image: postgres:15-alpine
+    container_name: postgres_test
+    environment:
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+      POSTGRES_DB: test_db
+    expose:
+      - "5432"
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pg_test_data:/var/lib/postgresql/data
 
 volumes:
   redis_data:
   chroma_data:
-  blocked_ips_data:
+  pg_test_data:
 
 
 networks:
