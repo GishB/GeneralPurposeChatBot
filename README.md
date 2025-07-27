@@ -62,9 +62,10 @@ curl -k -X 'POST' \
   -H 'Content-Type: application/json' \
   -H 'X-API-Token: QweuqqwQEW312eqwewWEWEEADAsd-WEQQ1231273787' \
   -d '{
-  "query": "Сколько денег выплачивают в случае смерти работника в 2025?",
+  "query": "Tell me what do you know about worker union?",
   "user_id": "2",
-  "request_id": "md5hash"
+  "request_id": "md5hash",
+  "source_name": "test"
 }'
 ```
 
