@@ -20,13 +20,15 @@ class QueryRewriteManager(BasicManager, ChatHistoryManager):
         redis_db=1,
         **kwargs,
     ):
-        super().__init__(
+        BasicManager.__init__(
+            self,
             maxTokens=self.max_tokens,
             model_name=model_name,
             temperature=self.temperature,
             redis_db=redis_db,
             **kwargs,
         )
+        ChatHistoryManager.__init__(self, redis_db=redis_db, **kwargs)
 
     def add_history_info(self, prompt: str, user_id: str) -> str:
         history = self.get_formatted_history(user_id=user_id)
