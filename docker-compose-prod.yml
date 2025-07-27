@@ -14,7 +14,7 @@ services:
     volumes:
       - ./prompts:/app/prompts
     expose:
-      - "8000"  # Только для внутренней сети
+      - "32000"
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
@@ -98,7 +98,6 @@ services:
 volumes:
   redis_data:
   chroma_data:
-  blocked_ips_data:
 
 networks:
   app-network:

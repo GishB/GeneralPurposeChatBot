@@ -24,7 +24,7 @@ async def startup_event():
     app.state.executor = ThreadPoolExecutor(
         max_workers=int(os.environ["MAX_FASTAPI_THREADS"])
         if int(os.environ["MAX_FASTAPI_THREADS"])
-        else 4
+        else 10
     )
 
 
@@ -38,7 +38,7 @@ def chat_with_bot(request: ChatRequest):
     - user_id: идентификатор пользователя (обязательный)
     """
     timer = ExecutionTimer()
-    time_in = timer.get_msk_time()
+    time_in = timer.format_european_time(timer.get_msk_time())
     try:
         allowed, current = rate_limiter.check_and_increment(request.user_id)
         if allowed:
@@ -74,28 +74,28 @@ def chat_with_bot(request: ChatRequest):
             }
         audit_logger.log(
             time_in=time_in,
-            time_out=timer.get_msk_time(),
+            time_out=timer.format_european_time(timer.get_msk_time()),
             user_id=request.user_id,
             source_name=request.source_name,
             request_id=request.request_id,
             query_in=request.query,
             response_out=out.get("response"),
             status=out.get("status"),
-            execution_time=timer.execution_time,
+            execution_time=timer.time(),
         )
         return out
 
     except Exception as e:
         audit_logger.log(
             time_in=time_in,
-            time_out=timer.get_msk_time(),
+            time_out=timer.format_european_time(timer.get_msk_time()),
             user_id=request.user_id,
             source_name=request.source_name,
             request_id=request.request_id,
             query_in=request.query,
             response_out=str(e),
             status="failed",
-            execution_time=timer.execution_time,
+            execution_time=timer.time(),
         )
         raise HTTPException(
             status_code=500, detail=f"Произошла ошибка при обработке запроса: {str(e)}"
@@ -121,4 +121,4 @@ async def threadpool_stats(request: Request):
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000, workers=1)
+    uvicorn.run(app, host="0.0.0.0", port=32000, workers=1)

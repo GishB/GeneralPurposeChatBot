@@ -21,7 +21,7 @@ def main():
     parser.add_argument(
         "--collection",
         type=str,
-        default=os.getenv("COLLECTION_NAME", "default_collection"),
+        default=os.getenv("COLLECTION_NAME", "PRODUCTION_PROFKOM"),
     )
     parser.add_argument(
         "--chroma-host", type=str, default=os.getenv("CHROMA_HOST", "127.0.0.1")

@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3.10-dev \
     gcc \
     wget \
+    libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build

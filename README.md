@@ -1,7 +1,7 @@
 # GeneralPurposeChatBot
 
  This is a repo for general purpose chatbot which can interact with AI models via YandexCloud API.
- Baseline idea is to help developers to create ChatBotAPI + RAG for users who like to find related info from documents. It is powered by ***YandexGPTAPI***, Redis and ChromaDB.
+ Baseline idea is to help developers to create ChatBotAPI + RAG for users who like to find related info from documents. It is powered by ***YandexGPTAPI***, Redis and ChromaDB + PostgresDB for logs.
 
 If you would like to check this bot go to tg link (sometimes i will run this for tests):
 > https://t.me/HelperUnionBot
@@ -98,7 +98,7 @@ If you woild like to change default prompt you will have 3 options.
  - [x] RerankingAPI for selected documents.
  - [x] ChatHistoryManager (based on Redis).
  - [X] QueryHelpManager (rewrite or modify user query in case of problems with query)
- - [ ] QueryFilterManager (check that user query are valid for this task)
+ - [ ] QueryFilterManager (check that user query are not just a SPAM)
  - [x] Docker Image
  - [X] Docker-Compose for test and prod.
  - [X] Nginx to control interactions.
@@ -110,9 +110,35 @@ If you woild like to change default prompt you will have 3 options.
 -  [X] CD logic to save images at docker registery server.
 -  [X] CD logic to deploy new image for chatbot on remote server.
 -  [X] Limitation for users to call the API.
--  [ ] Backlog logic for all user request throw API calls. (Maybe decorator here?)
+-  [X] Backlog logic for all user request throw API calls. (Maybe decorator here?)
 -  [ ] Baseline checker for generated text over baclog info. First check format, second check special questions retrieval.
 
 ### Future:
 -  [ ] Async connections to ChromaDB & Redis?? How to proxy this at Nginx?
 -  [ ] InternetSearchManager (surfing internet if no data available)
+
+
+#### How to configure PostgresDB for logs?
+
+1. Look at POSTGRES_DSN var in env example. There you will find EXPOSED PORT, IP and password, login.
+2. Log into PostgresDB container
+```docker exec -it postgres_test psql -U test_user -d test_db```
+3. CREATE TABLE at PostgresDB.
+```commandline
+CREATE TABLE chat_request_audit (
+    audit_id        SERIAL PRIMARY KEY,
+    time_in         VARCHAR(20) NOT NULL,
+    time_out        VARCHAR(20),
+    user_id         VARCHAR(128) NOT NULL,
+    source_name     VARCHAR(64) NOT NULL,
+    request_id      VARCHAR(256) NOT NULL,
+    query_in        VARCHAR(500) NOT NULL,
+    response_out    TEXT,
+    status          VARCHAR(32),
+    execution_time  NUMERIC(12,6)
+);
+```
+4. Check that table exists.
+```commandline
+SELECT * FROM chat_request_audit ORDER BY audit_id DESC LIMIT 5;
+```

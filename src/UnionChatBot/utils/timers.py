@@ -5,13 +5,12 @@ import pytz
 
 
 class ExecutionTimer:
-    def __enter__(self):
+    def __init__(self):
         self.start_time = time.perf_counter()
-        return self
 
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.end_time = time.perf_counter()
-        self.execution_time = self.end_time - self.start_time
+    def time(self):
+        end_time = time.perf_counter()
+        return end_time - self.start_time
 
     @staticmethod
     def get_msk_time() -> datetime:
