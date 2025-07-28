@@ -36,23 +36,22 @@ class UserRateLimiter:
         """
         Инкрементирует счётчик и проверяет, укладывается ли пользователь в лимит.
 
-        Returns
-        -------
-        allowed : bool
-            True, если пользователь ещё не превысил лимит.
-        current : int
-            Текущее значение счётчика после инкремента.
+        Arg:
+            user_id: уникальный идентификатор пользователя.
+
+        Returns:
+            Tuple, где первое значение True, если пользователь ещё не превысил лимит, и текущее значение счётчика после инкремента.
         """
         key = self.RATE_LIMIT_TEMPLATE.format(user_id=user_id)
 
         with self.redis.pipeline(transaction=True) as pipe:
-            # 1) Увеличиваем счётчик на 1 (атомарно по отношению к другим INCR)[7]
-            current = pipe.incr(key)
+            pipe.incr(key)
+            pipe.ttl(key)
+            results = pipe.execute()
+            current, ttl = results
 
-            pipe.expire(key, self.USER_QUERY_LIMIT_TTL_SECONDS)
-
-            # Выполняем оба запроса
-            current, _ = pipe.execute()
+        if current == 1 or ttl == -1 or ttl == -2:
+            self.redis.expire(key, self.USER_QUERY_LIMIT_TTL_SECONDS)
 
         allowed = current <= self.USER_QUERY_LIMIT_N
         return allowed, current

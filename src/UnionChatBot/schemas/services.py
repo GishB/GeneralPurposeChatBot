@@ -27,3 +27,10 @@ class ChatResponse(BaseModel):
 
     class Config:
         extra = "forbid"
+
+
+class ResetRequest(BaseModel):
+    user_id: str
+
+    class Config:
+        extra = "forbid"

@@ -9,6 +9,8 @@ from UnionChatBot.utils.error_handlers import is_specific_error
 from concurrent.futures import ThreadPoolExecutor
 from dotenv import load_dotenv
 
+from src.UnionChatBot.schemas.services import ResetRequest
+
 app = FastAPI()
 load_dotenv()
 
@@ -26,6 +28,17 @@ async def startup_event():
         if int(os.environ["MAX_FASTAPI_THREADS"])
         else 10
     )
+
+
+@app.post("/reset")
+def reset_limits(request: ResetRequest):
+    try:
+        rate_limiter.reset_counter(request.user_id)
+        return {"status": "ok", "user_id": request.user_id}
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Произошла ошибка при обработке запроса: {str(e)}"
+        )
 
 
 @app.post("/chat", response_model=ChatResponse)

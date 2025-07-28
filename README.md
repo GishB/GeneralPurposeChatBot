@@ -104,13 +104,13 @@ If you woild like to change default prompt you will have 3 options.
  - [X] Nginx to control interactions.
  - [X] github workflow for CI
  - [X] README setup locally .
- - [X] Async libraries to interact with users instead of telegrambotapi.
- - [X] Add options to use manual prompt files. Maybe mount option if we use Docker Compose? 
--  [X] Fix Reranker logic.
--  [X] CD logic to save images at docker registery server.
--  [X] CD logic to deploy new image for chatbot on remote server.
--  [X] Limitation for users to call the API.
--  [X] Backlog logic for all user request throw API calls. (Maybe decorator here?)
+ - [X] Async libraries to interact with users instead of telegrambotapi. -> case for telegram on desktop.
+ - [X] Add options to use manual prompt files. -> ./prompts
+-  [X] Fix Reranker logic. -> bm25 over selected text
+-  [X] CD logic to save images at docker registery server. -> github runner
+-  [X] CD logic to deploy new image for chatbot on remote server. -> github runner
+-  [X] Limitation for users to call the API. -> Redis.
+-  [X] Backlog logic for all user request throw API calls. -> PostgresDB.
 -  [ ] Baseline checker for generated text over backlog info. First check format, second check special questions retrieval.
 
 ### Future:

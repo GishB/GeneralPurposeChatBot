@@ -36,36 +36,30 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/union-chatbot:${{ steps.tag.outputs.VERSION }}
             ${{ secrets.DOCKERHUB_USERNAME }}/union-chatbot:latest
 
-      - name: Delivery new image to the server and restart docker-compose
+      - name: Deploy to server via SSH
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
+            set -e
+
             cd ${{ secrets.PATH_TO_PROJECT_DIR }}
-            
-            # pull git updates from main
+
+            echo "Pulling latest git commit..."
             git pull origin main
-            
-            # Login to Docker Hub to enable pulling private images
-            echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login \
-              --username ${{ secrets.DOCKERHUB_USERNAME }} \
-              --password-stdin
-            
-            # Retry pulling images up to 3 times
-            for i in 1 2 3; do
-              docker compose pull && break || sleep 5
-            done
-            
-            # Retry stopping containers up to 3 times
-            for i in 1 2 3; do
-              docker compose down && break || sleep 5
-            done
-            
-            # Retry starting containers up to 3 times
-            for i in 1 2 3; do
-              docker-compose -f docker-compose-prod.yml up -d && break || sleep 5
-            done
+
+            echo "Logging in to Docker Hub..."
+            echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+
+            echo "Pulling latest Docker images..."
+            docker-compose -f docker-compose-prod.yml pull
+
+            echo "Restarting containers..."
+            docker-compose -f docker-compose-prod.yml up -d
+
+            echo "Removing old images (optional cleanup):"
+            docker image prune -af
           
 
