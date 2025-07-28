@@ -3,13 +3,11 @@ from fastapi import FastAPI, HTTPException, Request
 from UnionChatBot.utils.SessionAdapter import setting_up
 from UnionChatBot.utils.RedisAdapters import UserRateLimiter
 from UnionChatBot.utils.PostgresAdapter import AuditLogger
-from UnionChatBot.schemas.services import ChatRequest, ChatResponse
+from UnionChatBot.schemas.services import ChatRequest, ChatResponse, ResetRequest
 from UnionChatBot.utils.timers import ExecutionTimer
 from UnionChatBot.utils.error_handlers import is_specific_error
 from concurrent.futures import ThreadPoolExecutor
 from dotenv import load_dotenv
-
-from src.UnionChatBot.schemas.services import ResetRequest
 
 app = FastAPI()
 load_dotenv()
