@@ -105,10 +105,12 @@ class CoreQueryProcessor(BasicManager):
             query: вопрос пользователя & сообщение.
             collection_name: название коллекции к которой необходимо обратиться в ChromaDB.
             user_id: уникальный идентификатор пользователя.
-
         Returns:
             Текстовый ответ модели для пользователя.
         """
+        # new_query: модифицированный запрос пользователя.
+        new_query: Optional[str] = None
+
         logger.debug(f"User {user_id} - init query: {query}")
         query_embedding = self.embedding_function(query)
         logger.debug(f"User {user_id} - query embedding generated")
@@ -127,16 +129,24 @@ class CoreQueryProcessor(BasicManager):
             return cached["response"]
 
         if self.query_rewriter:
-            query, status = self.query_rewriter.rewrite(query=query, user_id=user_id)
+            new_query, status = self.query_rewriter.rewrite(
+                query=query, user_id=user_id
+            )
             if status != 200:
                 logger.warning(
                     f"User {user_id} - query rewrite failed with status {status}: {query}"
                 )
                 return query
+            if "SPAM" in new_query:
+                logger.info(f"User {user_id} - send a SPAM message")
+                return (
+                    "Ваше сообщение было отнесено к SPAM категории! \n\n"
+                    "Если это ошибка, то пришлите, пожалуйста, информацию об этом в профсоюзный комитет!"
+                )
             logger.debug(f"User {user_id} - query after rewrite: {query}")
 
         data = self.chroma_adapter.get_info(
-            query=query, collection_name=collection_name
+            query=new_query if new_query else query, collection_name=collection_name
         )
         logger.debug(f"User {user_id} - chroma_adapter returned data: {data}")
 
@@ -149,7 +159,9 @@ class CoreQueryProcessor(BasicManager):
             response = requests.post(
                 url=self.url,
                 headers=self.setup_header(),
-                data=self.setup_data(text=query, prompt=new_prompt),
+                data=self.setup_data(
+                    text=new_query if new_query else query, prompt=new_prompt
+                ),
             )
             logger.debug(
                 f"User {user_id} - request sent, response status: {response.status_code}"
