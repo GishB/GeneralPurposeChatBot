@@ -137,7 +137,11 @@ class CoreQueryProcessor(BasicManager):
                     f"User {user_id} - query rewrite failed with status {status}: {query}"
                 )
                 return query
-            if "SPAM" in new_query:
+            if (
+                "SPAM" in new_query
+                or "Пожалуйста, сформулируйте ваш вопрос, чтобы я мог вам помочь."
+                in new_query
+            ):
                 logger.info(f"User {user_id} - send a SPAM message")
                 return (
                     "Ваше сообщение было отнесено к SPAM категории! \n\n"
