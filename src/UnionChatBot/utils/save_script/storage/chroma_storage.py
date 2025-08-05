@@ -2,7 +2,7 @@ import os
 
 import chromadb
 from UnionChatBot.utils.EmbeddingAPI import MyEmbeddingFunction
-from UnionChatBot.models.document import Document
+from UnionChatBot.utils.save_script.models.document import Document
 from typing import List
 
 

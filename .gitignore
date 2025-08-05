@@ -13,3 +13,4 @@ UnionChatBot.egg-info
 *.log
 /build/
 *.md
+*.docx

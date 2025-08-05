@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from UnionChatBot.processors.markdown_processor import MarkdownProcessor
-from UnionChatBot.storage.chroma_storage import ChromaStorage
-from UnionChatBot.readers.file_reader import LocalFileReader
+from UnionChatBot.utils.save_script.markdown_processor import MarkdownProcessor
+from UnionChatBot.utils.save_script.storage.chroma_storage import ChromaStorage
+from UnionChatBot.utils.save_script.readers.file_reader import LocalFileReader
 
 
 class IngestionService:
