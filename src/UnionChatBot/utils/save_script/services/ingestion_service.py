@@ -1,6 +1,8 @@
 from pathlib import Path
 
-from UnionChatBot.utils.save_script.markdown_processor import MarkdownProcessor
+from UnionChatBot.utils.save_script.processors.markdown_processor import (
+    MarkdownProcessor,
+)
 from UnionChatBot.utils.save_script.storage.chroma_storage import ChromaStorage
 from UnionChatBot.utils.save_script.readers.file_reader import LocalFileReader
 
