@@ -3,7 +3,7 @@ from pathlib import Path
 import hashlib
 from semantic_text_splitter import MarkdownSplitter
 
-from UnionChatBot.utils.save_script.document import Document, ProcessingConfig
+from UnionChatBot.utils.save_script.models.document import Document, ProcessingConfig
 
 
 class MarkdownProcessor:
