@@ -1,0 +1,116 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data_local:/data
+    networks:
+      - app-network
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+    ports:
+      - "6379:6379"
+
+  chromadb:
+    image: chromadb/chroma:latest
+    volumes:
+      - chroma_data_s3:/chroma/chroma
+    environment:
+      - CHROMA_SERVER_HOST=0.0.0.0
+      - CHROMA_SERVER_HTTP_PORT=8000
+    networks:
+      - app-network
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+    ports:
+      - "8000:8000"
+
+  profkomchatbot:
+    image: gishb/union-chatbot:latest
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+    secrets:
+      - source: app_secrets
+        target: .env.prod
+    volumes:
+      - prompts_s3:/app/prompts
+    networks:
+      - app-network
+    command: >
+      sh -c "
+      echo 'Loading environment variables from secrets...';
+      if [ -f /run/secrets/.env.prod ]; then
+        set -a;
+        . /run/secrets/.env.prod;
+        set +a;
+        echo 'Environment variables loaded successfully';
+      else
+        echo 'WARNING: /run/secrets/.env.prod not found!';
+      fi;
+      echo 'Starting application...';
+      exec python /app/main.py
+      "
+    deploy:
+      replicas: 2
+      placement:
+        constraints:
+          - node.role == worker
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+    ports:
+      - "8080:32000"
+    depends_on:
+      - redis
+      - chromadb
+
+secrets:
+  app_secrets:
+    external: true
+
+volumes:
+  redis_data_local:
+    driver: local
+
+  chroma_data_s3:
+    driver: rclone/docker-volume-rclone:latest
+    driver_opts:
+      remote: "beget-s3:725a993e5e79-profkom-files/chromadb"
+      allow_other: "true"
+
+  prompts_s3:
+    driver: rclone/docker-volume-rclone:latest
+    driver_opts:
+      remote: "beget-s3:725a993e5e79-profkom-files/prompts"
+      allow_other: "true"
+      read_only: "true"
+      umask: "0022"
+
+
+networks:
+  app-network:
+    driver: overlay
+    attachable: true
