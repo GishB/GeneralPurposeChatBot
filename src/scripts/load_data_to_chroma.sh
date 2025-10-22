@@ -5,6 +5,7 @@ set -e  # Выход при первой ошибке
 ENV_PATH="$HOME/environments/chatbot/bin/activate"
 PROJECT_PATH="$HOME/projects/GeneralPurposeChatBot/"
 PY_SCRIPT="$HOME/projects/GeneralPurposeChatBot/src/scripts/load_data_to_chroma.py"
+ENV_FILE="$HOME/projects/GeneralPurposeChatBot/.env.prod"  # Путь к .env.prod файлу
 
 # Правильное получение аргументов
 SRC_DIR="$1"              # Первый аргумент - путь к директории
@@ -16,6 +17,18 @@ if [[ -z "$SRC_DIR" || -z "$COLLECTION_NAME" ]]; then
     echo "Пример: $0 /tmp/md_azot_profkom/ my_collection"
     exit 1
 fi
+
+# Проверяем существование .env.prod файла
+if [[ ! -f "$ENV_FILE" ]]; then
+    echo "Ошибка: файл окружения не найден по пути $ENV_FILE"
+    exit 1
+fi
+
+# Загружаем переменные окружения из .env.prod файла
+echo "Загружаем переменные окружения из $ENV_FILE..."
+set -a  # Включаем автоэкспорт всех переменных
+source "$ENV_FILE"
+set +a  # Отключаем автоэкспорт
 
 # Проверяем существование виртуального окружения
 if [[ ! -f "$ENV_PATH" ]]; then

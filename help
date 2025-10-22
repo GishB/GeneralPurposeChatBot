@@ -1,0 +1,20 @@
+curl \
+  'https://www.supermeatboy.ru/profkomchatbot/chat' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'X-API-Token: 244XW1LO4n6I6X8c6?!r0!3lrd5546fZJr5E4DOQhoY4#8#SvbV3dM150D-Oc64M' \
+  -d '{
+  "query": "Tell me what do you know about worker union?",
+  "user_id": "2",
+  "request_id": "md5hash",
+  "source_name": "test"
+}'
+
+193.168.48.147
+93.189.229.243
+85.117.234.44
+46.173.19.193
+31.129.104.158
+
+#  почему на первом воркере у нас другой плагин? :D
+docker plugin disable rclone/docker-volume-rclone:latest && docker plugin set rclone/docker-volume-rclone:latest args="-v --allow-other" && docker plugin enable rclone/docker-volume-rclone:latest
