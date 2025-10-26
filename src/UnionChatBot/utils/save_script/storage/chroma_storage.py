@@ -7,10 +7,8 @@ from typing import List
 
 
 class ChromaStorage:
-    def __init__(self, host="localhost", token: str = "test-abcd1234#!"):
-        self.client = chromadb.HttpClient(
-            host=host, ssl=True, headers={"X-API-Token": token}
-        )
+    def __init__(self, host="localhost", port=8000):
+        self.client = chromadb.HttpClient(host=host, port=port)
         self.embedding_func = MyEmbeddingFunction(
             api_url=os.getenv("EMBEDDING_API"),
             folder_id=os.getenv("FOLDER_ID"),

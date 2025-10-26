@@ -24,18 +24,16 @@ def main():
         default=os.getenv("COLLECTION_NAME", "PRODUCTION_PROFKOM"),
     )
     parser.add_argument(
-        "--chroma-host",
-        type=str,
-        default=os.getenv(
-            "CHROMA_HOST", "https://www.supermeatboy.ru/chromadb/"
-        ),  # домен вместо IP
+        "--chroma-host", type=str, default=os.getenv("CHROMA_HOST", "127.0.0.1")
     )
-    parser.add_argument("--api-token", type=str, default=os.getenv("NGINX_TOKEN"))
+    parser.add_argument(
+        "--chroma-port", type=int, default=int(os.getenv("CHROMA_PORT", "8000"))
+    )
     args = parser.parse_args()
 
     config = ProcessingConfig.from_env()
     processor = MarkdownProcessor(config)
-    storage = ChromaStorage(host=args.chroma_host, token=args.api_token)
+    storage = ChromaStorage(host=args.chroma_host, port=args.chroma_port)
     reader = LocalFileReader()
     service = IngestionService(reader, processor, storage, args.collection)
     service.ingest_directory(args.source_dir)
