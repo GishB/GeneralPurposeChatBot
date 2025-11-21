@@ -175,7 +175,7 @@ class SemanticRedisCache:
             return queries[max_idx]
         return None
 
-    def get(self, query: str, query_embedding: np.ndarray) -> Optional[dict]:
+    def get(self, query_embedding: np.ndarray, query: Optional[str] = "text") -> Optional[dict]:
         """Пытается найти похожий запрос в кэше"""
         similar_query = self._get_similar_query(query_embedding)
         if similar_query:
