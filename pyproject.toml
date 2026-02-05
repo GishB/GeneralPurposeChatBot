@@ -13,20 +13,8 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 keywords = ["YandexGPT API", "LLM", "RAG", "LangChain"]
-
-[project.urls]
-Homepage = "https://github.com/GishB/GeneralPurposeTelegramBOT"
-"Bug Reports" = "https://github.com/GishB/GeneralPurposeTelegramBOT/issues"
-
-[tool.setuptools]
-package-dir = {"" = "src"}
-
-[tool.setuptools.packages.find]
-where = ["src"]
-exclude = ["tests*", "experiments*", "docs*", ".*", "*.egg-info", "build*", "dist*"]
-
-[dependency-groups]
-base = [
+dependencies = [
+    "scikit-learn>=1.8.0",
     "fastapi~=0.121.2",
     "langchain~=0.3.27",
     "pydantic==2.12.4",
@@ -42,9 +30,21 @@ base = [
     "fsspec==2025.5.1",
     "watchfiles==1.1.0",
     "pandas",
-    "numpy",
-    "psycopg2",
+    "numpy"
 ]
+
+[project.urls]
+Homepage = "https://github.com/GishB/GeneralPurposeTelegramBOT"
+"Bug Reports" = "https://github.com/GishB/GeneralPurposeTelegramBOT/issues"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+exclude = ["tests*", "experiments*", "docs*", ".*", "*.egg-info", "build*", "dist*"]
+
+[dependency-groups]
 
 dev = [
     "ruff",
