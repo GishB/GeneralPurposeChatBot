@@ -1,4 +1,4 @@
-from ..states import AgentState
+from agents.profkom_consultant import AgentState
 from langchain_core.prompts import ChatPromptTemplate
 
 class BaseAgentNodes:

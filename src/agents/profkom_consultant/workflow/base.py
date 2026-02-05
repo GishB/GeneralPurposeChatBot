@@ -1,8 +1,8 @@
 from langgraph.graph import StateGraph, END
 from langgraph.graph.state import CompiledStateGraph
 
-from agent.states import AgentState, AgentStatus
-from agent import UnionAgent
+from agents.profkom_consultant.states import AgentState, AgentStatus
+from agents.profkom_consultant import UnionAgent
 from langgraph.checkpoint.memory import MemorySaver
 
 def build_builder(agent: UnionAgent, checkpointer: MemorySaver | None) -> CompiledStateGraph:

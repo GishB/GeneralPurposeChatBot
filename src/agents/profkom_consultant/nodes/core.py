@@ -4,9 +4,9 @@ from typing import Any
 
 from langchain_core.prompts import ChatPromptTemplate
 
-from chroma_ext import ChromaAdapter
-from agent.nodes import BaseAgentNodes, ThinkTwiceNodes
-from agent.states import AgentState
+from modules.chroma_ext import ChromaAdapter
+from agents.profkom_consultant.nodes import BaseAgentNodes, ThinkTwiceNodes
+from agents.profkom_consultant.states import AgentState
 
 class UnionAgent(BaseAgentNodes, ThinkTwiceNodes):
     """ Класс профсоюзного агента.
@@ -18,11 +18,11 @@ class UnionAgent(BaseAgentNodes, ThinkTwiceNodes):
 
     """
 
-    def __init__(self, llm, cache, langfuse_client, chorma_client, **kwargs):
-        self.llm = llm
+    def __init__(self, llms: dict, cache, langfuse_client, chroma_client, **kwargs):
+        self.llm = llms.get("default")
         self.cache = cache
         self.langfuse_client = langfuse_client
-        self.chorma_client = chorma_client
+        self.chorma_client = chroma_client
 
         self.HISTORY_LIMIT = kwargs.get\
         (
