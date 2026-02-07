@@ -1,12 +1,13 @@
-from langgraph.graph import StateGraph, END
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.graph import END, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
-from agents.profkom_consultant.states import AgentState, AgentStatus
 from agents.profkom_consultant import UnionAgent
-from langgraph.checkpoint.memory import MemorySaver
+from agents.profkom_consultant.states import AgentState, AgentStatus
+
 
 def build_builder(agent: UnionAgent, checkpointer: MemorySaver | None) -> CompiledStateGraph:
-    """ Создаем граф профсоюзного агента
+    r"""Создаем граф профсоюзного агента
 
     Notes:
         1. Содержит ноду проверки информации на вход\выход согласно комплаенс политики;
@@ -33,30 +34,38 @@ def build_builder(agent: UnionAgent, checkpointer: MemorySaver | None) -> Compil
     builder.set_entry_point("validate")
 
     def route_in(state: AgentState):
-        return "decompose_question" if state["is_valid"] \
-            else "reject_stub"
+        return "decompose_question" if state["is_valid"] else "reject_stub"
 
     def route_loop(state: AgentState):
-        return "generate_additional_questions" if state["status"] == AgentStatus.AGAIN \
-            else "validate_final_answer" if state["status"] == AgentStatus.DONE else END
+        return (
+            "generate_additional_questions"
+            if state["status"] == AgentStatus.AGAIN
+            else "validate_final_answer"
+            if state["status"] == AgentStatus.DONE
+            else END
+        )
 
     def route_out(state: AgentState):
         return "update_user_history_context" if state["is_valid"] else "reject_stub"
 
-    builder.add_conditional_edges("validate", route_in, {
-        "decompose_question": "decompose_question",
-        "reject_stub": "reject_stub"
-    })
+    builder.add_conditional_edges(
+        "validate", route_in, {"decompose_question": "decompose_question", "reject_stub": "reject_stub"}
+    )
 
-    builder.add_conditional_edges("check_user_answer", route_loop, {
-        "generate_additional_questions": "generate_additional_questions",
-        "validate_final_answer": "validate_final_answer",
-    })
+    builder.add_conditional_edges(
+        "check_user_answer",
+        route_loop,
+        {
+            "generate_additional_questions": "generate_additional_questions",
+            "validate_final_answer": "validate_final_answer",
+        },
+    )
 
-    builder.add_conditional_edges("validate_final_answer", route_out, {
-        "update_user_history_context" : "update_user_history_context",
-        "reject_stub" : "reject_stub"
-    })
+    builder.add_conditional_edges(
+        "validate_final_answer",
+        route_out,
+        {"update_user_history_context": "update_user_history_context", "reject_stub": "reject_stub"},
+    )
 
     builder.add_edge("reject_stub", "update_user_history_context")
     builder.add_edge("decompose_question", "answer_parts_async")

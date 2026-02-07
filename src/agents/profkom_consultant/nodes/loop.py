@@ -1,10 +1,13 @@
 import re
-from ..states import AgentState, AgentStatus
+
 from langchain_core.prompts import ChatPromptTemplate
 
+from ..states import AgentState, AgentStatus
+
+
 class ThinkTwiceNodes:
-    """ Класс свойств умного размышления для агента.
-    """
+    """Класс свойств умного размышления для агента."""
+
     MAX_LOOP_GENERATION = 3
 
     async def check_user_answer(self, state: AgentState) -> AgentState:
@@ -21,13 +24,12 @@ class ThinkTwiceNodes:
         prompt = self.langfuse_client.get_prompt("check_user_answer").get_langchain_prompt()
         prompt = ChatPromptTemplate.from_template(prompt)
         chain = prompt | self.llm
-        response = await chain.ainvoke \
-                (
-                {
-                    "question": state["text"],
-                    "answer": state["final_answer"],
-                }
-            )
+        response = await chain.ainvoke(
+            {
+                "question": state["text"],
+                "answer": state["final_answer"],
+            }
+        )
         response = "DONE" in response.content.strip().upper()
 
         if response:
@@ -47,37 +49,30 @@ class ThinkTwiceNodes:
         return state
 
     async def generate_additional_questions(self, state) -> AgentState:
-        """ Генерируем новые вопросы чтобы ответить на вопрос пользователя.
+        """Генерируем новые вопросы чтобы ответить на вопрос пользователя.
 
-            Note:
-                Идея в том, чтобы LLM сгенерировал новые вопросы если ответ на запрос пользователя не дали.
-                Новые вопросы затем будут обработанны в цикле через part_async (если речь об UnionAgent).
+        Note:
+            Идея в том, чтобы LLM сгенерировал новые вопросы если ответ на запрос пользователя не дали.
+            Новые вопросы затем будут обработанны в цикле через part_async (если речь об UnionAgent).
 
-            Return:
-                Новый список вопросов.
+        Return:
+            Новый список вопросов.
         """
         prompt = self.langfuse_client.get_prompt("generate_additional_questions").get_langchain_prompt()
         prompt = ChatPromptTemplate.from_template(prompt)
         chain = prompt | self.llm
-        response = await chain.ainvoke \
-                (
-                {
-                    "question": state["text"],
-                    "part_questions": state["answers"],
-                    "answer": state["final_answer"],
-                }
-            )
+        response = await chain.ainvoke(
+            {
+                "question": state["text"],
+                "part_questions": state["answers"],
+                "answer": state["final_answer"],
+            }
+        )
 
         response = response.content.strip()
 
-        content = re.search \
-                (
-                r'<ЗАДАЧИ.*?>(.*?)</ЗАДАЧИ>', response, re.IGNORECASE | re.DOTALL
-            )
+        content = re.search(r"<ЗАДАЧИ.*?>(.*?)</ЗАДАЧИ>", response, re.IGNORECASE | re.DOTALL)
         content = content.group(1) if content else response
 
-        data = \
-            {
-                "parts": [p.strip() for p in content.split('<PART>') if p.strip()]
-            }
+        data = {"parts": [p.strip() for p in content.split("<PART>") if p.strip()]}
         return data

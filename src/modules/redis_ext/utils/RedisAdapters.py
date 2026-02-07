@@ -1,11 +1,11 @@
-import redis
-import numpy as np
 import hashlib
 import json
 import os
+from typing import Optional, Tuple
 
+import numpy as np
+import redis
 from sklearn.metrics.pairwise import cosine_similarity
-from typing import Tuple, Optional
 
 
 class UserRateLimiter:
@@ -17,9 +17,7 @@ class UserRateLimiter:
     """
 
     USER_QUERY_LIMIT_N = int(os.getenv("USER_QUERY_LIMIT_N", 10))
-    USER_QUERY_LIMIT_TTL_SECONDS = int(
-        os.getenv("USER_QUERY_LIMIT_TTL_SECONDS", 16 * 3600)
-    )
+    USER_QUERY_LIMIT_TTL_SECONDS = int(os.getenv("USER_QUERY_LIMIT_TTL_SECONDS", 16 * 3600))
     REDIS_HOST = str(os.getenv("REDIS_HOST", "127.0.0.1"))
     REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
     RATE_LIMIT_TEMPLATE = str(os.getenv("RATE_LIMIT_TEMPLATE", "msg_count:{user_id}"))
@@ -111,9 +109,7 @@ class SemanticRedisCache:
         """
         return f"{type_hash}:{hashlib.md5(query.encode('utf-8')).hexdigest()}"
 
-    def _store_query_data(
-        self, query: str, embedding: np.ndarray, response: str
-    ) -> None:
+    def _store_query_data(self, query: str, embedding: np.ndarray, response: str) -> None:
         """Сохраняет запрос, эмбеддинг и ответ в Redis"""
         if isinstance(embedding, list):
             embedding = np.array(embedding, dtype=np.float32)
@@ -184,15 +180,11 @@ class SemanticRedisCache:
 
     def set(self, query: str, query_embedding: np.ndarray, response: str) -> None:
         """Сохраняет новый запрос в кэш"""
-        self._store_query_data(
-            query=query, embedding=query_embedding, response=response
-        )
+        self._store_query_data(query=query, embedding=query_embedding, response=response)
 
     def _manage_cache_size(self):
         """Управление размером кэша (как в предыдущей реализации)"""
-        if (
-            self.redis.dbsize() > self.max_entries * 2
-        ):  # умножаем на 2, так как храним два ключа на запрос
+        if self.redis.dbsize() > self.max_entries * 2:  # умножаем на 2, так как храним два ключа на запрос
             oldest_keys = self.redis.keys("query:*")[: self.max_entries // 2]
             for key in oldest_keys:
                 embedding_key = key.decode().replace("query:", "embedding:")

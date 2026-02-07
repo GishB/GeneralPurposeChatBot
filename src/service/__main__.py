@@ -1,13 +1,15 @@
 import os
-from fastapi import FastAPI, HTTPException, Request
-from UnionChatBot.utils.SessionAdapter import setting_up
-from UnionChatBot.utils.RedisAdapters import UserRateLimiter
-from UnionChatBot.utils.PostgresAdapter import AuditLogger
-from UnionChatBot.schemas.services import ChatRequest, ChatResponse, ResetRequest
-from UnionChatBot.utils.timers import ExecutionTimer
-from UnionChatBot.utils.error_handlers import is_specific_error
 from concurrent.futures import ThreadPoolExecutor
+
 from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException, Request
+
+from UnionChatBot.schemas.services import ChatRequest, ChatResponse, ResetRequest
+from UnionChatBot.utils.error_handlers import is_specific_error
+from UnionChatBot.utils.PostgresAdapter import AuditLogger
+from UnionChatBot.utils.RedisAdapters import UserRateLimiter
+from UnionChatBot.utils.SessionAdapter import setting_up
+from UnionChatBot.utils.timers import ExecutionTimer
 
 app = FastAPI()
 load_dotenv()
@@ -22,9 +24,7 @@ audit_logger = AuditLogger(os.getenv("POSTGRES_DSN"))
 async def startup_event():
     """Ставим ограничение на кол-во параллельных потоков которые могут быть запущенны сервисом"""
     app.state.executor = ThreadPoolExecutor(
-        max_workers=int(os.environ["MAX_FASTAPI_THREADS"])
-        if int(os.environ["MAX_FASTAPI_THREADS"])
-        else 10
+        max_workers=int(os.environ["MAX_FASTAPI_THREADS"]) if int(os.environ["MAX_FASTAPI_THREADS"]) else 10
     )
 
 
@@ -34,9 +34,7 @@ def reset_limits(request: ResetRequest):
         rate_limiter.reset_counter(request.user_id)
         return {"status": "ok", "user_id": request.user_id}
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Произошла ошибка при обработке запроса: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Произошла ошибка при обработке запроса: {str(e)}")
 
 
 @app.post("/chat", response_model=ChatResponse)
@@ -108,9 +106,7 @@ def chat_with_bot(request: ChatRequest):
             status="failed",
             execution_time=timer.time(),
         )
-        raise HTTPException(
-            status_code=500, detail=f"Произошла ошибка при обработке запроса: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Произошла ошибка при обработке запроса: {str(e)}")
 
 
 @app.get("/health")

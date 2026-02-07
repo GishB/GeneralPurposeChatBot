@@ -1,9 +1,10 @@
 import os
+from typing import List
 
 import chromadb
+
 from UnionChatBot.utils.EmbeddingAPI import MyEmbeddingFunction
 from UnionChatBot.utils.save_script.models.document import Document
-from typing import List
 
 
 class ChromaStorage:
@@ -24,9 +25,7 @@ class ChromaStorage:
 
     def store_documents(self, coll_name: str, documents: List[Document]) -> None:
         collection = self.get_collection(coll_name)
-        existing_ids = set(
-            collection.get(ids=[doc.doc_id for doc in documents]).get("ids", [])
-        )
+        existing_ids = set(collection.get(ids=[doc.doc_id for doc in documents]).get("ids", []))
         new_docs = [doc for doc in documents if doc.doc_id not in existing_ids]
         if not new_docs:
             print("Нет новых документов")

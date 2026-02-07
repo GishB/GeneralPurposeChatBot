@@ -1,6 +1,6 @@
 from .base import BaseAgentNodes
-from .loop import ThinkTwiceNodes
 from .core import UnionAgent
+from .loop import ThinkTwiceNodes
 
 __all__ = [
     "BaseAgentNodes",

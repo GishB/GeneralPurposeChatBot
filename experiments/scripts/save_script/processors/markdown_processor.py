@@ -1,6 +1,7 @@
-from typing import List
-from pathlib import Path
 import hashlib
+from pathlib import Path
+from typing import List
+
 from semantic_text_splitter import MarkdownSplitter
 
 from UnionChatBot.utils.save_script.models.document import Document, ProcessingConfig
@@ -31,12 +32,7 @@ class MarkdownProcessor:
         return docs
 
     def _extract_header(self, first_chunk: str) -> str:
-        header = (
-            first_chunk.replace("\n", " ")
-            .replace("*", " ")
-            .replace("#", " ")
-            .replace("\\", " ")
-        )
+        header = first_chunk.replace("\n", " ").replace("*", " ").replace("#", " ").replace("\\", " ")
         header = header.split("!")[-1].split("base64")[-1].strip()
         return " ".join(header.split())
 

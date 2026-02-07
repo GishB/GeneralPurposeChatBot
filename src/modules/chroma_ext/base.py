@@ -1,6 +1,9 @@
+from typing import Any, Dict, List
+
 import chromadb
-from typing import List, Dict, Any
-from .utils import MyEmbeddingFunction, BM25Reranker
+
+from .utils import BM25Reranker, MyEmbeddingFunction
+
 
 class ChromaAdapter:
     """Класс позволяющий по http провести взаимодействие с ChromaDB.
@@ -21,51 +24,21 @@ class ChromaAdapter:
         if reranker_type == "bm25":
             self.reranker = BM25Reranker()
         else:
-            NotImplementedError(
-                "Других моделей для задач сортировки документов не существует!"
-            )
+            NotImplementedError("Других моделей для задач сортировки документов не существует!")
 
-        self.api_key = kwargs.get\
-            (
-            "API_KEY",
-            None
-            )
+        self.api_key = kwargs.get("API_KEY", None)
 
-        self.api_url = kwargs.get\
-            (
-            "API_URL",
-            "https://llm.api.cloud.yandex.net:443/foundationModels/v1/textEmbedding"
-            )
+        self.api_url = kwargs.get("API_URL", "https://llm.api.cloud.yandex.net:443/foundationModels/v1/textEmbedding")
 
-        self.folder_id = kwargs.get \
-            (
-            "FOLDER_ID",
-            None
-            )
+        self.folder_id = kwargs.get("FOLDER_ID", None)
 
-        self.host = kwargs.get \
-            (
-                "CHROMA_HOST",
-                "127.0.0.1"
-            )
+        self.host = kwargs.get("CHROMA_HOST", "127.0.0.1")
 
-        self.port = kwargs.get \
-            (
-                "CHROMA_PORT",
-                8000
-            )
+        self.port = kwargs.get("CHROMA_PORT", 8000)
 
-        self.topk_documents = kwargs.get \
-            (
-                "CHROMA_TOPK_DOCUMENTS",
-                5
-            )
+        self.topk_documents = kwargs.get("CHROMA_TOPK_DOCUMENTS", 5)
 
-        self.max_rag_documents = kwargs.get \
-            (
-                "CHROMA_MAX_RAG_DOCUMENTS",
-                20
-            )
+        self.max_rag_documents = kwargs.get("CHROMA_MAX_RAG_DOCUMENTS", 20)
 
         self.similarity_filter = similarity_filter
         self.client = chromadb.HttpClient(host=self.host, port=self.port)
@@ -93,12 +66,8 @@ class ChromaAdapter:
             )
         return self._embedding_function
 
-    def get_info_from_db(
-        self, query: str, collection_name: str, n_results: int = 30, **kwargs
-    ) -> Dict[str, Any]:
-        collection = self.client.get_collection(
-            name=collection_name, embedding_function=self.embedding_function
-        )
+    def get_info_from_db(self, query: str, collection_name: str, n_results: int = 30, **kwargs) -> Dict[str, Any]:
+        collection = self.client.get_collection(name=collection_name, embedding_function=self.embedding_function)
         return collection.query(
             query_texts=[query],
             n_results=n_results,
@@ -106,24 +75,17 @@ class ChromaAdapter:
         )
 
     def get_filtered_documents(self, data_raw: Dict[str, Any]) -> dict:
-        distances = data_raw["distances"][
-            0
-        ]  # Берем первый элемент, так как query_texts=[query]
+        distances = data_raw["distances"][0]  # Берем первый элемент, так как query_texts=[query]
         documents = data_raw["documents"][0]
         metadatas = data_raw["metadatas"][0]
 
-        return \
-        {
+        return {
             "documents": [
                 doc.split("<body>")[-1].replace("</body>", "")
                 for doc, dist in zip(documents, distances)
                 if dist < self.similarity_filter
             ],
-            "metadatas": [
-                metadatas[idx]
-                for idx, dist in enumerate(distances)
-                if dist < self.similarity_filter
-            ],
+            "metadatas": [metadatas[idx] for idx, dist in enumerate(distances) if dist < self.similarity_filter],
         }
 
     def get_pairs(self, query: str, documents: List[str]) -> List[List[str]]:
@@ -152,20 +114,11 @@ class ChromaAdapter:
                 "collection_name": collection_name,
             }
 
-        idx_relevant_documents = self.apply_reranker(
-            query=query, documents=filtered_documents["documents"]
-        )
+        idx_relevant_documents = self.apply_reranker(query=query, documents=filtered_documents["documents"])
         # TO DO: Вернуть pandas dataframe нормальный который будет в HTML конвертирован.
-        return \
-        {
-            "documents": \
-            [
-                filtered_documents["documents"][idx] for idx in idx_relevant_documents
-            ],
-            "metadatas": \
-            [
-                filtered_documents["metadatas"][idx] for idx in idx_relevant_documents
-            ],
+        return {
+            "documents": [filtered_documents["documents"][idx] for idx in idx_relevant_documents],
+            "metadatas": [filtered_documents["metadatas"][idx] for idx in idx_relevant_documents],
             "query": query,
             "collection_name": collection_name,
         }

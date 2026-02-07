@@ -1,8 +1,9 @@
-import os
 import json
-from langchain_redis import RedisSemanticCache
+import os
 from typing import Any, Dict, Optional
+
 from langchain_core.outputs import Generation
+from langchain_redis import RedisSemanticCache
 
 
 class RedisAdapter:
@@ -16,7 +17,7 @@ class RedisAdapter:
             redis_url=self.redis_url,
             embeddings=embeddings,
             distance_threshold=float(os.getenv("REDIS_THRESHOLD", 0.05)),
-            ttl=int(os.getenv("REDIS_TTL", 3600))
+            ttl=int(os.getenv("REDIS_TTL", 3600)),
         )
 
     def save(self, meta_info: str, query: str = "", output: str = "", json_data: Optional[dict] = None):

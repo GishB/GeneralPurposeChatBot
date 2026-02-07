@@ -1,16 +1,14 @@
 import os
+import time
 from typing import Any
 
 import numpy as np
 import requests
-import time
-
 from chromadb import Documents, EmbeddingFunction, Embeddings
 
 
 class MyEmbeddingFunction(EmbeddingFunction):
-    api_url = os.getenv\
-    (
+    api_url = os.getenv(
         "EMBEDDING_API",
         "https://llm.api.cloud.yandex.net:443/foundationModels/v1/textEmbedding",
     )
@@ -44,12 +42,8 @@ class MyEmbeddingFunction(EmbeddingFunction):
         self.text_type = text_type or "doc"
 
         # Set default model URIs if not provided
-        self.doc_model_uri = (
-            doc_model_uri or f"emb://{self.folder_id}/text-search-doc/latest"
-        )
-        self.query_model_uri = (
-            query_model_uri or f"emb://{self.folder_id}/text-search-query/latest"
-        )
+        self.doc_model_uri = doc_model_uri or f"emb://{self.folder_id}/text-search-doc/latest"
+        self.query_model_uri = query_model_uri or f"emb://{self.folder_id}/text-search-query/latest"
 
     def _get_single_embedding(self, text: str) -> np.ndarray:
         """
@@ -62,9 +56,7 @@ class MyEmbeddingFunction(EmbeddingFunction):
         Returns:
             numpy.ndarray: Embedding vector
         """
-        model_uri = (
-            self.doc_model_uri if self.text_type == "doc" else self.query_model_uri
-        )
+        model_uri = self.doc_model_uri if self.text_type == "doc" else self.query_model_uri
 
         data = {"modelUri": model_uri, "text": text}
         time.sleep(self.time_sleep)
