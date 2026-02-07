@@ -3,7 +3,7 @@ name = "UnionChatBot"
 version = "0.3.0-alpha"
 description = "LangChain based Agent to please them all!"
 readme = "README.md"
-requires-python = "==3.11.*"
+requires-python = "==3.12.*"
 license = {text = "MIT License"}
 authors = [{name = "Aleksandr Samofalov", email = "SamofalovWORK@yandex.ru"}]
 classifiers = [
@@ -17,6 +17,7 @@ dependencies = [
     "scikit-learn>=1.8.0",
     "fastapi~=0.121.2",
     "langchain~=0.3.27",
+    "langgraph",
     "pydantic==2.12.4",
     "redis~=7.0.1",
     "jupyter~=1.1.1",
@@ -30,7 +31,9 @@ dependencies = [
     "fsspec==2025.5.1",
     "watchfiles==1.1.0",
     "pandas",
-    "numpy"
+    "numpy",
+    "chromadb~=1.0.20",
+    "rank-bm25~=0.2.2"
 ]
 
 [project.urls]
@@ -42,6 +45,7 @@ package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
+include = ["agents*", "modules*", "service*"]
 exclude = ["tests*", "experiments*", "docs*", ".*", "*.egg-info", "build*", "dist*"]
 
 [dependency-groups]
@@ -54,7 +58,7 @@ dev = [
 
 [tool.ruff]
 line-length = 120
-target-version = "py311"
+target-version = "py312"
 exclude = [
     ".bzr", ".direnv", ".eggs", ".git", ".hg", ".mypy_cache",
     ".nox", ".pants.d", ".pyenv", ".pytest_cache", ".pytype",
@@ -64,10 +68,22 @@ exclude = [
 ]
 
 [tool.ruff.lint]
-select = ["E4", "E7", "E9", "F", "I", "B", "C4", "W"]
-ignore = ["E501", "B008", "B904"]
+select = [
+    "E4",
+    "E7",
+    "E9",
+    "F",
+    "I",
+    "B",
+    "C4",
+    "W"
+]
+ignore = [
+    "E501",
+    "B008",
+    "B904"
+]
 fixable = ["ALL"]
-dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
 [tool.ruff.lint.isort]
 known-first-party = ["UnionChatBot"]
@@ -82,8 +98,7 @@ docstring-code-line-length = "dynamic"
 
 [tool.pylint.main]
 fail-under = 9
-py-version = "3.11"
-jobs = 0
+py-version = "3.12"
 
 [tool.pylint.messages_control]
 disable = [
