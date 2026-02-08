@@ -1,4 +1,5 @@
 from langchain_core.prompts import ChatPromptTemplate
+
 from agents.profkom_consultant.states import AgentState
 
 
@@ -27,10 +28,7 @@ class BaseAgentNodes:
                     self.langfuse_client.get_prompt("policy_validation").get_langchain_prompt()
                 )
                 chain = prompt | self.llm
-                output = await chain.ainvoke\
-                    ({
-                        "text": state["text"]
-                    })
+                output = await chain.ainvoke({"text": state["text"]})
                 output = output.content.strip().lower()
                 self.logger.info(f"Output: {output}")
 

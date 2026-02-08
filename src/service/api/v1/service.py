@@ -1,18 +1,20 @@
 """
 Здесь можно организовать бизнес-логику, специфичную для конкретного сервиса.
 """
+
 import uuid
+
 from fastapi import APIRouter, Depends, status
 
-from service.context import APP_CTX
+from agents.profkom_consultant import workflow
+from modules.langfuse_ext import AsyncLangfuseClient
+from modules.postgres_ext import PostgreSaver
 from service.config import APP_CONFIG
+from service.context import APP_CTX
+from service.exceptions import AgentInternalError
 
 from . import schemas
 from .utils import common_headers
-from modules.postgres_ext import PostgreSaver
-from modules.langfuse_ext import AsyncLangfuseClient
-from agents.profkom_consultant import workflow
-from service.exceptions import AgentInternalError
 
 router = APIRouter()
 logger = APP_CTX.get_logger()
@@ -23,16 +25,14 @@ logger = APP_CTX.get_logger()
     status_code=status.HTTP_200_OK,
     response_model=schemas.ChatResponse,
     responses={
-        status.HTTP_424_FAILED_DEPENDENCY: {
-            "description": "Ошибка при взаимодействии с внешней системой"
-        },
+        status.HTTP_424_FAILED_DEPENDENCY: {"description": "Ошибка при взаимодействии с внешней системой"},
     },
 )
 async def chat(
-        request: schemas.ChatRequest,
-        headers: dict = Depends(common_headers),
-        postgre: PostgreSaver = Depends(lambda: APP_CTX.postgre),
-        langfuse: AsyncLangfuseClient = Depends(lambda: APP_CTX.langfuse),
+    request: schemas.ChatRequest,
+    headers: dict = Depends(common_headers),
+    postgre: PostgreSaver = Depends(lambda: APP_CTX.postgre),
+    langfuse: AsyncLangfuseClient = Depends(lambda: APP_CTX.langfuse),
 ):
     """
     Главный endpoint диалога с профсоюзным агентом.
@@ -66,42 +66,34 @@ async def chat(
         async with postgre.get_user_checkpointer() as checkpointer:
             agent_graph = await workflow.graph_builder(checkpointer)
 
-            config = \
-            {
-                "configurable": \
-                {
-                    "thread_id": headers["x-user-id"]
-                },
+            config = {
+                "configurable": {"thread_id": headers["x-user-id"]},
                 "callbacks": callbacks,
                 "run_id": langfuse_trace_id,
-                "metadata": \
-                {
+                "metadata": {
                     "stage": APP_CONFIG.langfuse.stage,
                     "langfuse_user_id": headers["x-user-id"],
                     "langfuse_session_id": headers["x-session-id"],
                     "client_id": headers["x-client-id"],
-                    "endpoint": "/chat"
+                    "endpoint": "/chat",
                 },
             }
 
-            result = await agent_graph.ainvoke\
-            (
+            result = await agent_graph.ainvoke(
                 {"user_question": request.message},
                 config=config,
             )
 
             logger.info(f"Ответ сгенерирован: {len(result['final_answer'])} символов")
-            return schemas.ChatResponse\
-                (
-                response=result['final_answer'],
+            return schemas.ChatResponse(
+                response=result["final_answer"],
                 langfuse_trace_id=langfuse_trace_id,
                 **headers,
-                )
+            )
 
     except Exception as error:
-        logger.critical \
-            (
-                f"Ошибка агента [user_id={headers['x-user-id']}, session_id={headers['x-session-id']}: error: {error}]",
-                exc_info=True,
-            )
+        logger.critical(
+            f"Ошибка агента [user_id={headers['x-user-id']}, session_id={headers['x-session-id']}: error: {error}]",
+            exc_info=True,
+        )
         raise AgentInternalError("Неожиданная ошибка агента")

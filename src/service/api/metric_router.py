@@ -17,7 +17,7 @@ logger = APP_CTX.get_logger()
 )
 async def like(
     # pylint: disable=C0103,W0613
-    header_x_trace_id: str = Header(uuid.uuid4(), alias="x-trace-id")
+    header_x_trace_id: str = Header(uuid.uuid4(), alias="x-trace-id"),
 ):
     logger.metric(
         metric_name="service_likes_total",
@@ -33,7 +33,7 @@ async def like(
 )
 async def dislike(
     # pylint: disable=C0103,W0613
-    header_x_trace_id: str = Header(uuid.uuid4(), alias="x-trace-id")
+    header_x_trace_id: str = Header(uuid.uuid4(), alias="x-trace-id"),
 ):
     logger.metric(
         metric_name="service_dislikes_total",

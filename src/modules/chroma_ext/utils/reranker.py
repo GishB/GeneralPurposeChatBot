@@ -3,6 +3,7 @@ from typing import List
 import numpy as np
 import tiktoken
 from rank_bm25 import BM25Okapi
+
 from service.logger import LoggerConfigurator
 
 
@@ -16,7 +17,7 @@ class BM25Reranker:
 
     def preprocess(self, text: str) -> List[str]:
         """Токенизация текста и возвращение строковых токенов."""
-        self.logger.debug(f"Preprocessing over text")
+        self.logger.debug("Preprocessing over text")
         tokens = self.tokenizer.encode(text.lower())
         # Преобразуем токены обратно в строки для совместимости с BM25
         token_strings = []
@@ -25,7 +26,7 @@ class BM25Reranker:
             token_str = token_str.strip()
             if token_str and len(token_str) > 0:
                 token_strings.append(token_str)
-        self.logger.debug(f"Finished preprocessing over text")
+        self.logger.debug("Finished preprocessing over text")
         return token_strings
 
     def fit(self, documents: List[str]):

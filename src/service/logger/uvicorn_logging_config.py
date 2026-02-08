@@ -26,6 +26,6 @@ LOGGING_CONFIG = {
             "handlers": ["default"],
             "level": "INFO",
             "propagate": False,
-        }
+        },
     },
 }

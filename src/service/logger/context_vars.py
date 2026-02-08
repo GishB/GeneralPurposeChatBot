@@ -4,7 +4,6 @@ from .models import ContextLog
 
 
 class ContextVarsContainer:
-
     @property
     def context_vars(self) -> ContextLog:
         return ContextLog(

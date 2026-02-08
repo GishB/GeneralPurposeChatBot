@@ -75,7 +75,7 @@ class LoguruPatcher:
         elif _target == "audit-event":
             _log_record = Event(
                 name=record["extra"].get("audit_event_name", None),
-                createdAt=int(time()*1000),
+                createdAt=int(time() * 1000),
                 params=[
                     EventParam(name="uid-pod", value=record["extra"].get("audit_uid_pod")),
                     EventParam(name="ip-address", value=record["extra"].get("audit_ip_address")),

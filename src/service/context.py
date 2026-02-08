@@ -1,11 +1,11 @@
 import pytz
+
 from service.base import Singleton
 from service.config import APP_CONFIG, Secrets
 from service.logger import ContextVarsContainer, LoggerConfigurator
 
 
 class AppContext(metaclass=Singleton):
-
     @property
     def logger(self):
         return self._logger_manager.async_logger

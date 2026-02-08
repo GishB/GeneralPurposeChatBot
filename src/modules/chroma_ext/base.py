@@ -1,8 +1,12 @@
+from typing import Any, Dict, List
+
 import chromadb
 import pandas as pd
-from typing import Any, Dict, List
-from .utils import BM25Reranker, MyEmbeddingFunction
+
 from service.logger import LoggerConfigurator
+
+from .utils import BM25Reranker, MyEmbeddingFunction
+
 
 class ChromaAdapter:
     """Класс позволяющий по http провести взаимодействие с ChromaDB.
@@ -30,8 +34,7 @@ class ChromaAdapter:
 
         self.api_key = kwargs.get("API_KEY", None)
         self.logger.info(f"CHROMA_API_KEY: {self.api_key[:4]}**{self.api_key[-4:]}")
-        self.api_url = kwargs.get("API_URL",
-                                  "https://llm.api.cloud.yandex.net:443/foundationModels/v1/textEmbedding")
+        self.api_url = kwargs.get("API_URL", "https://llm.api.cloud.yandex.net:443/foundationModels/v1/textEmbedding")
         self.logger.info(f"CHROMA_API_URL: {self.api_url}")
         self.folder_id = kwargs.get("FOLDER_ID", None)
         self.logger.info(f"CHROMA_FOLDER_ID: {self.folder_id[:4]}**{self.folder_id[-4:]}")
@@ -68,7 +71,7 @@ class ChromaAdapter:
 
     @property
     def embedding_function(self):
-        self.logger.debug(f"embedding_function initialized")
+        self.logger.debug("embedding_function initialized")
         if self._embedding_function is None:
             self._embedding_function = MyEmbeddingFunction(
                 logger=self.logger,
@@ -77,20 +80,12 @@ class ChromaAdapter:
                 iam_token=self.api_key,
                 text_type=self.text_type,
             )
-        self.logger.debug(f"embedding_function initialized")
+        self.logger.debug("embedding_function initialized")
         return self._embedding_function
 
-    def get_info_from_db(self,
-                         query: str,
-                         collection_name: str,
-                         n_results: int = 30,
-                         **kwargs) -> Dict[str, Any]:
+    def get_info_from_db(self, query: str, collection_name: str, n_results: int = 30, **kwargs) -> Dict[str, Any]:
         self.logger.debug(f"get_info_from_db called for {collection_name}")
-        collection = self.client.get_collection\
-            (
-            name=collection_name,
-            embedding_function=self.embedding_function
-            )
+        collection = self.client.get_collection(name=collection_name, embedding_function=self.embedding_function)
 
         return collection.query(
             query_texts=[query],
@@ -137,20 +132,18 @@ class ChromaAdapter:
 
         if not filtered_documents["documents"]:
             self.logger.debug(f"no documents found in {collection_name}")
-            return pd.DataFrame.from_dict\
-                    (data=\
-                        {
-                        "documents": [],
-                        "metadatas": [],
-                        }
-                    )
+            return pd.DataFrame.from_dict(
+                data={
+                    "documents": [],
+                    "metadatas": [],
+                }
+            )
 
         idx_relevant_documents = self.apply_reranker(query=query, documents=filtered_documents["documents"])
         self.logger.info(f"Finished get_info for {query} returned {len(idx_relevant_documents)} documents")
-        return pd.DataFrame.from_dict\
-            (data=\
-                {
+        return pd.DataFrame.from_dict(
+            data={
                 "documents": [filtered_documents["documents"][idx] for idx in idx_relevant_documents],
                 "metadatas": [filtered_documents["metadatas"][idx] for idx in idx_relevant_documents],
-                }
-            )
+            }
+        )

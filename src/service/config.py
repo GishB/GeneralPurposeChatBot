@@ -7,6 +7,7 @@ from pydantic_settings import BaseSettings
 
 load_dotenv("../../.env")
 
+
 class BaseAppSettings(BaseSettings):
     """
     Базовый класс для настроек.
@@ -84,56 +85,50 @@ class YandexGPTSettings(BaseAppSettings):
     """
     Настройки YandexGPTFoundation models.
     """
-    model_name: str = Field(validation_alias="MODEL_NAME",
-                            default="yandexgpt")
-    temperature: float = Field(validation_alias="TEMPERATURE",
-                               default=0.1)
-    profanity_check: bool = Field(validation_alias="PROFANCIE_CHECK",
-                                  default=False)
 
-    openai_api_key: str = Field(validation_alias="OPENAI_API_KEY",
-                                default=None)
-    openai_folder_id: str = Field(validation_alias="OPENAI_FOLDER_ID",
-                                  default=None)
-    openai_api_base: str = Field(validation_alias="OPENAI_API_BASE",
-                                 default="https://llm.api.cloud.yandex.net/v1")
+    model_name: str = Field(validation_alias="MODEL_NAME", default="yandexgpt")
+    temperature: float = Field(validation_alias="TEMPERATURE", default=0.1)
+    profanity_check: bool = Field(validation_alias="PROFANCIE_CHECK", default=False)
+
+    openai_api_key: str = Field(validation_alias="OPENAI_API_KEY", default=None)
+    openai_folder_id: str = Field(validation_alias="OPENAI_FOLDER_ID", default=None)
+    openai_api_base: str = Field(validation_alias="OPENAI_API_BASE", default="https://llm.api.cloud.yandex.net/v1")
 
     @property
     def model(self):
         return f"gpt://{self.openai_folder_id}/{self.model_name}"
 
+
 class LangFuseSettings(BaseAppSettings):
     """
     Настройка для логирования.
     """
+
     secret_key: str = Field(validation_alias="LANGFUSE_SECRET_KEY", default="")
     public_key: str = Field(validation_alias="LANGFUSE_PUBLIC_KEY", default="")
     host: str = Field(validation_alias="LANGFUSE_HOST", default="http://127.0.0.1:3000")
     stage: str = Field(validation_alias="LANGFUSE_STAGE", default="dev")
 
+
 class ChromaSettings(BaseAppSettings):
     """
     Для работы с векторной базой данных.
     """
-    similarity_filter_score: float = Field(validation_alias="SIMILARITY_FILTER",
-                                           default=1.5)
-    openai_api_key: str = Field(validation_alias="OPENAI_API_KEY",
-                                default=None)
-    openai_folder_id: str = Field(validation_alias="OPENAI_FOLDER_ID",
-                                  default=None)
-    chroma_max_rag_documents: int = Field(validation_alias="CHROMA_MAX_RAG_DOCUMENTS",
-                                          default=42)
-    collection_name: str = Field(validation_alias="COLLECTION_NAME",
-                                 default="PRODUCTION_PROFKOM")
-    embeding_api: str = Field(validation_alias="EMBEDDING_API",
-                              default="https://llm.api.cloud.yandex.net:443/foundationModels/v1/textEmbedding")
-    time_sleep: float = Field(validation_alias="TIME_SLEEP_RATE_EMBEDDER",
-                              default=0.01)
+
+    similarity_filter_score: float = Field(validation_alias="SIMILARITY_FILTER", default=1.5)
+    openai_api_key: str = Field(validation_alias="OPENAI_API_KEY", default=None)
+    openai_folder_id: str = Field(validation_alias="OPENAI_FOLDER_ID", default=None)
+    chroma_max_rag_documents: int = Field(validation_alias="CHROMA_MAX_RAG_DOCUMENTS", default=42)
+    collection_name: str = Field(validation_alias="COLLECTION_NAME", default="PRODUCTION_PROFKOM")
+    embeding_api: str = Field(
+        validation_alias="EMBEDDING_API",
+        default="https://llm.api.cloud.yandex.net:443/foundationModels/v1/textEmbedding",
+    )
+    time_sleep: float = Field(validation_alias="TIME_SLEEP_RATE_EMBEDDER", default=0.01)
 
     @property
     def header(self):
-        return \
-        {
+        return {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self.openai_api_key}",
             "x-folder-id": self.folder_id,
@@ -147,13 +142,12 @@ class ChromaSettings(BaseAppSettings):
     def query_model_uri(self):
         return f"emb://{self.folder_id}/text-search-query/latest"
 
+
 class RedisSettings(BaseAppSettings):
-    redis_url: str = Field(validation_alias="REDIS_URL",
-                           default="redis://127.0.0.1:6379")
-    redis_threshold: float = Field(validation_alias="REDIS_THRESHOLD",
-                                   default=0.05)
-    redis_ttl: int = Field(validation_alias="REDIS_TTL",
-                           default=3600)
+    redis_url: str = Field(validation_alias="REDIS_URL", default="redis://127.0.0.1:6379")
+    redis_threshold: float = Field(validation_alias="REDIS_THRESHOLD", default=0.05)
+    redis_ttl: int = Field(validation_alias="REDIS_TTL", default=3600)
+
 
 class Secrets:
     """

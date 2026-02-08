@@ -4,11 +4,12 @@ from typing import Any
 
 from langchain_core.prompts import ChatPromptTemplate
 
+from agents.profkom_consultant.states import AgentState
+from service.logger import LoggerConfigurator
+
 from .base import BaseAgentNodes
 from .loop import ThinkTwiceNodes
 
-from agents.profkom_consultant.states import AgentState
-from service.logger import LoggerConfigurator
 
 class UnionAgent(BaseAgentNodes, ThinkTwiceNodes):
     r"""Класс профсоюзного агента.
@@ -20,13 +21,7 @@ class UnionAgent(BaseAgentNodes, ThinkTwiceNodes):
 
     """
 
-    def __init__(self,
-                 logger: LoggerConfigurator,
-                 llms: dict,
-                 cache,
-                 langfuse_client,
-                 chroma_client,
-                 **kwargs):
+    def __init__(self, logger: LoggerConfigurator, llms: dict, cache, langfuse_client, chroma_client, **kwargs):
         self.logger = logger
         self.logger.info(f"Initializing {__name__}")
         self.llm = llms.get("default")
@@ -65,12 +60,8 @@ class UnionAgent(BaseAgentNodes, ThinkTwiceNodes):
                 prompt = self.langfuse_client.get_prompt("decompose_question").get_langchain_prompt()
                 prompt = ChatPromptTemplate.from_template(prompt)
                 chain = prompt | self.llm
-                response = await chain.ainvoke\
-                (
-                    {
-                        "user_question": question,
-                        "user_history": state.get("user_history", "")
-                    }
+                response = await chain.ainvoke(
+                    {"user_question": question, "user_history": state.get("user_history", "")}
                 )
                 response = response.content.strip()
 
