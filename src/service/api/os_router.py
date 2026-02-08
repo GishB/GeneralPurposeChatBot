@@ -1,7 +1,3 @@
-"""
-!!!!!! НЕ РЕДАКТИРОВАТЬ !!!!!!
-"""
-
 from importlib.metadata import distribution
 
 from fastapi import APIRouter, status
@@ -26,11 +22,11 @@ async def health():
     response_model=schemas.InfoResponse,
 )
 async def info():
-    dist = distribution("aigw-rest-service")
+    dist = distribution("UnionChatBot")
 
     return schemas.InfoResponse(
         name=str(dist.metadata["Name"]),
-        description=str(dist.metadata["Summary"]),
+        description=str(dist.metadata["Description"]),
         type="REST API",
         version=str(dist.version),
     )

@@ -69,25 +69,3 @@ class GigachatTestEmbeddingsRequest(BaseModel):
         min_length=4,
         examples=["Привет!"],
     )
-
-class LisaSearchRequest(BaseModel):
-    """ Схема для запроса из мессенджера Лисы.
-    """
-    ucpkb_id: Optional[str] = Field(
-        description="ID клиента (ЕПК ID)",
-    )
-    industry_qualifier_name: Optional[str] = Field(
-        description="Отрасль по ОКК",
-    )
-    inn: Optional[str] = Field(
-        description_name="ИНН клиента"
-    )
-
-class LisaSearchResponse(BaseModel):
-    text: str = Field(..., description="Варианты ответа для пользователя по сценарию 1 и 2")
-
-class PartnerSearchRequest(BaseModel):
-    text: str = Field(..., description="Любое текстовое сообщение от пользователя")
-
-class PartnerSearchResponse(BaseModel):
-    text: str = Field(..., description="Любой ответ от модели текстом")

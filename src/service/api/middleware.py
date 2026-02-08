@@ -5,7 +5,7 @@ from datetime import datetime
 from fastapi import Request, status
 from starlette.concurrency import iterate_in_threadpool
 
-from aigw_service.context import APP_CTX
+from service.context import APP_CTX
 
 NON_LOGGED_ENDPOINTS = (
     "/like",
@@ -48,7 +48,7 @@ async def log_requests(request: Request, call_next):
         x_trace_id=headers_to_log.get("x-trace-id", ""),
         x_request_time=headers_to_log.get("x-request-time", ""),
         x_client_id=headers_to_log.get("x-client-id", ""),
-        x_aigw_session_id=headers_to_log.get("x-aigw-session-id", ""),
+        x_aigw_session_id=headers_to_log.get("x-session-id", ""),
         x_user_id=headers_to_log.get("x-user-id", ""),
     )
 
@@ -74,11 +74,11 @@ async def log_requests(request: Request, call_next):
         client_id = headers_to_log.get("x-user-id", None)
         if client_id:
             logger.metric(
-                metric_name=f"aigw_service_user_{client_id}",
+                metric_name=f"service_user_{client_id}",
                 metric_value=1,
             )
         logger.metric(
-            metric_name="aigw_service_requests_total",
+            metric_name="service_requests_total",
             metric_value=1,
         )
         logger.audit(
@@ -114,7 +114,7 @@ async def log_requests(request: Request, call_next):
             path=request_path,
         )
         logger.metric(
-            metric_name="aigw_service_responses_total",
+            metric_name="service_responses_total",
             metric_value=1,
         )
         logger.audit(
@@ -129,19 +129,19 @@ async def log_requests(request: Request, call_next):
         processing_time_ms = int(round(time.time() - start_time, 3) * 1000)
         logger.info(f"Request processing time for {request_path}: {processing_time_ms} ms")
         logger.metric(
-            metric_name="aigw_service_process_duration_ms",
+            metric_name="service_process_duration_ms",
             metric_value=processing_time_ms,
         )
 
         # Кидаем метрику статуса обработки запроса
         if response.status_code < status.HTTP_400_BAD_REQUEST:
             logger.metric(
-                metric_name="aigw_service_request_status_success_total",
+                metric_name="service_request_status_success_total",
                 metric_value=1,
             )
         else:
             logger.metric(
-                metric_name="aigw_service_request_status_failure_total",
+                metric_name="service_request_status_failure_total",
                 metric_value=1,
             )
     else:

@@ -40,7 +40,7 @@ def common_headers(
     header_x_user_id: str = Header(
         default=None,
         alias="x-user-id",
-        description="ID пользователя. Необязателен (пока).",
+        description="ID пользователя",
         example=uuid.uuid4(),
     ),
 ) -> dict:

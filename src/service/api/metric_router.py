@@ -1,12 +1,8 @@
-"""
-!!!!!! НЕ РЕДАКТИРОВАТЬ !!!!!!
-"""
-
 import uuid
 
 from fastapi import APIRouter, Header, status
 
-from aigw_service.context import APP_CTX
+from service.context import APP_CTX
 
 from . import schemas
 
@@ -24,7 +20,7 @@ async def like(
     header_x_trace_id: str = Header(uuid.uuid4(), alias="x-trace-id")
 ):
     logger.metric(
-        metric_name="aigw_service_likes_total",
+        metric_name="service_likes_total",
         metric_value=1,
     )
     return {"rating_result": "like recorded"}
@@ -40,7 +36,7 @@ async def dislike(
     header_x_trace_id: str = Header(uuid.uuid4(), alias="x-trace-id")
 ):
     logger.metric(
-        metric_name="aigw_service_dislikes_total",
+        metric_name="service_dislikes_total",
         metric_value=1,
     )
     return {"rating_result": "dislike recorded"}
