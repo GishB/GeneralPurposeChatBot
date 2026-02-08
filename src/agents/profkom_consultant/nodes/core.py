@@ -4,9 +4,13 @@ from typing import Any
 
 from langchain_core.prompts import ChatPromptTemplate
 
-from agents.profkom_consultant.nodes import BaseAgentNodes, ThinkTwiceNodes
-from agents.profkom_consultant.states import AgentState
+from .base import BaseAgentNodes
+from .loop import ThinkTwiceNodes
 
+from agents.profkom_consultant.states import AgentState
+from modules.logger_ext import get_logger
+
+logger = get_logger(__name__)
 
 class UnionAgent(BaseAgentNodes, ThinkTwiceNodes):
     r"""Класс профсоюзного агента.
@@ -19,13 +23,19 @@ class UnionAgent(BaseAgentNodes, ThinkTwiceNodes):
     """
 
     def __init__(self, llms: dict, cache, langfuse_client, chroma_client, **kwargs):
+        logger.info(f"Initializing {__name__}")
         self.llm = llms.get("default")
+        logger.info(f"LLM keys {llms.keys()}")
+
         self.cache = cache
         self.langfuse_client = langfuse_client
         self.chorma_client = chroma_client
 
         self.HISTORY_LIMIT = kwargs.get("HISTORY_LIMIT", 10)
         self.COLLECTION_NAME = kwargs.get("COLLECTION_NAME", "PRODUCTION_PROFKOM")
+
+        logger.info(f"HISTORY_LIMIT: {self.HISTORY_LIMIT}")
+        logger.info(f"COLLECTION_NAME: {self.COLLECTION_NAME}")
 
     async def decompose_question(self, state: AgentState) -> None | dict[str, Any] | dict[str, list[Any]]:
         """Декомпозируем предложение пользователя на отдельные задачи.
@@ -66,7 +76,7 @@ class UnionAgent(BaseAgentNodes, ThinkTwiceNodes):
         except Exception as e:
             print(f"Error at decompose_question: {e}")
 
-    async def answer_parts_async(self, state: AgentState, max_concurrent: int = 4) -> AgentState:
+    async def answer_parts_async(self, state: AgentState, max_concurrent: int = 8) -> AgentState:
         """Генерируем асинхронные ответы на список вопросов.
 
         Note:
@@ -89,16 +99,19 @@ class UnionAgent(BaseAgentNodes, ThinkTwiceNodes):
                 if cached_result:
                     return cached_result.get("json").get("answer")
                 else:
-                    retrived_data = await asyncio.create_task(
-                        self.chorma_client.get_info(query=part, collection_name=self.COLLECTION_NAME)
-                    )  # TO DO: TO HTML!
-                    result = await chain.ainvoke({"text": part, "rag": retrived_data})
+                    retrived_data = await asyncio.to_thread(
+                        self.chorma_client.get_info,
+                        query=part,
+                        collection_name=self.COLLECTION_NAME,
+                    )
+                    html_data = retrived_data.to_html()
+                    result = await chain.ainvoke({"text": part, "rag": html_data})
                     cache_data = {"answer": result.content.strip()}
                     self.cache.save(meta_info="answer_parts_async", query=part, output="", json_data=cache_data)
                     return cache_data.get("answer")
 
         if state.get("parts"):
-            tasks = [asyncio.create_task(call_llm(part, state)) for part in state["parts"]]
+            tasks = [asyncio.create_task(call_llm(part)) for part in state["parts"]]
             results = await asyncio.gather(*tasks, return_exceptions=True)
             state["answers"] = [str(r) if not isinstance(r, Exception) else f"Error: {r}" for r in results]
         return state

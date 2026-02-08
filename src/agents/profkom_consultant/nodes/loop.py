@@ -27,6 +27,7 @@ class ThinkTwiceNodes:
         response = await chain.ainvoke(
             {
                 "question": state["text"],
+                "history_questions": state.get("user_history", "[]"),
                 "answer": state["final_answer"],
             }
         )
@@ -64,7 +65,7 @@ class ThinkTwiceNodes:
         response = await chain.ainvoke(
             {
                 "question": state["text"],
-                "part_questions": state["answers"],
+                "history_questions": state.get("user_history", "[]"),
                 "answer": state["final_answer"],
             }
         )
