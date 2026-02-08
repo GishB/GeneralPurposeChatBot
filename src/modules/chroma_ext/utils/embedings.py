@@ -5,13 +5,12 @@ from typing import Any
 import numpy as np
 import requests
 from chromadb import Documents, EmbeddingFunction, Embeddings
-from modules.logger_ext import get_logger
-
-logger = get_logger(__name__)
+from service.logger import LoggerConfigurator
 
 class MyEmbeddingFunction(EmbeddingFunction):
     def __init__(
         self,
+        logger: LoggerConfigurator,
         doc_model_uri: str = None,
         query_model_uri: str = None,
         text_type: str = None,
@@ -27,24 +26,24 @@ class MyEmbeddingFunction(EmbeddingFunction):
             time_sleep: time between each query to yandex api.
         """
         super().__init__(*args, **kwargs)
-
+        self.logger = logger
         self.api_url = os.getenv\
         (
             "EMBEDDING_API",
             "https://llm.api.cloud.yandex.net:443/foundationModels/v1/textEmbedding",
         ) or kwargs.get("api_url")
-        logger.info(f"api_url: {self.api_url}")
+        self.logger.info(f"api_url: {self.api_url}")
 
         self.folder_id = os.getenv("FOLDER_ID", None) or kwargs.get("folder_id")
-        logger.info(
+        self.logger.info(
             f"iam_token: {self.folder_id[:4]}***{self.folder_id[-4:]}")
 
         self.iam_token = os.getenv("API_KEY", None) or kwargs.get("iam_token")
-        logger.info(
+        self.logger.info(
             f"iam_token: {self.iam_token[:4]}***{self.iam_token[-4:]}")
 
         self.time_sleep = float(os.getenv("TIME_SLEEP_RATE_EMBEDDER", 0.01))
-        logger.info(
+        self.logger.info(
             f"time_sleep: {self.time_sleep}")
 
         self.headers =\
@@ -55,15 +54,15 @@ class MyEmbeddingFunction(EmbeddingFunction):
         }
         # set default text type doc if not provided
         self.text_type = text_type or "doc"
-        logger.info(
+        self.logger.info(
             f"text_type: {self.text_type}")
 
         # Set default model URIs if not provided
         self.doc_model_uri = doc_model_uri or f"emb://{self.folder_id}/text-search-doc/latest"
-        logger.info(
+        self.logger.info(
             f"doc_model_uri: {self.doc_model_uri}")
         self.query_model_uri = query_model_uri or f"emb://{self.folder_id}/text-search-query/latest"
-        logger.info(
+        self.logger.info(
             f"query_model_uri: {self.query_model_uri}")
 
     def _get_single_embedding(self, text: str) -> np.ndarray:
@@ -77,20 +76,12 @@ class MyEmbeddingFunction(EmbeddingFunction):
         Returns:
             numpy.ndarray: Embedding vector
         """
-        logger.info\
-        (
-            "called _get_single_embedding"
-        )
         model_uri = self.doc_model_uri if self.text_type == "doc" else self.query_model_uri
 
         data = {"modelUri": model_uri, "text": text}
         time.sleep(self.time_sleep)
         response = requests.post(self.api_url, json=data, headers=self.headers)
         response.raise_for_status()
-        logger.info \
-            (
-                "finished _get_single_embedding"
-            )
         return np.array(response.json()["embedding"])
 
     def __call__(self, input: Documents) -> Embeddings:

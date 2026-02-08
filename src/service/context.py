@@ -1,6 +1,4 @@
 import pytz
-from httpx import RequestError
-
 from service.base import Singleton
 from service.config import APP_CONFIG, Secrets
 from service.logger import ContextVarsContainer, LoggerConfigurator

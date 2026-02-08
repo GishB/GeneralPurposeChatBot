@@ -12,7 +12,6 @@ from service.context import APP_CTX
 
 # pylint: disable=C0103
 def common_headers(
-    # AEF Уникальный идентификатор экземпляра процесса
     header_x_trace_id: str = Header(
         ...,
         alias="x-trace-id",
@@ -34,7 +33,7 @@ def common_headers(
     header_x_aigw_session_id: str = Header(
         default=None,
         alias="x-aigw-session-id",
-        description="ID сессии внутри AIGW (например, для БД). Необязателен.",
+        description="ID сессии (например, для БД). Необязателен.",
         example=uuid.uuid4(),
     ),
     header_x_user_id: str = Header(

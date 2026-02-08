@@ -8,9 +8,7 @@ from .base import BaseAgentNodes
 from .loop import ThinkTwiceNodes
 
 from agents.profkom_consultant.states import AgentState
-from modules.logger_ext import get_logger
-
-logger = get_logger(__name__)
+from service.logger import LoggerConfigurator
 
 class UnionAgent(BaseAgentNodes, ThinkTwiceNodes):
     r"""Класс профсоюзного агента.
@@ -22,10 +20,17 @@ class UnionAgent(BaseAgentNodes, ThinkTwiceNodes):
 
     """
 
-    def __init__(self, llms: dict, cache, langfuse_client, chroma_client, **kwargs):
-        logger.info(f"Initializing {__name__}")
+    def __init__(self,
+                 logger: LoggerConfigurator,
+                 llms: dict,
+                 cache,
+                 langfuse_client,
+                 chroma_client,
+                 **kwargs):
+        self.logger = logger
+        self.logger.info(f"Initializing {__name__}")
         self.llm = llms.get("default")
-        logger.info(f"LLM keys {llms.keys()}")
+        self.logger.info(f"LLM keys {llms.keys()}")
 
         self.cache = cache
         self.langfuse_client = langfuse_client
@@ -34,8 +39,8 @@ class UnionAgent(BaseAgentNodes, ThinkTwiceNodes):
         self.HISTORY_LIMIT = kwargs.get("HISTORY_LIMIT", 10)
         self.COLLECTION_NAME = kwargs.get("COLLECTION_NAME", "PRODUCTION_PROFKOM")
 
-        logger.info(f"HISTORY_LIMIT: {self.HISTORY_LIMIT}")
-        logger.info(f"COLLECTION_NAME: {self.COLLECTION_NAME}")
+        self.logger.info(f"HISTORY_LIMIT: {self.HISTORY_LIMIT}")
+        self.logger.info(f"COLLECTION_NAME: {self.COLLECTION_NAME}")
 
     async def decompose_question(self, state: AgentState) -> None | dict[str, Any] | dict[str, list[Any]]:
         """Декомпозируем предложение пользователя на отдельные задачи.
@@ -60,8 +65,12 @@ class UnionAgent(BaseAgentNodes, ThinkTwiceNodes):
                 prompt = self.langfuse_client.get_prompt("decompose_question").get_langchain_prompt()
                 prompt = ChatPromptTemplate.from_template(prompt)
                 chain = prompt | self.llm
-                response = await chain.ainvoke(
-                    {"user_question": question, "user_history": state.get("user_history", "")}
+                response = await chain.ainvoke\
+                (
+                    {
+                        "user_question": question,
+                        "user_history": state.get("user_history", "")
+                    }
                 )
                 response = response.content.strip()
 
@@ -139,6 +148,7 @@ class UnionAgent(BaseAgentNodes, ThinkTwiceNodes):
                     "task_responses": answers_text,
                     "user_history": state.get("user_history", "Нет истории запросов."),
                     "original_question": question,
+                    "model_answers": state.get("model_answers", "Нет истории ответов от модели"),
                     "additional_info": state.get(
                         "additional_info", "Нет дополнительной информации по предыдущим ответам."
                     ),

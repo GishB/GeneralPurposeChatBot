@@ -1,19 +1,11 @@
-import ssl
-import hashlib
-from pathlib import Path
-from datetime import datetime, timezone
 import os
 from logging import DEBUG, INFO
 
-from cryptography import x509
-from cryptography.hazmat.primitives import serialization
-
 from dotenv import load_dotenv
-from pydantic import Field, field_validator, model_validator
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings
 
-load_dotenv()
-
+load_dotenv("../../.env")
 
 class BaseAppSettings(BaseSettings):
     """
@@ -35,7 +27,7 @@ class AppSettings(BaseAppSettings):
 
     app_host: str = Field(validation_alias="APP_HOST", default="0.0.0.0")
     app_port: int = Field(validation_alias="APP_PORT", default=8080)
-    kube_net_name: str = Field(validation_alias="PROJECT_NAME", default="WORKERUNION")
+    app_name: str = Field(validation_alias="PROJECT_NAME", default="KarlMarksAlive")
     timezone: str = Field(validation_alias="TIMEZONE", default="Europe/Moscow")
 
 
@@ -52,7 +44,7 @@ class LogSettings(BaseAppSettings):
     private_audit_file_path: str = Field(validation_alias="AUDIT_LOG_PATH", default=os.getcwd())
     private_audit_file_name: str = Field(validation_alias="AUDIT_LOG_FILE_NAME", default="events.log")
     audit_host_ip: str = Field(validation_alias="HOST_IP", default="127.0.0.1")
-    audit_host_uid: str = Field(validation_alias="HOST_UID", default="63bd6cbe-170b-49bf-a65c-3ce967398ccd")
+    audit_host_uid: str = Field(validation_alias="HOST_UID", default="42bd6cbe-126b-41bf-a65c-9ce19450901ccd")
 
     @field_validator(
         "private_log_file_path",
@@ -90,13 +82,78 @@ class LogSettings(BaseAppSettings):
 
 class YandexGPTSettings(BaseAppSettings):
     """
-    Настройки GigaChat.
+    Настройки YandexGPTFoundation models.
     """
-    model_name: str = Field(validation_alias="MODEL_NAME", default="YandexGPT")
-    temperature: float = Field(validation_alias="TEMPERATURE", default=0.1)
-    profanity_check: bool = Field(validation_alias="PROFANCIE_CHECK", default=False)
+    model_name: str = Field(validation_alias="MODEL_NAME",
+                            default="yandexgpt")
+    temperature: float = Field(validation_alias="TEMPERATURE",
+                               default=0.1)
+    profanity_check: bool = Field(validation_alias="PROFANCIE_CHECK",
+                                  default=False)
 
+    openai_api_key: str = Field(validation_alias="OPENAI_API_KEY",
+                                default=None)
+    openai_folder_id: str = Field(validation_alias="OPENAI_FOLDER_ID",
+                                  default=None)
+    openai_api_base: str = Field(validation_alias="OPENAI_API_BASE",
+                                 default="https://llm.api.cloud.yandex.net/v1")
 
+    @property
+    def model(self):
+        return f"gpt://{self.openai_folder_id}/{self.model_name}"
+
+class LangFuseSettings(BaseAppSettings):
+    """
+    Настройка для логирования.
+    """
+    secret_key: str = Field(validation_alias="LANGFUSE_SECRET_KEY", default="")
+    public_key: str = Field(validation_alias="LANGFUSE_PUBLIC_KEY", default="")
+    host: str = Field(validation_alias="LANGFUSE_HOST", default="http://127.0.0.1:3000")
+    stage: str = Field(validation_alias="LANGFUSE_STAGE", default="dev")
+
+class ChromaSettings(BaseAppSettings):
+    """
+    Для работы с векторной базой данных.
+    """
+    similarity_filter_score: float = Field(validation_alias="SIMILARITY_FILTER",
+                                           default=1.5)
+    openai_api_key: str = Field(validation_alias="OPENAI_API_KEY",
+                                default=None)
+    openai_folder_id: str = Field(validation_alias="OPENAI_FOLDER_ID",
+                                  default=None)
+    chroma_max_rag_documents: int = Field(validation_alias="CHROMA_MAX_RAG_DOCUMENTS",
+                                          default=42)
+    collection_name: str = Field(validation_alias="COLLECTION_NAME",
+                                 default="PRODUCTION_PROFKOM")
+    embeding_api: str = Field(validation_alias="EMBEDDING_API",
+                              default="https://llm.api.cloud.yandex.net:443/foundationModels/v1/textEmbedding")
+    time_sleep: float = Field(validation_alias="TIME_SLEEP_RATE_EMBEDDER",
+                              default=0.01)
+
+    @property
+    def header(self):
+        return \
+        {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.openai_api_key}",
+            "x-folder-id": self.folder_id,
+        }
+
+    @property
+    def doc_model_uri(self):
+        return f"emb://{self.folder_id}/text-search-doc/latest"
+
+    @property
+    def query_model_uri(self):
+        return f"emb://{self.folder_id}/text-search-query/latest"
+
+class RedisSettings(BaseAppSettings):
+    redis_url: str = Field(validation_alias="REDIS_URL",
+                           default="redis://127.0.0.1:6379")
+    redis_threshold: float = Field(validation_alias="REDIS_THRESHOLD",
+                                   default=0.05)
+    redis_ttl: int = Field(validation_alias="REDIS_TTL",
+                           default=3600)
 
 class Secrets:
     """
@@ -106,6 +163,9 @@ class Secrets:
     app: AppSettings = AppSettings()
     llm: YandexGPTSettings = YandexGPTSettings()
     log: LogSettings = LogSettings()
+    chroma: ChromaSettings = ChromaSettings()
+    langfuse: LangFuseSettings = LangFuseSettings()
+    redis: RedisSettings = RedisSettings()
 
 
 APP_CONFIG = Secrets()

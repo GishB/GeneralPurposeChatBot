@@ -1,7 +1,5 @@
 from typing import List, TypedDict
-
 from .status import AgentStatus
-
 
 class AgentState(TypedDict, total=False):
     user_id: str
