@@ -8,8 +8,8 @@ from service.logger.uvicorn_logging_config import LOGGING_CONFIG
 def main():
     uvicorn.run(
         create_app,
-        host=APP_CONFIG.HOST,
-        port=APP_CONFIG.PORT,
+        host=APP_CONFIG.app.host,
+        port=APP_CONFIG.app.port,
         access_log=False,
         log_config=LOGGING_CONFIG,
     )

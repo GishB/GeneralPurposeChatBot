@@ -26,9 +26,9 @@ class AppSettings(BaseAppSettings):
     Настройки приложения.
     """
 
-    app_host: str = Field(validation_alias="APP_HOST", default="0.0.0.0")
-    app_port: int = Field(validation_alias="APP_PORT", default=8080)
-    app_name: str = Field(validation_alias="PROJECT_NAME", default="KarlMarksAlive")
+    host: str = Field(validation_alias="APP_HOST", default="0.0.0.0")
+    port: int = Field(validation_alias="APP_PORT", default=8080)
+    name: str = Field(validation_alias="PROJECT_NAME", default="KarlMarksAlive")
     timezone: str = Field(validation_alias="TIMEZONE", default="Europe/Moscow")
 
 
@@ -88,7 +88,7 @@ class YandexGPTSettings(BaseAppSettings):
 
     model_name: str = Field(validation_alias="MODEL_NAME", default="yandexgpt")
     temperature: float = Field(validation_alias="TEMPERATURE", default=0.1)
-    profanity_check: bool = Field(validation_alias="PROFANCIE_CHECK", default=False)
+    # profanity_check: bool = Field(validation_alias="PROFANCIE_CHECK", default=False)
 
     openai_api_key: str = Field(validation_alias="OPENAI_API_KEY", default=None)
     openai_folder_id: str = Field(validation_alias="OPENAI_FOLDER_ID", default=None)
@@ -97,6 +97,16 @@ class YandexGPTSettings(BaseAppSettings):
     @property
     def model(self):
         return f"gpt://{self.openai_folder_id}/{self.model_name}"
+
+    @property
+    def base_params(self):
+        return \
+            {
+                "model": self.model,
+                "temperature": self.temperature,
+                "openai_api_key": self.openai_api_key,
+                "openai_api_base": self.openai_api_base,
+            }
 
 
 class LangFuseSettings(BaseAppSettings):
@@ -142,6 +152,39 @@ class ChromaSettings(BaseAppSettings):
     def query_model_uri(self):
         return f"emb://{self.folder_id}/text-search-query/latest"
 
+class PostgreSettings(BaseAppSettings):
+    user: str = Field(validation_alias="PG_USER", default="postgres")
+    password: str = Field(validation_alias="PG_PASSWORD", default="")
+    postgres_db: str = Field(validation_alias="POSTGRES_DB", default="postgres")
+    schema: str = Field(validation_alias="PG_SCHEMA", default="postgres")
+    host: str = Field(validation_alias="PG_HOST", default="localhost")
+    port: int = Field(validation_alias="PG_PORT", default=5432)
+
+    sslmode: str = Field(validation_alias="PG_SSLMODE", default="disable")
+    pool_min_size: int = Field(validation_alias="POOL_MIN_SIZE", default=5)
+    pool_max_size: int = Field(validation_alias="POOL_MAX_SIZE", default=20)
+    pool_max_idle: int = Field(validation_alias="POOL_MAXIDLE", default=60)
+    keepalive_interval: int = Field(validation_alias="KEEPALIVE_INTERVAL", default=60)
+    keepalive_count: int = Field(validation_alias="KEEPALIVE_COUNT", default=5)
+
+    @property
+    def encoded_pass(self) -> str:
+        from urllib.parse import quote_plus
+        return quote_plus(self.password)
+
+    @property
+    def conninfo(self) -> str:
+        return (
+            f"postgresql://{self.user}:{self.encoded_pass}"
+            f"@{self.host}:{self.port}/{self.postgres_db}"
+            f"?sslmode={self.sslmode}"
+            f"&options=-c%20search_path%3D{self.schema}"
+            f"&keepalives=1"
+            f"&keepalives_idle={self.pool_max_idle}"
+            f"&keepalives_interval={self.keepalive_interval}"
+            f"&keepalives_count={self.keepalive_count}"
+        )
+
 
 class RedisSettings(BaseAppSettings):
     redis_url: str = Field(validation_alias="REDIS_URL", default="redis://127.0.0.1:6379")
@@ -156,6 +199,7 @@ class Secrets:
 
     app: AppSettings = AppSettings()
     llm: YandexGPTSettings = YandexGPTSettings()
+    postgres: PostgreSettings = PostgreSettings()
     log: LogSettings = LogSettings()
     chroma: ChromaSettings = ChromaSettings()
     langfuse: LangFuseSettings = LangFuseSettings()

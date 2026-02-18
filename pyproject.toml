@@ -37,6 +37,8 @@ dependencies = [
     "pandas-stubs~=3.0.0",
     "pytz>=2025.2",
     "loguru>=0.7.3",
+    "psycopg[binary,pool]==3.2.9",
+    "langgraph-checkpoint-postgres==2.0.25",
 ]
 
 [project.urls]

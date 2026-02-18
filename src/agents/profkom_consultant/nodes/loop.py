@@ -27,6 +27,7 @@ class ThinkTwiceNodes:
         response = await chain.ainvoke(
             {
                 "question": state["text"],
+                "parts": state.get("parts", "[]"),
                 "history_questions": state.get("user_history", "[]"),
                 "answer": state["final_answer"],
             }
@@ -44,9 +45,12 @@ class ThinkTwiceNodes:
                 state["counter_loop"] = 0
                 state["additional_info"] = ""
             else:
-                state["status"] = AgentStatus.AGAIN
+                if not state.get("counter_loop"):
+                    state["counter_loop"] = 0
+
                 state["counter_loop"] += 1
                 state["additional_info"] = state["final_answer"]
+                state["status"] = AgentStatus.AGAIN
         return state
 
     async def generate_additional_questions(self, state) -> AgentState:

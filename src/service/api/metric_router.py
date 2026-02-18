@@ -16,7 +16,6 @@ logger = APP_CTX.get_logger()
     response_model=schemas.RateResponse,
 )
 async def like(
-    # pylint: disable=C0103,W0613
     header_x_trace_id: str = Header(uuid.uuid4(), alias="x-trace-id"),
 ):
     logger.metric(

@@ -61,3 +61,7 @@ class RedisAdapter:
                 print(f"JSON decode error: {e}")
                 return None
         return None
+
+    def health_check(self) -> bool:
+        """ Simple health check """
+        return True
