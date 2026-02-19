@@ -31,7 +31,7 @@ def common_headers(
         example="telegram",
     ),
     header_x_user_id: str = Header(
-        default=None,
+        ...,
         alias="x-user-id",
         description="ID пользователя",
         example=uuid.uuid4(),
