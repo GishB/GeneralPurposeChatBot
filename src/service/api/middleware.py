@@ -36,7 +36,7 @@ def _get_decoded_body(raw_body: bytes, message_type: str, logger):
 
 async def log_requests(request: Request, call_next):
     start_time = time.time()
-    logger = APP_CTX.get_logger()
+    logger = APP_CTX.logger
     request_path = request.url.path
 
     # Достаем заголовки запроса

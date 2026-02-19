@@ -71,6 +71,7 @@ class ThinkTwiceNodes:
                 "question": state["text"],
                 "history_questions": state.get("user_history", "[]"),
                 "answer": state["final_answer"],
+                "parts": state.get("parts", "[]"),
             }
         )
 

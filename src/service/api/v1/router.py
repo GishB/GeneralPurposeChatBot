@@ -2,19 +2,17 @@
 Ядро для работы с endpoints.
 """
 
-import uuid
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from langchain_openai import ChatOpenAI
-
+from agents.profkom_consultant import build_builder, AgentStatus
+from langgraph.checkpoint.memory import MemorySaver
 from service.context import APP_CTX
 from service.config import APP_CONFIG
 
 from . import schemas
-from .schemas import ChatRequest, ChatResponse, ResetRequest, FailedDependecyResponse, YandexGPTAPITestResponse
+from .schemas import AgentChatRequest, AgentChatResponse, FailedDependecyResponse, YandexGPTAPITestResponse
 from .utils import common_headers
-from service.exceptions import AgentInternalError
-from agents.profkom_consultant import workflow
 
 router = APIRouter()
 logger = APP_CTX.get_logger()
@@ -37,11 +35,11 @@ async def yandex_gptapi_test(
         yandexgpt_base_params = Depends(APP_CTX.get_yandexgpt_base_params),
 ):
         yandexgpt_client = ChatOpenAI(**yandexgpt_base_params)
-        logger.info(f"Generation an answer based on the givern question... "
+        logger.debug(f"Generation an answer based on the givern question... "
                     f"for {headers.get('header_x_user_id')}")
         try:
             answer = yandexgpt_client.invoke(request.question)
-            logger.info(f"Generated answer: {answer}")
+            logger.debug(f"Generated answer: {answer}")
         except Exception as e:
             logger.error(f"Generation an answer failed with exception: {e}")
             return JSONResponse(
@@ -49,3 +47,63 @@ async def yandex_gptapi_test(
                 content=FailedDependecyResponse(error_description=str(e)).model_dump(),
             )
         return schemas.YandexGPTAPITestResponse(answer=answer.content)
+
+@router.post("/chat",
+             status_code=status.HTTP_200_OK,
+             response_model=AgentChatResponse
+)
+async def chat(
+        request: AgentChatRequest,
+        headers: dict = Depends(common_headers),
+):
+    """ Обработка входящих запросов к API агента.
+
+    Args:
+        request: Входящий запрос от пользователя с полезной нагрузкой;
+        headers: Заголовок запроса с системной информацией;
+    """
+    logger.debug(f"Длина запроса на входе: {len(request.text)}")
+
+    agent_payload = {
+        "user_id": headers.get('x-user-id'),
+        "text": request.organisation + "|" + request.text,
+        "status": AgentStatus.ACTIVE,
+    }
+
+    try:
+        # async with APP_CTX.postgres.get_user_checkpointer() as checkpointer:
+        agent_graph = build_builder(
+            agent=APP_CTX.get_agent(),
+            checkpointer=MemorySaver()
+        )
+
+        langfuse = await APP_CTX.get_langfuse()
+
+        config={
+            "configurable": {"thread_id": headers.get('x-user-id')},
+            "callbacks": [langfuse.handler],
+            "metadata": {
+                "stage": APP_CONFIG.app.stage,
+                "langfuse_session_id": headers.get('x-trace-id'),
+                "langfuse_user_id": headers.get('x-user-id'),
+            },
+        }
+
+        result = await agent_graph.ainvoke(
+            input=agent_payload,
+            config=config,
+        )
+        logger.debug(f"Ответ сгенерирован. Его длина {len(result['final_answer'])} символов")
+        return AgentChatResponse(response=result["final_answer"])
+
+    except Exception as e:
+        logger.critical\
+        (
+                f"""Ошибка агента:
+                 [user_id={headers.get('x-user-id')}],
+                 [session_id = {headers.get('x-trace-id')}]
+                 [source_id = {headers.get('x-source-id')}]
+                 {e}
+                """
+        )
+

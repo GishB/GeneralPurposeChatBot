@@ -1,4 +1,5 @@
 from langgraph.checkpoint.memory import MemorySaver
+from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from langgraph.graph import END, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
@@ -6,7 +7,8 @@ from agents.profkom_consultant import UnionAgent
 from agents.profkom_consultant.states import AgentState, AgentStatus
 
 
-def build_builder(agent: UnionAgent, checkpointer: MemorySaver | None) -> CompiledStateGraph:
+def build_builder(agent: UnionAgent,
+                  checkpointer: MemorySaver | AsyncPostgresSaver | None) -> CompiledStateGraph:
     r"""Создаем граф профсоюзного агента
 
     Notes:

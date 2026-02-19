@@ -30,6 +30,7 @@ class AppSettings(BaseAppSettings):
     port: int = Field(validation_alias="APP_PORT", default=8080)
     name: str = Field(validation_alias="PROJECT_NAME", default="KarlMarksAlive")
     timezone: str = Field(validation_alias="TIMEZONE", default="Europe/Moscow")
+    stage: str = Field(validation_alias="STAGE", default="dev")
 
 
 class LogSettings(BaseAppSettings):

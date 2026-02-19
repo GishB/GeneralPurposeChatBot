@@ -44,6 +44,17 @@ class LangfuseClient:
             trace_name=self.config.stage,
         )
 
+    async def on_startup(self) -> None:
+        """ Инициализация клиента Langfuse"""
+        self.logger.info("LangFuse startup")
+        try:
+            self.client = self.__create_client
+            self.handler = self.__create_callback_handler
+            self.health_check()
+        except Exception as e:
+            Warning(f"LangFuse startup failed: {e}")
+
+
     def health_check(self) -> bool:
         """ Simple health check trigger.
 

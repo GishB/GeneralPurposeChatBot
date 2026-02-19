@@ -115,24 +115,25 @@ class AppContext(metaclass=Singleton):
         self.logger.info(f"Timezone is {self.timezone}")
 
     def get_logger(self) -> LoggerConfigurator:
-        return self._logger_manager
+        return self.logger
 
-    def get_langfuse(self) -> LangfuseClient:
+    async def get_langfuse(self) -> LangfuseClient:
         if not self._langfuse_client:
             self._langfuse_client = self.langfuse_ext
+        await self._langfuse_client.on_startup()
         return self._langfuse_client
 
-    def get_chroma(self) -> ChromaAdapter:
+    async def get_chroma(self) -> ChromaAdapter:
         if not self._chroma_client:
             self._chroma_client = self.chroma_ext
         return self._chroma_client
 
-    def get_redis(self) -> RedisAdapter:
+    async def get_redis(self) -> RedisAdapter:
         if not self._redis_ext:
             self._redis_ext = self.redis_ext
         return self._redis_ext
 
-    def get_yandexgpt_embeddings(self):
+    async def get_yandexgpt_embeddings(self):
         if not self._yandexgpt_embeddings:
             self._yandexgpt_embeddings = self.yandexgpt_embeddings_client
         return self._yandexgpt_embeddings
@@ -163,16 +164,16 @@ class AppContext(metaclass=Singleton):
 
     async def on_startup(self):
         self.logger.info("Application is starting up.")
-        self.get_langfuse()
+        await self.get_langfuse()
         self.logger.info(f"Langfuse is healthy {self.langfuse_ext.health_check()}")
-        self.get_chroma()
+        await self.get_chroma()
         self.logger.info(f"Chroma is healthy {self.chroma_ext.health_check()}")
-        self.get_redis()
+        await self.get_redis()
         self.logger.info(f"Redis is healthy {self.redis_ext.health_check()}")
 
         # self.get_postgres_client()
         self.get_agent()
-        self.get_yandexgpt_embeddings()
+        await self.get_yandexgpt_embeddings()
         self.logger.info("All connections checked. Application is up and ready.")
 
     async def on_shutdown(self):

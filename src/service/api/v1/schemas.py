@@ -5,35 +5,38 @@
 from pydantic import BaseModel, Field
 
 
-class ChatRequest(BaseModel):
-    query: str = Field(
+class AgentChatRequest(BaseModel):
+    """
+    Стандартная схема на вход от пользователя.
+    """
+    text: str = Field(
         ...,
         min_length=4,
-        max_length=500,
+        max_length=512,
         examples=[
-            "Я ваСя ПупкИН! Привет! Мне нравится работать. Как долго действует коллективный договор на предприятии?"
+            "Как вступить в профсоюз?"
         ],
     )
-    user_id: str = Field(..., examples=["0", "123124214"])
-    request_id: str = Field(..., examples=["a1b2c3d4e5f67890"])
-    source_name: str = Field(..., examples=["telegram", "www.profkom-nevazot.ru"])
+    organisation: str = Field(...,
+                              min_length=2,
+                              max_length=256,
+                              examples=[
+                                  "ППО Невинномысский Азот"
+                              ])
 
     class Config:
         extra = "forbid"
 
 
-class ChatResponse(BaseModel):
-    response: str = Field(..., examples=["Привет Вася Пупкин! Долго действует!"])
-    request_id: str = Field(..., examples=["a1b2c3d4e5f67890"])
-    status: str = Field(..., examples=["success", "failed"])
-    user_id: str = Field(..., examples=["0", "123124214"])
-
-    class Config:
-        extra = "forbid"
-
-
-class ResetRequest(BaseModel):
-    user_id: str
+class AgentChatResponse(BaseModel):
+    """
+    Стандартная схема ответа на вопрос пользователя
+    """
+    response: str = Field(...,
+                          min_length=4,
+                          max_length=2048,
+                          examples=["Для того, чтобы вступить в профсоюз вам необходимо всеголишь..."]
+                         )
 
     class Config:
         extra = "forbid"

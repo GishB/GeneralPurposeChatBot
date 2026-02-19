@@ -15,7 +15,7 @@ def common_headers(
     header_x_trace_id: str = Header(
         ...,
         alias="x-trace-id",
-        description="Уникальный идентификатор экземпляра процесса (основной операции). Сквозной ID всей цепочки вызовов. AEF.",
+        description="Уникальный идентификатор экземпляра процесса (основной операции).",
         example=uuid.uuid4(),
     ),
     header_x_request_time: str = Header(
@@ -24,17 +24,11 @@ def common_headers(
         description="Время отправки запроса в формате ISO 8601.",
         example=str(datetime.now(tz=APP_CTX.get_pytz_timezone()).isoformat()),
     ),
-    header_x_client_id: str = Header(
+    header_x_source_id: str = Header(
         ...,
-        alias="x-client-id",
-        description="КЭ системы отправляющей запрос. AEF.",
-        example="CI00163870",
-    ),
-    header_x_aigw_session_id: str = Header(
-        default=None,
-        alias="x-aigw-session-id",
-        description="ID сессии (например, для БД). Необязателен.",
-        example=uuid.uuid4(),
+        alias="x-source-name",
+        description="Уникальное название системы которая отправляет запрос.",
+        example="telegram",
     ),
     header_x_user_id: str = Header(
         default=None,
@@ -46,7 +40,6 @@ def common_headers(
     return {
         "x-trace-id": header_x_trace_id,
         "x-request-time": header_x_request_time,
-        "x-client-id": header_x_client_id,
-        "x-aigw-session-id": header_x_aigw_session_id,
+        "x-source-id": header_x_source_id,
         "x-user-id": header_x_user_id,
     }
