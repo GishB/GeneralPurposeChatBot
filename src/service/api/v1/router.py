@@ -5,7 +5,7 @@
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from langchain_openai import ChatOpenAI
-from langgraph.checkpoint.memory import MemorySaver
+# from langgraph.checkpoint.memory import MemorySaver
 
 from agents.profkom_consultant import AgentStatus, build_builder
 from service.config import APP_CONFIG
@@ -64,31 +64,40 @@ async def chat(
 
     agent_payload = {
         "user_id": headers.get("x-user-id"),
-        "text": request.organisation + "|" + request.text,
+        "text": request.organisation + " | " + request.text,
         "status": AgentStatus.ACTIVE,
     }
-
     try:
-        # async with APP_CTX.postgres.get_user_checkpointer() as checkpointer:
-        agent_graph = build_builder(agent=APP_CTX.get_agent(), checkpointer=MemorySaver())
+        client = await APP_CTX.get_postgres_client()
+        async with client.get_user_checkpointer() as checkpointer:
+            agent_graph = build_builder(agent=APP_CTX.get_agent(), checkpointer=checkpointer)
 
-        langfuse = await APP_CTX.get_langfuse()
+            langfuse = await APP_CTX.get_langfuse()
 
-        config = {
-            "configurable": {"thread_id": headers.get("x-user-id")},
-            "callbacks": [langfuse.handler],
-            "metadata": {
-                "stage": APP_CONFIG.app.stage,
-                "langfuse_session_id": headers.get("x-trace-id"),
-                "langfuse_user_id": headers.get("x-user-id"),
-            },
-        }
+            config = \
+            {
+                "configurable": \
+                    {
+                        "thread_id": headers.get("x-user-id")
+                    },
+                "callbacks": \
+                    [
+                        langfuse.handler
+                    ],
+                "metadata": \
+                {
+                    "stage": APP_CONFIG.app.stage,
+                    "langfuse_session_id": headers.get("x-trace-id"),
+                    "langfuse_user_id": headers.get("x-user-id"),
+                },
+            }
 
-        result = await agent_graph.ainvoke(
-            input=agent_payload,
-            config=config,
-        )
-        logger.debug(f"Ответ сгенерирован. Его длина {len(result['final_answer'])} символов")
+            result = await agent_graph.ainvoke\
+            (
+                input=agent_payload,
+                config=config,
+            )
+            logger.debug(f"Ответ сгенерирован. Его длина {len(result['final_answer'])} символов")
         return AgentChatResponse(response=result["final_answer"])
 
     except Exception as e:

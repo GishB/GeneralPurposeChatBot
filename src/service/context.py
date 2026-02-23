@@ -54,8 +54,10 @@ class AppContext(metaclass=Singleton):
 
     @property
     def yandexgpt_embeddings_client(self):
-        return YandexGPTEmbeddings(
-            folder_id=self._yandexgpt_base_params.openai_folder_id, iam_token=self._yandexgpt_base_params.openai_api_key
+        return YandexGPTEmbeddings\
+        (
+            folder_id=self._yandexgpt_base_params.openai_folder_id,
+            iam_token=self._yandexgpt_base_params.openai_api_key
         )
 
     @property
@@ -105,7 +107,7 @@ class AppContext(metaclass=Singleton):
     async def get_langfuse(self) -> LangfuseClient:
         if not self._langfuse_client:
             self._langfuse_client = self.langfuse_ext
-        await self._langfuse_client.on_startup()
+            await self._langfuse_client.on_startup()
         return self._langfuse_client
 
     async def get_chroma(self) -> ChromaAdapter:
@@ -133,9 +135,10 @@ class AppContext(metaclass=Singleton):
             self._profkom_agent = self.profkom_agent
         return self._profkom_agent
 
-    def get_postgres_client(self) -> PostgresClient:
+    async def get_postgres_client(self) -> PostgresClient:
         if not self._postgres_ext:
             self._postgres_ext = self.postgres_ext
+            await self._postgres_ext.ensure_pool()
         return self._postgres_ext
 
     def get_yandexgpt_base_params(self):
@@ -150,20 +153,23 @@ class AppContext(metaclass=Singleton):
     async def on_startup(self):
         self.logger.info("Application is starting up.")
         await self.get_langfuse()
-        self.logger.info(f"Langfuse is healthy {self.langfuse_ext.health_check()}")
+        self.logger.info(f"Langfuse is healthy {self._langfuse_client.health_check()}")
         await self.get_chroma()
-        self.logger.info(f"Chroma is healthy {self.chroma_ext.health_check()}")
+        self.logger.info(f"Chroma is healthy {self._chroma_client.health_check()}")
         await self.get_redis()
-        self.logger.info(f"Redis is healthy {self.redis_ext.health_check()}")
+        self.logger.info(f"Redis is healthy {self._redis_ext.health_check()}")
+        await self.get_postgres_client()
+        self.logger.info(f"Postgres is healthy {self._postgres_ext.health_check()}")
 
-        # self.get_postgres_client()
         self.get_agent()
+
         await self.get_yandexgpt_embeddings()
         self.logger.info("All connections checked. Application is up and ready.")
 
     async def on_shutdown(self):
         self.logger.info("Application is shutting down.")
         self._logger_manager.remove_logger_handlers()
+        await self._postgres_ext.close()
 
 
 APP_CTX = AppContext(APP_CONFIG)

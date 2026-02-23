@@ -1,4 +1,5 @@
 import asyncio
+from contextlib import asynccontextmanager
 from typing import Any
 
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
@@ -22,11 +23,11 @@ class PostgresClient:
 
     def _log_config_info(self) -> None:
         """Show config information for Postgres"""
-        password = self.settings.password
+        password = self.settings.encoded_pass
         password_len = len(password) if password else None
 
         if not password_len or password_len == 0:
-            self.logger.warning("Password not defined!")
+            self.logger.error("Password not defined!")
         else:
             prefix = password[:2] if password_len >= 2 else ""
             suffix = password[-2:] if password_len >= 2 else ""
@@ -34,15 +35,15 @@ class PostgresClient:
             self.logger.info(f"Password defined: {masked}")
 
         self.logger.info(
-            f"user={self.settings.postgres_user}"
-            f"host={self.settings.postgres_host}"
-            f"port={self.settings.postgres_port}"
+            f"user={self.settings.user} "
+            f"host={self.settings.host} "
+            f"port={self.settings.port} "
             f"dbname={self.settings.postgres_db}"
         )
         self.logger.info(
-            f"poll_min_size={self.settings.poll_min_size}"
-            f"poll_max_size={self.settings.poll_max_size}"
-            f"poll_max_idle={self.settings.poll_max_idle:.1f}s"
+            f"poll_min_size={self.settings.pool_min_size} "
+            f"poll_max_size={self.settings.pool_max_size} "
+            f"poll_max_idle={self.settings.pool_max_idle:.1f}s "
         )
 
     async def ensure_pool(self) -> None:
@@ -60,10 +61,10 @@ class PostgresClient:
                 if self._pool is None:
                     self.logger.info("Postgres.ensure_pool: Creating new Postgres pool...")
                     self._pool = AsyncConnectionPool(
-                        conninfo=self.config.conninfo,
-                        min_size=self.config.pool_min_size,
-                        max_size=self.config.pool_max_size,
-                        max_idle=self.config.pool_max_idle,
+                        conninfo=self.settings.conninfo,
+                        min_size=self.settings.pool_min_size,
+                        max_size=self.settings.pool_max_size,
+                        max_idle=self.settings.pool_max_idle,
                     )
                     await self._pool.open(wait=True)
                     stats = self._pool.get_stats()
@@ -88,6 +89,7 @@ class PostgresClient:
                 conn = None
         return conn
 
+    @asynccontextmanager
     async def get_user_checkpointer(self):
         self.logger.debug(f"Postgres.get_user_checkpointer: {id(self)}")
         await self.ensure_pool()
@@ -129,4 +131,15 @@ class PostgresClient:
             self.logger.debug(f"Postgres.close already closed {id(self)}")
 
     def health_check(self) -> bool:
-        return self._pool is not None
+        return True if self._pool else False
+
+if __name__ == "__main__":
+    from service.context import APP_CTX
+
+    async def test():
+        client = APP_CTX.get_postgres_client()
+        async with client.get_user_checkpointer() as saver:  # ✅ async with для generator
+            await saver.setup()  # Таблицы созданы!
+            print("✅ Saver готов с setup()")
+
+    asyncio.run(test())

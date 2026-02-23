@@ -40,7 +40,7 @@ class RedisAdapter:
         """
         output=str в text, json_data=dict в metadata.
         """
-        self.logger.info("saving query")
+        # self.logger.debug("saving query")
         metadata = {"json": json_data} if json_data else {}
         metadata["query"] = query
         metadata["output"] = output
@@ -52,16 +52,16 @@ class RedisAdapter:
 
     def get(self, meta_info: str, query: str = "") -> Optional[Dict[str, Any]]:
         """Возвращает полный dict из JSON в text."""
-        self.logger.info("getting query")
+        # self.logger.debug("getting query")
         result = self.semantic_cache.lookup(query, meta_info)
         if result:
             try:
                 return json.loads(result[0].text)
             except json.JSONDecodeError as e:
-                print(f"JSON decode error: {e}")
+                self.logger.error(f"JSON decode error: {e}")
                 return None
         return None
 
     def health_check(self) -> bool:
         """Simple health check"""
-        return True
+        return True if self.semantic_cache else False
