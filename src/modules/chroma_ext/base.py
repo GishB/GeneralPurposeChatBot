@@ -34,11 +34,7 @@ class ChromaAdapter:
 
         self.api_key = kwargs.get("API_KEY", None)
         self.logger.info(f"CHROMA_API_KEY: {self.api_key[:4]}**{self.api_key[-4:]}")
-        self.api_url = kwargs.get\
-            (
-            "API_URL",
-            "https://llm.api.cloud.yandex.net:443/foundationModels/v1/textEmbedding"
-            )
+        self.api_url = kwargs.get("API_URL", "https://llm.api.cloud.yandex.net:443/foundationModels/v1/textEmbedding")
         self.logger.info(f"CHROMA_API_URL: {self.api_url}")
         self.folder_id = kwargs.get("FOLDER_ID", None)
         self.logger.info(f"CHROMA_FOLDER_ID: {self.folder_id[:4]}**{self.folder_id[-4:]}")
@@ -153,5 +149,5 @@ class ChromaAdapter:
         )
 
     def health_check(self) -> bool:
-        """ Simple Chroma check"""
+        """Simple Chroma check"""
         return True

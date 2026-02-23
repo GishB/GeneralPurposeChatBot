@@ -39,6 +39,7 @@ dependencies = [
     "loguru>=0.7.3",
     "psycopg[binary,pool]==3.2.9",
     "langgraph-checkpoint-postgres==2.0.25",
+    "uvicorn>=0.40.0",
 ]
 
 [project.urls]

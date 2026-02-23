@@ -5,31 +5,28 @@ from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from psycopg import AsyncConnection
 from psycopg_pool import AsyncConnectionPool
 
-from service.logger import LoggerConfigurator
 from service.config import PostgreSettings
+from service.logger import LoggerConfigurator
+
 
 class PostgresClient:
-    def __init__(
-            self,
-            config: PostgreSettings,
-            logger: LoggerConfigurator
-        ):
+    def __init__(self, config: PostgreSettings, logger: LoggerConfigurator):
         self.settings = config
         self.logger = logger
 
-        self._pool:  AsyncPostgresSaver | None = None
+        self._pool: AsyncPostgresSaver | None = None
         self._lock = asyncio.Lock()
 
         self.logger.info(f"Initializing Postgres client... {id(self)}")
         self._log_config_info()
 
     def _log_config_info(self) -> None:
-        """ Show config information for Postgres """
+        """Show config information for Postgres"""
         password = self.settings.password
         password_len = len(password) if password else None
 
         if not password_len or password_len == 0:
-            self.logger.warning(f"Password not defined!")
+            self.logger.warning("Password not defined!")
         else:
             prefix = password[:2] if password_len >= 2 else ""
             suffix = password[-2:] if password_len >= 2 else ""
@@ -49,7 +46,7 @@ class PostgresClient:
         )
 
     async def ensure_pool(self) -> None:
-        """ Ensure Postgres pool is initialized
+        """Ensure Postgres pool is initialized
 
         Notes:
             Create on startup. Pull must be alive all the app timeline.
@@ -61,12 +58,12 @@ class PostgresClient:
         if self._pool is None:
             async with self._lock:
                 if self._pool is None:
-                    self.logger.info(f"Postgres.ensure_pool: Creating new Postgres pool...")
+                    self.logger.info("Postgres.ensure_pool: Creating new Postgres pool...")
                     self._pool = AsyncConnectionPool(
                         conninfo=self.config.conninfo,
                         min_size=self.config.pool_min_size,
                         max_size=self.config.pool_max_size,
-                        max_idle=self.config.pool_max_idle
+                        max_idle=self.config.pool_max_idle,
                     )
                     await self._pool.open(wait=True)
                     stats = self._pool.get_stats()
@@ -95,10 +92,7 @@ class PostgresClient:
         self.logger.debug(f"Postgres.get_user_checkpointer: {id(self)}")
         await self.ensure_pool()
 
-        conn = await self._take_conn_in_loop(
-            dead_connection_count=0,
-            max_attempts=self.settings.pool_max_size
-        )
+        conn = await self._take_conn_in_loop(dead_connection_count=0, max_attempts=self.settings.pool_max_size)
 
         if conn is None:
             self.logger.critical(

@@ -1,7 +1,9 @@
 from langfuse import Langfuse
 from langfuse.callback import CallbackHandler
+
 from service.config import LangFuseSettings
 from service.logger import LoggerConfigurator
+
 
 class LangfuseClient:
     def __init__(self, app_config: LangFuseSettings, logger: LoggerConfigurator):
@@ -45,7 +47,7 @@ class LangfuseClient:
         )
 
     async def on_startup(self) -> None:
-        """ Инициализация клиента Langfuse"""
+        """Инициализация клиента Langfuse"""
         self.logger.info("LangFuse startup")
         try:
             self.client = self.__create_client
@@ -54,9 +56,8 @@ class LangfuseClient:
         except Exception as e:
             Warning(f"LangFuse startup failed: {e}")
 
-
     def health_check(self) -> bool:
-        """ Simple health check trigger.
+        """Simple health check trigger.
 
         Return:
             True if connection exists.

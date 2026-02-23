@@ -3127,6 +3127,7 @@ dependencies = [
     { name = "rank-bm25" },
     { name = "redis" },
     { name = "scikit-learn" },
+    { name = "uvicorn" },
     { name = "watchfiles" },
     { name = "yandexcloud" },
 ]
@@ -3163,6 +3164,7 @@ requires-dist = [
     { name = "rank-bm25", specifier = "~=0.2.2" },
     { name = "redis", specifier = "~=7.0.1" },
     { name = "scikit-learn", specifier = ">=1.8.0" },
+    { name = "uvicorn", specifier = ">=0.40.0" },
     { name = "watchfiles", specifier = "==1.1.0" },
     { name = "yandexcloud", specifier = "==0.373.0" },
 ]

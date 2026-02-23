@@ -7,8 +7,7 @@ from agents.profkom_consultant import UnionAgent
 from agents.profkom_consultant.states import AgentState, AgentStatus
 
 
-def build_builder(agent: UnionAgent,
-                  checkpointer: MemorySaver | AsyncPostgresSaver | None) -> CompiledStateGraph:
+def build_builder(agent: UnionAgent, checkpointer: MemorySaver | AsyncPostgresSaver | None) -> CompiledStateGraph:
     r"""Создаем граф профсоюзного агента
 
     Notes:

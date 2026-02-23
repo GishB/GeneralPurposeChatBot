@@ -5,10 +5,11 @@
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from langchain_openai import ChatOpenAI
-from agents.profkom_consultant import build_builder, AgentStatus
 from langgraph.checkpoint.memory import MemorySaver
-from service.context import APP_CTX
+
+from agents.profkom_consultant import AgentStatus, build_builder
 from service.config import APP_CONFIG
+from service.context import APP_CTX
 
 from . import schemas
 from .schemas import AgentChatRequest, AgentChatResponse, FailedDependecyResponse, YandexGPTAPITestResponse
@@ -17,46 +18,43 @@ from .utils import common_headers
 router = APIRouter()
 logger = APP_CTX.get_logger()
 
-@router.post("/test_invoke",
-             status_code=status.HTTP_200_OK,
-             response_model=YandexGPTAPITestResponse,
-             responses=\
-                     {
-                        status.HTTP_424_FAILED_DEPENDENCY: \
-                        {
-                         "description": "Ошибка при попытке обратиться к YandexGPTAPI",
-                         "model": schemas.FailedDependecyResponse
-                        },
-                    },
-             )
-async def yandex_gptapi_test(
-        request: schemas.YandexGPTAPITestRequest,
-        headers: dict = Depends(common_headers),
-        yandexgpt_base_params = Depends(APP_CTX.get_yandexgpt_base_params),
-):
-        yandexgpt_client = ChatOpenAI(**yandexgpt_base_params)
-        logger.debug(f"Generation an answer based on the givern question... "
-                    f"for {headers.get('header_x_user_id')}")
-        try:
-            answer = yandexgpt_client.invoke(request.question)
-            logger.debug(f"Generated answer: {answer}")
-        except Exception as e:
-            logger.error(f"Generation an answer failed with exception: {e}")
-            return JSONResponse(
-                status_code=status.HTTP_424_FAILED_DEPENDENCY,
-                content=FailedDependecyResponse(error_description=str(e)).model_dump(),
-            )
-        return schemas.YandexGPTAPITestResponse(answer=answer.content)
 
-@router.post("/chat",
-             status_code=status.HTTP_200_OK,
-             response_model=AgentChatResponse
+@router.post(
+    "/test_invoke",
+    status_code=status.HTTP_200_OK,
+    response_model=YandexGPTAPITestResponse,
+    responses={
+        status.HTTP_424_FAILED_DEPENDENCY: {
+            "description": "Ошибка при попытке обратиться к YandexGPTAPI",
+            "model": schemas.FailedDependecyResponse,
+        },
+    },
 )
-async def chat(
-        request: AgentChatRequest,
-        headers: dict = Depends(common_headers),
+async def yandex_gptapi_test(
+    request: schemas.YandexGPTAPITestRequest,
+    headers: dict = Depends(common_headers),
+    yandexgpt_base_params=Depends(APP_CTX.get_yandexgpt_base_params),
 ):
-    """ Обработка входящих запросов к API агента.
+    yandexgpt_client = ChatOpenAI(**yandexgpt_base_params)
+    logger.debug(f"Generation an answer based on the givern question... for {headers.get('header_x_user_id')}")
+    try:
+        answer = yandexgpt_client.invoke(request.question)
+        logger.debug(f"Generated answer: {answer}")
+    except Exception as e:
+        logger.error(f"Generation an answer failed with exception: {e}")
+        return JSONResponse(
+            status_code=status.HTTP_424_FAILED_DEPENDENCY,
+            content=FailedDependecyResponse(error_description=str(e)).model_dump(),
+        )
+    return schemas.YandexGPTAPITestResponse(answer=answer.content)
+
+
+@router.post("/chat", status_code=status.HTTP_200_OK, response_model=AgentChatResponse)
+async def chat(
+    request: AgentChatRequest,
+    headers: dict = Depends(common_headers),
+):
+    """Обработка входящих запросов к API агента.
 
     Args:
         request: Входящий запрос от пользователя с полезной нагрузкой;
@@ -65,27 +63,24 @@ async def chat(
     logger.debug(f"Длина запроса на входе: {len(request.text)}")
 
     agent_payload = {
-        "user_id": headers.get('x-user-id'),
+        "user_id": headers.get("x-user-id"),
         "text": request.organisation + "|" + request.text,
         "status": AgentStatus.ACTIVE,
     }
 
     try:
         # async with APP_CTX.postgres.get_user_checkpointer() as checkpointer:
-        agent_graph = build_builder(
-            agent=APP_CTX.get_agent(),
-            checkpointer=MemorySaver()
-        )
+        agent_graph = build_builder(agent=APP_CTX.get_agent(), checkpointer=MemorySaver())
 
         langfuse = await APP_CTX.get_langfuse()
 
-        config={
-            "configurable": {"thread_id": headers.get('x-user-id')},
+        config = {
+            "configurable": {"thread_id": headers.get("x-user-id")},
             "callbacks": [langfuse.handler],
             "metadata": {
                 "stage": APP_CONFIG.app.stage,
-                "langfuse_session_id": headers.get('x-trace-id'),
-                "langfuse_user_id": headers.get('x-user-id'),
+                "langfuse_session_id": headers.get("x-trace-id"),
+                "langfuse_user_id": headers.get("x-user-id"),
             },
         }
 
@@ -97,13 +92,11 @@ async def chat(
         return AgentChatResponse(response=result["final_answer"])
 
     except Exception as e:
-        logger.critical\
-        (
-                f"""Ошибка агента:
-                 [user_id={headers.get('x-user-id')}],
-                 [session_id = {headers.get('x-trace-id')}]
-                 [source_id = {headers.get('x-source-id')}]
+        logger.critical(
+            f"""Ошибка агента:
+                 [user_id={headers.get("x-user-id")}],
+                 [session_id = {headers.get("x-trace-id")}]
+                 [source_id = {headers.get("x-source-id")}]
                  {e}
                 """
         )
-

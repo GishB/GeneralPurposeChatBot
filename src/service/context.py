@@ -2,35 +2,30 @@ import pytz
 from langchain_community.embeddings.yandex import YandexGPTEmbeddings
 from langchain_openai import ChatOpenAI
 
+from agents.profkom_consultant import UnionAgent
+from modules.chroma_ext import ChromaAdapter
+from modules.langfuse_ext import LangfuseClient
+from modules.postgres_ext import PostgresClient
+from modules.redis_ext import RedisAdapter
 from service.base import Singleton
 from service.config import APP_CONFIG, Secrets
 from service.logger import ContextVarsContainer, LoggerConfigurator
-from modules.langfuse_ext import LangfuseClient
-from modules.chroma_ext import ChromaAdapter
-from modules.redis_ext import RedisAdapter
-from modules.postgres_ext import PostgresClient
-from agents.profkom_consultant import UnionAgent
+
 
 class AppContext(metaclass=Singleton):
     @property
     def profkom_agent(self):
         return UnionAgent(
-                   logger=self.logger,
-                   llms=\
-                       {
-                           "default": ChatOpenAI(**self.get_yandexgpt_base_params())
-                       },
-                   cache=self.redis_ext,
-                   langfuse_client=self.langfuse_ext.client,
-                   chroma_client=self.chroma_ext,
-                   )
+            logger=self.logger,
+            llms={"default": ChatOpenAI(**self.get_yandexgpt_base_params())},
+            cache=self.redis_ext,
+            langfuse_client=self.langfuse_ext.client,
+            chroma_client=self.chroma_ext,
+        )
 
     @property
     def postgres_ext(self):
-        return PostgresClient (
-                logger=self.logger,
-                config=self._postgres_base_params
-        )
+        return PostgresClient(logger=self.logger, config=self._postgres_base_params)
 
     @property
     def logger(self):
@@ -38,49 +33,40 @@ class AppContext(metaclass=Singleton):
 
     @property
     def langfuse_ext(self):
-        return LangfuseClient\
-                (
-                app_config=self._langfuse_base_params,
-                logger=self.logger,
-                )
+        return LangfuseClient(
+            app_config=self._langfuse_base_params,
+            logger=self.logger,
+        )
 
     @property
     def chroma_ext(self):
-        return ChromaAdapter \
-            (
+        return ChromaAdapter(
             logger=self.logger,
-            similarity_filter= self._chroma_base_params.similarity_filter_score,
+            similarity_filter=self._chroma_base_params.similarity_filter_score,
             **{
-                "API_KEY":  self._chroma_base_params.openai_api_key,
-                "FOLDER_ID":  self._chroma_base_params.openai_folder_id,
-                "CHROMA_MAX_RAG_DOCUMENTS": self._chroma_base_params.chroma_max_rag_documents}
-            )
+                "API_KEY": self._chroma_base_params.openai_api_key,
+                "FOLDER_ID": self._chroma_base_params.openai_folder_id,
+                "CHROMA_MAX_RAG_DOCUMENTS": self._chroma_base_params.chroma_max_rag_documents,
+                "CHROMA_HOST": self._chroma_base_params.host,
+                "CHROMA_PORT": self._chroma_base_params.port,
+            },
+        )
 
     @property
     def yandexgpt_embeddings_client(self):
-        return YandexGPTEmbeddings \
-            (
-                folder_id=self._yandexgpt_base_params.openai_folder_id,
-                iam_token=self._yandexgpt_base_params.openai_api_key
-            )
+        return YandexGPTEmbeddings(
+            folder_id=self._yandexgpt_base_params.openai_folder_id, iam_token=self._yandexgpt_base_params.openai_api_key
+        )
 
     @property
     def redis_ext(self):
-        return RedisAdapter\
-            (
-             logger = self.logger,
-             embeddings = self.yandexgpt_embeddings_client,
-             redis_url = self._redis_base_params.redis_url,
-             redis_threshold = self._redis_base_params.redis_threshold,
-             redis_ttl = self._redis_base_params.redis_ttl
-             )
-
-    @property
-    def postgres_ext(self):
-        return PostgresClient\
-            (
+        return RedisAdapter(
             logger=self.logger,
-            )
+            embeddings=self.yandexgpt_embeddings_client,
+            redis_url=self._redis_base_params.redis_url,
+            redis_threshold=self._redis_base_params.redis_threshold,
+            redis_ttl=self._redis_base_params.redis_ttl,
+        )
 
     def __init__(self, secrets: Secrets):
         self.timezone = pytz.timezone(secrets.app.timezone)
@@ -101,7 +87,6 @@ class AppContext(metaclass=Singleton):
         self._chroma_base_params = secrets.chroma
         self._yandexgpt_base_params = secrets.llm
         self._redis_base_params = secrets.redis
-
 
         self._langfuse_client: LangfuseClient | None = None
         self._chroma_client: ChromaAdapter | None = None
@@ -139,7 +124,7 @@ class AppContext(metaclass=Singleton):
         return self._yandexgpt_embeddings
 
     def get_agent(self) -> UnionAgent:
-        """ Simple get for Agent Graph.
+        """Simple get for Agent Graph.
 
         Returns:
             Compiled Agent Graph.

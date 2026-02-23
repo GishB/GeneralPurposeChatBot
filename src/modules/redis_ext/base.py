@@ -63,5 +63,5 @@ class RedisAdapter:
         return None
 
     def health_check(self) -> bool:
-        """ Simple health check """
+        """Simple health check"""
         return True

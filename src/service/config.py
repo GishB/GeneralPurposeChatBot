@@ -1,11 +1,11 @@
 import os
 from logging import DEBUG, INFO
 
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings
 
-load_dotenv("../../.env")
+load_dotenv(find_dotenv())
 
 
 class BaseAppSettings(BaseSettings):
@@ -101,13 +101,12 @@ class YandexGPTSettings(BaseAppSettings):
 
     @property
     def base_params(self):
-        return \
-            {
-                "model": self.model,
-                "temperature": self.temperature,
-                "openai_api_key": self.openai_api_key,
-                "openai_api_base": self.openai_api_base,
-            }
+        return {
+            "model": self.model,
+            "temperature": self.temperature,
+            "openai_api_key": self.openai_api_key,
+            "openai_api_base": self.openai_api_base,
+        }
 
 
 class LangFuseSettings(BaseAppSettings):
@@ -126,6 +125,8 @@ class ChromaSettings(BaseAppSettings):
     Для работы с векторной базой данных.
     """
 
+    host: str = Field(validation_alias="CHROMA_HOST", default="127.0.0.1")
+    port: int = Field(validation_alias="CHROMA_PORT", default=443)
     similarity_filter_score: float = Field(validation_alias="SIMILARITY_FILTER", default=1.5)
     openai_api_key: str = Field(validation_alias="OPENAI_API_KEY", default=None)
     openai_folder_id: str = Field(validation_alias="OPENAI_FOLDER_ID", default=None)
@@ -152,6 +153,7 @@ class ChromaSettings(BaseAppSettings):
     @property
     def query_model_uri(self):
         return f"emb://{self.folder_id}/text-search-query/latest"
+
 
 class PostgreSettings(BaseAppSettings):
     user: str = Field(validation_alias="PG_USER", default="postgres")
@@ -188,9 +190,15 @@ class PostgreSettings(BaseAppSettings):
 
 
 class RedisSettings(BaseAppSettings):
-    redis_url: str = Field(validation_alias="REDIS_URL", default="redis://127.0.0.1:6379")
+    port: int = Field(validation_alias="REDIS_PORT", default=6379)
+    host: str = Field(validation_alias="REDIS_HOST", default="127.0.0.1")
+
     redis_threshold: float = Field(validation_alias="REDIS_THRESHOLD", default=0.05)
     redis_ttl: int = Field(validation_alias="REDIS_TTL", default=3600)
+
+    @property
+    def redis_url(self):
+        return f"redis://{self.host}:{self.port}"
 
 
 class Secrets:

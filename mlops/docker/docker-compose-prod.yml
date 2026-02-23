@@ -4,6 +4,10 @@ services:
   chatbot:
     image: gishb/union-chatbot:latest
     deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
       resources:
         limits:
           cpus: '2.0'
@@ -11,23 +15,20 @@ services:
         reservations:
           cpus: '1.0'
           memory: 1G
-    volumes:
-      - ./prompts:/app/prompts
     expose:
       - "32000"
-    environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - CHROMA_HOST=chromadb
-      - CHROMA_PORT=8000
     env_file:
-      - .env.prod
+      - /opt/unionchatbot/.env.prod
     networks:
       - app-network
 
   redis:
-    image: redis:latest
+    image: redis:7-alpine
     deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
       resources:
         limits:
           cpus: '1.0'
@@ -47,6 +48,10 @@ services:
   chromadb:
     image: chromadb/chroma:latest
     deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
       resources:
         limits:
           cpus: '1.0'
@@ -66,6 +71,10 @@ services:
   nginx:
     image: nginx:1.23-alpine
     deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
       resources:
         limits:
           cpus: '1.0'    # Максимум 1 ядро
