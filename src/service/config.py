@@ -89,6 +89,7 @@ class YandexGPTSettings(BaseAppSettings):
 
     model_name: str = Field(validation_alias="MODEL_NAME", default="yandexgpt")
     temperature: float = Field(validation_alias="TEMPERATURE", default=0.1)
+    max_retries: int = Field(validation_alias="LLM_MAX_RETRIES", default=5)
     # profanity_check: bool = Field(validation_alias="PROFANCIE_CHECK", default=False)
 
     openai_api_key: str = Field(validation_alias="OPENAI_API_KEY", default=None)
@@ -106,6 +107,8 @@ class YandexGPTSettings(BaseAppSettings):
             "temperature": self.temperature,
             "openai_api_key": self.openai_api_key,
             "openai_api_base": self.openai_api_base,
+            "max_retries": self.max_retries,
+
         }
 
 
@@ -136,7 +139,11 @@ class ChromaSettings(BaseAppSettings):
         validation_alias="EMBEDDING_API",
         default="https://llm.api.cloud.yandex.net:443/foundationModels/v1/textEmbedding",
     )
-    time_sleep: float = Field(validation_alias="TIME_SLEEP_RATE_EMBEDDER", default=0.01)
+    time_sleep: float = Field(validation_alias="TIME_SLEEP_RATE_EMBEDDER", default=0.1)
+    max_retries: int = Field(validation_alias="CHROMA_MAX_RETRIES", default=5)
+    request_timeout: float = Field(validation_alias="CHROMA_REQUEST_TIMEOUT", default=1)
+    batch_size: int = Field(validation_alias="CHROMA_BATCH_SIZE", default=16)
+    sleep_between_batches: int = Field(validation_alias="CHROMA_SLEEP_BETWEEN_BATCHES", default=2)
 
     @property
     def header(self):
@@ -169,6 +176,8 @@ class PostgreSettings(BaseAppSettings):
     pool_max_idle: int = Field(validation_alias="POOL_MAXIDLE", default=60)
     keepalive_interval: int = Field(validation_alias="KEEPALIVE_INTERVAL", default=60)
     keepalive_count: int = Field(validation_alias="KEEPALIVE_COUNT", default=5)
+
+    history_limit: int = Field(validation_alias="HISTORY_LIMIT", default=10)
 
     @property
     def encoded_pass(self) -> str:

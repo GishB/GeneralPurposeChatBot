@@ -21,6 +21,9 @@ class AppContext(metaclass=Singleton):
             cache=self.redis_ext,
             langfuse_client=self.langfuse_ext.client,
             chroma_client=self.chroma_ext,
+            **{"COLLECTION_NAME": self._chroma_base_params.collection_name,
+               "HISTORY_LIMIT": self._postgres_base_params.history_limit
+               },
         )
 
     @property

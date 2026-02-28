@@ -2,6 +2,7 @@ import asyncio
 import re
 from typing import Any
 
+from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 
 from agents.profkom_consultant.states import AgentState
@@ -36,6 +37,22 @@ class UnionAgent(BaseAgentNodes, ThinkTwiceNodes):
 
         self.logger.info(f"HISTORY_LIMIT: {self.HISTORY_LIMIT}")
         self.logger.info(f"COLLECTION_NAME: {self.COLLECTION_NAME}")
+
+    async def _detect_topics_for_question(self, question: str) -> str:
+        """ Detects topics based on question.
+
+        Args:
+            question: specific user simple question.
+
+        Returns:
+            Relevant topic.
+        """
+        prompt = self.langfuse_client.get_prompt("topic_choose_router").get_langchain_prompt()
+        prompt = ChatPromptTemplate.from_template(prompt)
+        chain = prompt | self.llm
+        response = await chain.ainvoke({"question": question})
+        return response.content.strip()
+
 
     async def decompose_question(self, state: AgentState) -> None | dict[str, Any] | dict[str, list[Any]]:
         """Декомпозируем предложение пользователя на отдельные задачи.
@@ -94,15 +111,19 @@ class UnionAgent(BaseAgentNodes, ThinkTwiceNodes):
         chain = prompt | self.llm
 
         async def call_llm(part: str) -> str:
+            self.logger.info(f"Calling {part}")
             async with semaphore:
                 cached_result = self.cache.get(meta_info="answer_parts_async", query=part)
                 if cached_result:
                     return cached_result.get("json").get("answer")
                 else:
+                    topic = await self._detect_topics_for_question(part)
+                    self.logger.info(f"Topic: {topic}")
                     retrived_data = await asyncio.to_thread(
                         self.chorma_client.get_info,
                         query=part,
                         collection_name=self.COLLECTION_NAME,
+                        topics=[topic]
                     )
                     html_data = retrived_data.to_html()
                     result = await chain.ainvoke({"text": part, "rag": html_data})

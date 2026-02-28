@@ -18,12 +18,12 @@ class BaseAgentNodes:
         try:
             cached_result = self.cache.get(meta_info="validate_input", query=question)
             if cached_result:
-                self.logger.info(f"Cached result {cached_result}")
+                self.logger.debug(f"Cached result {cached_result}")
                 state["is_valid"] = cached_result.get("json").get("is_valid")
                 state["final_answer"] = cached_result.get("json").get("final_answer")
                 return state
             else:
-                self.logger.info(f"Cached result {cached_result}")
+                self.logger.debug(f"Cached result {cached_result}")
                 prompt = ChatPromptTemplate.from_template(
                     self.langfuse_client.get_prompt("policy_validation").get_langchain_prompt()
                 )
@@ -41,7 +41,7 @@ class BaseAgentNodes:
                 state["final_answer"] = cache_data["final_answer"]
 
             state["is_valid"] = is_valid
-            self.logger.info(f"is_valid: {is_valid}")
+            self.logger.debug(f"is_valid: {is_valid}")
             self.cache.save(meta_info="validate_input", query=question, output="", json_data=cache_data)
             return state
 

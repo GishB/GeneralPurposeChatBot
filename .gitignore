@@ -14,3 +14,4 @@ UnionChatBot.egg-info
 /build/
 *.md
 *.docx
+*.txt

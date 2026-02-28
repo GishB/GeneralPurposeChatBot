@@ -2,6 +2,7 @@ from typing import Any, Dict, List
 
 import chromadb
 import pandas as pd
+from chromadb import QueryResult
 
 from service.logger import LoggerConfigurator
 
@@ -83,7 +84,24 @@ class ChromaAdapter:
         self.logger.debug("embedding_function initialized")
         return self._embedding_function
 
-    def get_info_from_db(self, query: str, collection_name: str, n_results: int = 30, **kwargs) -> Dict[str, Any]:
+    def get_info_from_db(self,
+                         query: str,
+                         collection_name: str,
+                         n_results: int = 30,
+                         where: dict | None = None,
+                         **kwargs) -> QueryResult:
+        """ Extract semantic information from database
+
+        Args:
+            query: specific user question
+            collection_name: specific collection name
+            n_results: number of relevant results
+            where: filter topic
+            **kwargs:
+
+        Returns:
+            relevant documents
+        """
         self.logger.debug(f"get_info_from_db called for {collection_name}")
         collection = self.client.get_collection(name=collection_name, embedding_function=self.embedding_function)
 
@@ -91,10 +109,11 @@ class ChromaAdapter:
             query_texts=[query],
             n_results=n_results,
             include=["documents", "metadatas", "distances"],
+            where=where,
         )
 
     def get_filtered_documents(self, data_raw: Dict[str, Any]) -> dict:
-        self.logger.info(f"get_filtered_documents: documents number {len(data_raw['documents'])}")
+        self.logger.debug(f"get_filtered_documents: documents number {len(data_raw['documents'])}")
         distances = data_raw["distances"][0]  # Берем первый элемент, так как query_texts=[query]
         documents = data_raw["documents"][0]
         metadatas = data_raw["metadatas"][0]
@@ -109,24 +128,36 @@ class ChromaAdapter:
         }
 
     def get_pairs(self, query: str, documents: List[str]) -> List[List[str]]:
-        self.logger.info(f"called get_pairs for {query}")
+        self.logger.debug(f"called get_pairs for {query}")
         return [[query, doc] for doc in documents]
 
     def apply_reranker(self, query, documents):
-        self.logger.info(f"called apply_reranker for {query}")
+        self.logger.debug(f"called apply_reranker for {query}")
         if self.reranker_type == "bm25":
             self.reranker.fit(documents)
             return self.reranker.rerank(query=query, top_k=self.topk_documents)
         return None
 
-    def get_info(self, query: str, collection_name: str) -> pd.DataFrame:
+    def get_info(self,
+                 query: str,
+                 collection_name: str,
+                 topics: list[str] | None = None) -> pd.DataFrame:
         # TO DO: фильтрация по метаданным и потом только query!
-        self.logger.info(f"called {query} in get_info for {collection_name}")
+        self.logger.debug(f"called {query} in get_info for {collection_name} and topics {topics}")
+
+        where = None
+        if topics:
+            # один topic можно передать прямо строкой, несколько — через $in
+            if len(topics) == 1:
+                where = {"topic": topics[0]}
+            else:
+                where = {"topic": {"$in": topics}}
 
         data_raw = self.get_info_from_db(
             query=query,
             collection_name=collection_name,
             n_results=self.max_rag_documents,
+            where=where,
         )
         filtered_documents = self.get_filtered_documents(data_raw)
 
@@ -140,7 +171,7 @@ class ChromaAdapter:
             )
 
         idx_relevant_documents = self.apply_reranker(query=query, documents=filtered_documents["documents"])
-        self.logger.info(f"Finished get_info for {query} returned {len(idx_relevant_documents)} documents")
+        self.logger.debug(f"Finished get_info for {query} returned {len(idx_relevant_documents)} documents")
         return pd.DataFrame.from_dict(
             data={
                 "documents": [filtered_documents["documents"][idx] for idx in idx_relevant_documents],
