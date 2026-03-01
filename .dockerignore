@@ -12,6 +12,10 @@
 /build/
 /nginx/
 
+# Игнорируем проектные файлы
+mlops/
+experiments/
+
 # Игнорируем временные файлы IDE
 .idea
 .vscode

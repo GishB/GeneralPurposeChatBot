@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  chatbot:
+    image: union-chatbot:latest
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+    expose:
+      - "32000"
+    env_file:
+      - /opt/unionchatbot/.env.prod
+    networks:
+      - app-network
+
+  redis:
+    image: redis:7-alpine
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+    expose:
+      - "6379"
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - app-network
+
+  chromadb:
+    image: chromadb/chroma:1.5.2
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+    expose:
+      - "8000"
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - chroma_data:/data
+    networks:
+      - app-network
+
+  postgres_test:
+    image: postgres:15-alpine
+    container_name: postgres_test
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    expose:
+      - "5432"
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pg_test_data:/var/lib/postgresql/data
+
+volumes:
+  redis_data:
+  chroma_data:
+  pg_test_data:
+
+
+networks:
+  app-network:
+    driver: bridge
