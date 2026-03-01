@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -uo pipefail
 SRC="$1"
 TGT="$2"
 mkdir -p "$TGT"
