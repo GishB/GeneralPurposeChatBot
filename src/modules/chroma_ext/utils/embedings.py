@@ -1,14 +1,13 @@
 import os
 import time
-from typing import Any
+from itertools import islice
+from typing import Any, Iterable
 
 import numpy as np
 import requests
-
-from itertools import islice
-from typing import Iterable
-from requests.exceptions import ConnectTimeout, ReadTimeout, Timeout
 from chromadb import Documents, EmbeddingFunction, Embeddings
+from requests.exceptions import ConnectTimeout, ReadTimeout, Timeout
+
 from service.logger import LoggerConfigurator
 
 
@@ -102,28 +101,20 @@ class MyEmbeddingFunction(EmbeddingFunction):
                     continue
 
                 # Остальные 4xx — логическая ошибка, ретраить нет смысла
-                self.logger.error(
-                    f"Embedding request failed: status={resp.status_code}, "
-                    f"body={resp.text[:500]!r}"
-                )
+                self.logger.error(f"Embedding request failed: status={resp.status_code}, body={resp.text[:500]!r}")
                 self.logger.error(f"Model URI: {model_uri}")
                 self.logger.error(f"Text length: {len(text)}")
                 resp.raise_for_status()
 
             except (ConnectTimeout, ReadTimeout, Timeout) as e:
-                self.logger.warning(
-                    f"Embedding timeout on attempt {attempt}/{self.max_retries}: {e}"
-                )
+                self.logger.warning(f"Embedding timeout on attempt {attempt}/{self.max_retries}: {e}")
                 if attempt == self.max_retries:
                     raise
                 backoff = self.time_sleep * (2**attempt)
                 time.sleep(backoff)
 
         # Если все попытки не удались, явно падаем
-        raise RuntimeError(
-            f"Failed to get embedding after {self.max_retries} attempts "
-            f"for text of length {len(text)}"
-        )
+        raise RuntimeError(f"Failed to get embedding after {self.max_retries} attempts for text of length {len(text)}")
 
     @staticmethod
     def _batched(iterable: Iterable[str], n: int):
@@ -131,7 +122,6 @@ class MyEmbeddingFunction(EmbeddingFunction):
         it = iter(iterable)
         while batch := list(islice(it, n)):
             yield batch
-
 
     def __call__(self, input: Documents) -> Embeddings:
         if isinstance(input, str):
@@ -143,12 +133,9 @@ class MyEmbeddingFunction(EmbeddingFunction):
             if batch_idx != 0:
                 time.sleep(self.sleep_between_batches)
 
-            self.logger.info(
-                f"Embedding batch {batch_idx}, size={len(batch)}"
-            )
+            self.logger.info(f"Embedding batch {batch_idx}, size={len(batch)}")
             for text in batch:
                 emb = self._get_single_embedding(text)
                 embeddings.append(emb)
 
         return np.array(embeddings)
-

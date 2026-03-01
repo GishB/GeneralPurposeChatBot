@@ -5,8 +5,8 @@
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from langchain_openai import ChatOpenAI
-# from langgraph.checkpoint.memory import MemorySaver
 
+# from langgraph.checkpoint.memory import MemorySaver
 from agents.profkom_consultant import AgentStatus, build_builder
 from service.config import APP_CONFIG
 from service.context import APP_CTX
@@ -77,26 +77,17 @@ async def chat(
 
                 langfuse = await APP_CTX.get_langfuse()
 
-                config = \
-                {
-                    "configurable": \
-                        {
-                            "thread_id": headers.get("x-user-id")
-                        },
-                    "callbacks": \
-                        [
-                            langfuse.handler
-                        ],
-                    "metadata": \
-                    {
+                config = {
+                    "configurable": {"thread_id": headers.get("x-user-id")},
+                    "callbacks": [langfuse.handler],
+                    "metadata": {
                         "stage": APP_CONFIG.app.stage,
                         "langfuse_session_id": headers.get("x-trace-id"),
                         "langfuse_user_id": headers.get("x-user-id"),
                     },
                 }
 
-                result = await agent_graph.ainvoke\
-                (
+                result = await agent_graph.ainvoke(
                     input=agent_payload,
                     config=config,
                 )
@@ -114,9 +105,8 @@ async def chat(
             )
     else:
         ttl = rate_limiter.ttl(user_id=headers.get("x-user-id"))
-        return AgentChatResponse\
-            (
-            response=f"""
-            Вы превысили свой лимит обращений к профсоюзному консультанту. 
-            Возврашайтесь снова через {ttl}.
-            """)
+        return AgentChatResponse(
+            response=f""" Вы превысили свой лимит обращений к профсоюзному консультанту. \n
+            Возврашайтесь снова через {ttl} секунд.
+            """
+        )

@@ -133,6 +133,7 @@ class PostgresClient:
     def health_check(self) -> bool:
         return True if self._pool else False
 
+
 if __name__ == "__main__":
     from service.context import APP_CTX
 

@@ -108,7 +108,6 @@ class YandexGPTSettings(BaseAppSettings):
             "openai_api_key": self.openai_api_key,
             "openai_api_base": self.openai_api_base,
             "max_retries": self.max_retries,
-
         }
 
 
@@ -182,6 +181,7 @@ class PostgreSettings(BaseAppSettings):
     @property
     def encoded_pass(self) -> str:
         from urllib.parse import quote_plus
+
         return quote_plus(self.password)
 
     @property
@@ -208,7 +208,6 @@ class RedisSettings(BaseAppSettings):
     user_counter_limit: int = Field(validation_alias="USER_COUNTER_LIMIT", default=10)
     user_ttl_limit: int = Field(validation_alias="USER_TTL_LIMIT", default=84000)
     rate_limit_template: str = Field(validation_alias="RATE_LIMIT_TEMPLATE", default="msg_count:{user_id}")
-
 
     @property
     def redis_url(self):

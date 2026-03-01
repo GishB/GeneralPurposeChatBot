@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from pathlib import Path
 from typing import List
 
 import chromadb
 
-from pathlib import Path
-from service.logger import LoggerConfigurator
 from modules.chroma_ext.utils import MyEmbeddingFunction
+from service.logger import LoggerConfigurator
+
 from .data_reader import DocumentChunk, load_docx_with_metadata
 
 
@@ -18,15 +19,14 @@ def _group_by_source(chunks: List[DocumentChunk]):
         by_source[source].append(ch)
     return by_source
 
+
 def _collect_current_sources(root_dir: str) -> set[str]:
     root = Path(root_dir)
     return {str(p) for p in root.rglob("*.docx")}
 
+
 def sync_docx_directory_to_collection(
-    logger: LoggerConfigurator,
-    root_dir: str,
-    collection_name: str,
-    **kwargs
+    logger: LoggerConfigurator, root_dir: str, collection_name: str, **kwargs
 ) -> None:
     """Синхронизирует все .docx из root_dir в коллекцию Chroma.
 
@@ -103,11 +103,7 @@ def sync_docx_directory_to_collection(
         metas = [ch.metadata for ch in file_chunks]
 
         logger.info(f"  -> adding {len(ids)} chunks")
-        collection.add(
-            ids=ids,
-            documents=docs,
-            metadatas=metas
-        )
+        collection.add(ids=ids, documents=docs, metadatas=metas)
 
     current_sources = _collect_current_sources(root_dir)
     logger.info(f"Current sources on disk: {len(current_sources)}")

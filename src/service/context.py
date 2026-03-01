@@ -24,7 +24,6 @@ class AppContext(metaclass=Singleton):
             USER_QUERY_LIMIT_N=self._redis_base_params.user_counter_limit,
         )
 
-
     @property
     def profkom_agent(self):
         return UnionAgent(
@@ -33,9 +32,10 @@ class AppContext(metaclass=Singleton):
             cache=self.redis_ext,
             langfuse_client=self.langfuse_ext.client,
             chroma_client=self.chroma_ext,
-            **{"COLLECTION_NAME": self._chroma_base_params.collection_name,
-               "HISTORY_LIMIT": self._postgres_base_params.history_limit
-               },
+            **{
+                "COLLECTION_NAME": self._chroma_base_params.collection_name,
+                "HISTORY_LIMIT": self._postgres_base_params.history_limit,
+            },
         )
 
     @property
@@ -69,10 +69,8 @@ class AppContext(metaclass=Singleton):
 
     @property
     def yandexgpt_embeddings_client(self):
-        return YandexGPTEmbeddings\
-        (
-            folder_id=self._yandexgpt_base_params.openai_folder_id,
-            iam_token=self._yandexgpt_base_params.openai_api_key
+        return YandexGPTEmbeddings(
+            folder_id=self._yandexgpt_base_params.openai_folder_id, iam_token=self._yandexgpt_base_params.openai_api_key
         )
 
     @property

@@ -84,13 +84,10 @@ class ChromaAdapter:
         self.logger.debug("embedding_function initialized")
         return self._embedding_function
 
-    def get_info_from_db(self,
-                         query: str,
-                         collection_name: str,
-                         n_results: int = 30,
-                         where: dict | None = None,
-                         **kwargs) -> QueryResult:
-        """ Extract semantic information from database
+    def get_info_from_db(
+        self, query: str, collection_name: str, n_results: int = 30, where: dict | None = None, **kwargs
+    ) -> QueryResult:
+        """Extract semantic information from database
 
         Args:
             query: specific user question
@@ -138,10 +135,7 @@ class ChromaAdapter:
             return self.reranker.rerank(query=query, top_k=self.topk_documents)
         return None
 
-    def get_info(self,
-                 query: str,
-                 collection_name: str,
-                 topics: list[str] | None = None) -> pd.DataFrame:
+    def get_info(self, query: str, collection_name: str, topics: list[str] | None = None) -> pd.DataFrame:
         # TO DO: фильтрация по метаданным и потом только query!
         self.logger.debug(f"called {query} in get_info for {collection_name} and topics {topics}")
 

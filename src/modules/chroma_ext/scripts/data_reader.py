@@ -10,9 +10,11 @@ import docx2txt
 
 from service.logger import LoggerConfigurator
 
+
 @dataclass
 class DocumentChunk:
     """Один чанк документа, готовый для записи в Chroma."""
+
     id: str
     text: str
     metadata: dict[str, Any]
@@ -89,7 +91,7 @@ def load_docx_with_metadata(
     chunks: List[DocumentChunk] = []
 
     logger.debug("Loading docx with metadata...")
-    for path in root.rglob("*.docx"): # TO DO: tqdm
+    for path in root.rglob("*.docx"):  # TO DO: tqdm
         full_text = _read_docx(path)
         if not full_text:
             continue
@@ -117,12 +119,14 @@ def load_docx_with_metadata(
 
             # ВАЖНО: препендим топик в начало чанка
             if topic_prefix:
-                chunk_text = ("# Титульный текст документа: \n\n" +
-                              topic_prefix +
-                              "\n\n" +
-                              "## Часть текста по документу: \n\n" +
-                              base_chunk_text + "\n\n"
-                              )
+                chunk_text = (
+                    "# Титульный текст документа: \n\n"
+                    + topic_prefix
+                    + "\n\n"
+                    + "## Часть текста по документу: \n\n"
+                    + base_chunk_text
+                    + "\n\n"
+                )
             else:
                 chunk_text = base_chunk_text
 

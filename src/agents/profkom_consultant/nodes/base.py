@@ -25,7 +25,7 @@ class BaseAgentNodes:
             else:
                 self.logger.debug(f"Cached result {cached_result}")
                 prompt = ChatPromptTemplate.from_template(
-                    self.langfuse_client.get_prompt("policy_validation").get_langchain_prompt() # TO DO: FIX
+                    self.langfuse_client.get_prompt("policy_validation").get_langchain_prompt()  # TO DO: FIX
                 )
                 chain = prompt | self.llm
                 output = await chain.ainvoke({"text": state["text"]})

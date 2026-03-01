@@ -1,5 +1,7 @@
-import redis
 from typing import Tuple
+
+import redis
+
 
 class UserRateLimiter:
     """
@@ -83,7 +85,7 @@ class UserRateLimiter:
         return self.redis.ttl(key)
 
     def health_check(self) -> bool:
-        """ Simple ping check
+        """Simple ping check
 
         Returns:
             check that redis is healthy
