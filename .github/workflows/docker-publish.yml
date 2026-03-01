@@ -31,6 +31,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          file: ./mlops/docker/Dockerfile
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/union-chatbot:${{ steps.tag.outputs.VERSION }}
