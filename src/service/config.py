@@ -205,6 +205,11 @@ class RedisSettings(BaseAppSettings):
     redis_threshold: float = Field(validation_alias="REDIS_THRESHOLD", default=0.05)
     redis_ttl: int = Field(validation_alias="REDIS_TTL", default=3600)
 
+    user_counter_limit: int = Field(validation_alias="USER_COUNTER_LIMIT", default=10)
+    user_ttl_limit: int = Field(validation_alias="USER_TTL_LIMIT", default=84000)
+    rate_limit_template: str = Field(validation_alias="RATE_LIMIT_TEMPLATE", default="msg_count:{user_id}")
+
+
     @property
     def redis_url(self):
         return f"redis://{self.host}:{self.port}"

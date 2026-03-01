@@ -1,6 +1,6 @@
 [project]
 name = "UnionChatBot"
-version = "0.3.0-alpha"
+version = "0.3.0"
 description = "LangChain based Agent to please them all!"
 readme = "README.md"
 requires-python = "==3.12.*"

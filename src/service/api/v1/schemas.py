@@ -4,7 +4,6 @@
 
 from pydantic import BaseModel, Field
 
-
 class AgentChatRequest(BaseModel):
     """
     Стандартная схема на вход от пользователя.

@@ -46,7 +46,7 @@ services:
       - app-network
 
   chromadb:
-    image: chromadb/chroma:latest
+    image: chromadb/chroma:1.5.2
     deploy:
       restart_policy:
         condition: on-failure

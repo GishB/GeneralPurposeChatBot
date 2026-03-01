@@ -60,52 +60,63 @@ async def chat(
         request: Входящий запрос от пользователя с полезной нагрузкой;
         headers: Заголовок запроса с системной информацией;
     """
-    logger.debug(f"Длина запроса на входе: {len(request.text)}")
+    rate_limiter = await APP_CTX.get_ratelimiter()
+    allowed, current = rate_limiter.check_and_increment(user_id=headers.get("x-user-id"))
+    if allowed:
+        logger.debug(f"Длина запроса на входе: {len(request.text)}")
 
-    agent_payload = {
-        "user_id": headers.get("x-user-id"),
-        "text": request.organisation + " | " + request.text,
-        "status": AgentStatus.ACTIVE,
-    }
-    try:
-        client = await APP_CTX.get_postgres_client()
-        async with client.get_user_checkpointer() as checkpointer:
-            agent_graph = build_builder(agent=APP_CTX.get_agent(), checkpointer=checkpointer)
+        agent_payload = {
+            "user_id": headers.get("x-user-id"),
+            "text": request.organisation + " | " + request.text,
+            "status": AgentStatus.ACTIVE,
+        }
+        try:
+            client = await APP_CTX.get_postgres_client()
+            async with client.get_user_checkpointer() as checkpointer:
+                agent_graph = build_builder(agent=APP_CTX.get_agent(), checkpointer=checkpointer)
 
-            langfuse = await APP_CTX.get_langfuse()
+                langfuse = await APP_CTX.get_langfuse()
 
-            config = \
-            {
-                "configurable": \
-                    {
-                        "thread_id": headers.get("x-user-id")
-                    },
-                "callbacks": \
-                    [
-                        langfuse.handler
-                    ],
-                "metadata": \
+                config = \
                 {
-                    "stage": APP_CONFIG.app.stage,
-                    "langfuse_session_id": headers.get("x-trace-id"),
-                    "langfuse_user_id": headers.get("x-user-id"),
-                },
-            }
+                    "configurable": \
+                        {
+                            "thread_id": headers.get("x-user-id")
+                        },
+                    "callbacks": \
+                        [
+                            langfuse.handler
+                        ],
+                    "metadata": \
+                    {
+                        "stage": APP_CONFIG.app.stage,
+                        "langfuse_session_id": headers.get("x-trace-id"),
+                        "langfuse_user_id": headers.get("x-user-id"),
+                    },
+                }
 
-            result = await agent_graph.ainvoke\
-            (
-                input=agent_payload,
-                config=config,
+                result = await agent_graph.ainvoke\
+                (
+                    input=agent_payload,
+                    config=config,
+                )
+                logger.debug(f"Ответ сгенерирован. Его длина {len(result['final_answer'])} символов")
+            return AgentChatResponse(response=result["final_answer"])
+
+        except Exception as e:
+            logger.critical(
+                f"""Ошибка агента:
+                     [user_id={headers.get("x-user-id")}],
+                     [session_id = {headers.get("x-trace-id")}]
+                     [source_id = {headers.get("x-source-id")}]
+                     {e}
+                    """
             )
-            logger.debug(f"Ответ сгенерирован. Его длина {len(result['final_answer'])} символов")
-        return AgentChatResponse(response=result["final_answer"])
-
-    except Exception as e:
-        logger.critical(
-            f"""Ошибка агента:
-                 [user_id={headers.get("x-user-id")}],
-                 [session_id = {headers.get("x-trace-id")}]
-                 [source_id = {headers.get("x-source-id")}]
-                 {e}
-                """
-        )
+    else:
+        ttl = rate_limiter.ttl(user_id=headers.get("x-user-id"))
+        return AgentChatResponse\
+            (
+            response=f"""
+            Вы превысили свой лимит обращений к профсоюзному консультанту. 
+            Возврашайтесь снова через {ttl}.
+            """)
