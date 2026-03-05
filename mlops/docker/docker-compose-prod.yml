@@ -23,7 +23,7 @@ services:
       - app-network
 
   redis:
-    image: redis:7-alpine
+    image: redis:latest
     deploy:
       restart_policy:
         condition: on-failure
