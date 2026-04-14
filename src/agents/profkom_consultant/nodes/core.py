@@ -46,10 +46,14 @@ class UnionAgent(BaseAgentNodes, ThinkTwiceNodes):
         Returns:
             Relevant topic.
         """
+        from service.logger.context_vars import current_span
+
         prompt = self.langfuse_client.get_prompt("topic_choose_router").get_langchain_prompt()
         prompt = ChatPromptTemplate.from_template(prompt)
         chain = prompt | self.llm
-        response = await chain.ainvoke({"question": question})
+        span = current_span.get()
+        config = self._llm_config(span)
+        response = await chain.ainvoke({"question": question}, config=config)
         return response.content.strip()
 
     async def decompose_question(self, state: AgentState) -> None | dict[str, Any] | dict[str, list[Any]]:
@@ -66,30 +70,32 @@ class UnionAgent(BaseAgentNodes, ThinkTwiceNodes):
         Return:
             Словарь простых вопросов пользователя.
         """
-        question = state["text"]
-        try:
-            cached_result = self.cache.get(meta_info="decompose_question_" + state["user_id"], query=question)
-            if cached_result:
-                return {"parts": cached_result.get("json").get("parts")}
-            else:
-                prompt = self.langfuse_client.get_prompt("decompose_question").get_langchain_prompt()
-                prompt = ChatPromptTemplate.from_template(prompt)
-                chain = prompt | self.llm
-                response = await chain.ainvoke(
-                    {"user_question": question, "user_history": state.get("user_history", "")}
-                )
-                response = response.content.strip()
+        async with self._node_span("decompose_question", state) as span:
+            question = state["text"]
+            try:
+                cached_result = self.cache.get(meta_info="decompose_question_" + state["user_id"], query=question)
+                if cached_result:
+                    return {"parts": cached_result.get("json").get("parts")}
+                else:
+                    prompt = self.langfuse_client.get_prompt("decompose_question").get_langchain_prompt()
+                    prompt = ChatPromptTemplate.from_template(prompt)
+                    chain = prompt | self.llm
+                    response = await chain.ainvoke(
+                        {"user_question": question, "user_history": state.get("user_history", "")},
+                        config=self._llm_config(span),
+                    )
+                    response = response.content.strip()
 
-                content = re.search(r"<ЗАДАЧИ.*?>(.*?)</ЗАДАЧИ>", response, re.IGNORECASE | re.DOTALL)
-                content = content.group(1) if content else response
+                    content = re.search(r"<ЗАДАЧИ.*?>(.*?)</ЗАДАЧИ>", response, re.IGNORECASE | re.DOTALL)
+                    content = content.group(1) if content else response
 
-                cache_data = {"parts": [p.strip() for p in content.split("<PART>") if p.strip()]}
-                self.cache.save(
-                    meta_info="decompose_question_" + state["user_id"], query=question, output="", json_data=cache_data
-                )
-                return cache_data
-        except Exception as e:
-            print(f"Error at decompose_question: {e}")
+                    cache_data = {"parts": [p.strip() for p in content.split("<PART>") if p.strip()]}
+                    self.cache.save(
+                        meta_info="decompose_question_" + state["user_id"], query=question, output="", json_data=cache_data
+                    )
+                    return cache_data
+            except Exception as e:
+                self.logger.error(f"Error at decompose_question: {e}")
 
     async def answer_parts_async(self, state: AgentState, max_concurrent: int = 8) -> AgentState:
         """Генерируем асинхронные ответы на список вопросов.
@@ -100,37 +106,39 @@ class UnionAgent(BaseAgentNodes, ThinkTwiceNodes):
         Returns:
             Список простых ответов на глобальный вопрос пользователя.
         """
-        state["answers"] = []
-        semaphore = asyncio.Semaphore(max_concurrent)
+        async with self._node_span("answer_parts_async", state) as span:
+            state["answers"] = []
+            semaphore = asyncio.Semaphore(max_concurrent)
 
-        prompt = self.langfuse_client.get_prompt("query_worker").get_langchain_prompt()
-        prompt = ChatPromptTemplate.from_template(prompt)
-        # TO DO: CHECK что мы умеем работать с данными RAG
-        chain = prompt | self.llm
+            prompt = self.langfuse_client.get_prompt("query_worker").get_langchain_prompt()
+            prompt = ChatPromptTemplate.from_template(prompt)
+            # TO DO: CHECK что мы умеем работать с данными RAG
+            chain = prompt | self.llm
 
-        async def call_llm(part: str) -> str:
-            self.logger.info(f"Calling {part}")
-            async with semaphore:
-                cached_result = self.cache.get(meta_info="answer_parts_async", query=part)
-                if cached_result:
-                    return cached_result.get("json").get("answer")
-                else:
-                    topic = await self._detect_topics_for_question(part)
-                    self.logger.info(f"Topic: {topic}")
-                    retrived_data = await asyncio.to_thread(
-                        self.chorma_client.get_info, query=part, collection_name=self.COLLECTION_NAME, topics=[topic]
-                    )
-                    html_data = retrived_data.to_html()
-                    result = await chain.ainvoke({"text": part, "rag": html_data})
-                    cache_data = {"answer": result.content.strip()}
-                    self.cache.save(meta_info="answer_parts_async", query=part, output="", json_data=cache_data)
-                    return cache_data.get("answer")
+            async def call_llm(part: str) -> str:
+                self.logger.info(f"Calling {part}")
+                async with semaphore:
+                    cached_result = self.cache.get(meta_info="answer_parts_async", query=part)
+                    if cached_result:
+                        return cached_result.get("json").get("answer")
+                    else:
+                        topic = await self._detect_topics_for_question(part)
+                        self.logger.info(f"Topic: {topic}")
+                        retrived_data = await asyncio.to_thread(
+                            self.chorma_client.get_info, query=part, collection_name=self.COLLECTION_NAME, topics=[topic]
+                        )
+                        html_data = retrived_data.to_html()
+                        config = self._llm_config(span)
+                        result = await chain.ainvoke({"text": part, "rag": html_data}, config=config)
+                        cache_data = {"answer": result.content.strip()}
+                        self.cache.save(meta_info="answer_parts_async", query=part, output="", json_data=cache_data)
+                        return cache_data.get("answer")
 
-        if state.get("parts"):
-            tasks = [asyncio.create_task(call_llm(part)) for part in state["parts"]]
-            results = await asyncio.gather(*tasks, return_exceptions=True)
-            state["answers"] = [str(r) if not isinstance(r, Exception) else f"Error: {r}" for r in results]
-        return state
+            if state.get("parts"):
+                tasks = [asyncio.create_task(call_llm(part)) for part in state["parts"]]
+                results = await asyncio.gather(*tasks, return_exceptions=True)
+                state["answers"] = [str(r) if not isinstance(r, Exception) else f"Error: {r}" for r in results]
+            return state
 
     async def collect_final_answer(self, state: AgentState) -> AgentState:
         """Собираем итоговый ответ на вопрос пользователя.
@@ -143,26 +151,28 @@ class UnionAgent(BaseAgentNodes, ThinkTwiceNodes):
         Return:
             Итоговый текст ответа пользователю на вопрос.
         """
-        question = state["text"]
-        if state.get("answers"):
-            answers_text = "\n".join(f"{i + 1}. {ans}" for i, ans in enumerate(state["answers"]) if ans)
-            prompt = self.langfuse_client.get_prompt("summary_response").get_langchain_prompt()
-            prompt = ChatPromptTemplate.from_template(prompt)
-            chain = prompt | self.llm
-            # TO DO: CHECK что у нас огромный промпт не ломает ответ
-            response = await chain.ainvoke(
-                {
-                    "task_responses": answers_text,
-                    "user_history": state.get("user_history", "Нет истории запросов."),
-                    "original_question": question,
-                    "model_answers": state.get("model_answers", "Нет истории ответов от модели"),
-                    "additional_info": state.get(
-                        "additional_info", "Нет дополнительной информации по предыдущим ответам."
-                    ),
-                }
-            )
-            response = response.content.strip()
-            state["final_answer"] = response
-        else:
-            state["final_answer"] = "Нет данных для итогового ответа."
-        return state
+        async with self._node_span("collect_final_answer", state) as span:
+            question = state["text"]
+            if state.get("answers"):
+                answers_text = "\n".join(f"{i + 1}. {ans}" for i, ans in enumerate(state["answers"]) if ans)
+                prompt = self.langfuse_client.get_prompt("summary_response").get_langchain_prompt()
+                prompt = ChatPromptTemplate.from_template(prompt)
+                chain = prompt | self.llm
+                # TO DO: CHECK что у нас огромный промпт не ломает ответ
+                response = await chain.ainvoke(
+                    {
+                        "task_responses": answers_text,
+                        "user_history": state.get("user_history", "Нет истории запросов."),
+                        "original_question": question,
+                        "model_answers": state.get("model_answers", "Нет истории ответов от модели"),
+                        "additional_info": state.get(
+                            "additional_info", "Нет дополнительной информации по предыдущим ответам."
+                        ),
+                    },
+                    config=self._llm_config(span),
+                )
+                response = response.content.strip()
+                state["final_answer"] = response
+            else:
+                state["final_answer"] = "Нет данных для итогового ответа."
+            return state

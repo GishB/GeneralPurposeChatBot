@@ -61,6 +61,9 @@ dev = [
     "ruff",
     "pylint",
     "pre-commit",
+    "pytest",
+    "pytest-asyncio",
+    "httpx",
 ]
 
 [tool.ruff]

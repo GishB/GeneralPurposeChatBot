@@ -1,6 +1,10 @@
 from contextvars import ContextVar
+from typing import Any
 
 from .models import ContextLog
+
+current_trace: ContextVar[Any | None] = ContextVar("current_trace", default=None)
+current_span: ContextVar[Any | None] = ContextVar("current_span", default=None)
 
 
 class ContextVarsContainer:
@@ -46,4 +50,4 @@ class ContextVarsContainer:
         )
 
 
-__all__ = ["ContextVarsContainer"]
+__all__ = ["ContextVarsContainer", "current_trace", "current_span"]

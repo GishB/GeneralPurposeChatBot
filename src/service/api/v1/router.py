@@ -10,6 +10,7 @@ from langchain_openai import ChatOpenAI
 from agents.profkom_consultant import AgentStatus, build_builder
 from service.config import APP_CONFIG
 from service.context import APP_CTX
+from service.logger.context_vars import current_trace
 
 from . import schemas
 from .schemas import AgentChatRequest, AgentChatResponse, FailedDependecyResponse, YandexGPTAPITestResponse
@@ -76,10 +77,16 @@ async def chat(
                 agent_graph = build_builder(agent=APP_CTX.get_agent(), checkpointer=checkpointer)
 
                 langfuse = await APP_CTX.get_langfuse()
+                trace = langfuse.client.trace(
+                    name="chat",
+                    user_id=headers.get("x-user-id"),
+                    session_id=headers.get("x-trace-id"),
+                    metadata={"stage": APP_CONFIG.app.stage},
+                )
+                current_trace.set(trace)
 
                 config = {
                     "configurable": {"thread_id": headers.get("x-user-id")},
-                    "callbacks": [langfuse.handler],
                     "metadata": {
                         "stage": APP_CONFIG.app.stage,
                         "langfuse_session_id": headers.get("x-trace-id"),
