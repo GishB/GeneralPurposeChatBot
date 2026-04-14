@@ -109,12 +109,15 @@ class ChromaAdapter:
         Returns:
             relevant documents
         """
-        span = self._start_span("chroma_query", {
-            "query": query,
-            "collection": collection_name,
-            "n_results": n_results,
-            "where": where,
-        })
+        span = self._start_span(
+            "chroma_query",
+            {
+                "query": query,
+                "collection": collection_name,
+                "n_results": n_results,
+                "where": where,
+            },
+        )
         try:
             self.logger.debug(f"get_info_from_db called for {collection_name}")
             collection = self.client.get_collection(name=collection_name, embedding_function=self.embedding_function)
@@ -162,11 +165,14 @@ class ChromaAdapter:
 
     def get_info(self, query: str, collection_name: str, topics: list[str] | None = None) -> pd.DataFrame:
         # TO DO: фильтрация по метаданным и потом только query!
-        span = self._start_span("chroma_rag", {
-            "query": query,
-            "collection": collection_name,
-            "topics": topics,
-        })
+        span = self._start_span(
+            "chroma_rag",
+            {
+                "query": query,
+                "collection": collection_name,
+                "topics": topics,
+            },
+        )
         try:
             self.logger.debug(f"called {query} in get_info for {collection_name} and topics {topics}")
 

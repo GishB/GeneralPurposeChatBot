@@ -91,7 +91,10 @@ class UnionAgent(BaseAgentNodes, ThinkTwiceNodes):
 
                     cache_data = {"parts": [p.strip() for p in content.split("<PART>") if p.strip()]}
                     self.cache.save(
-                        meta_info="decompose_question_" + state["user_id"], query=question, output="", json_data=cache_data
+                        meta_info="decompose_question_" + state["user_id"],
+                        query=question,
+                        output="",
+                        json_data=cache_data,
                     )
                     return cache_data
             except Exception as e:
@@ -125,7 +128,10 @@ class UnionAgent(BaseAgentNodes, ThinkTwiceNodes):
                         topic = await self._detect_topics_for_question(part)
                         self.logger.info(f"Topic: {topic}")
                         retrived_data = await asyncio.to_thread(
-                            self.chorma_client.get_info, query=part, collection_name=self.COLLECTION_NAME, topics=[topic]
+                            self.chorma_client.get_info,
+                            query=part,
+                            collection_name=self.COLLECTION_NAME,
+                            topics=[topic],
                         )
                         html_data = retrived_data.to_html()
                         config = self._llm_config(span)

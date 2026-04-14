@@ -26,6 +26,7 @@ class BaseAgentNodes:
         if span:
             return {"callbacks": [CallbackHandler(stateful_client=span)]}
         return {}
+
     async def validate_text(self, state: AgentState) -> AgentState:
         """Проверяем, что текст вопроса пользователя соответсвует публичной политики.
 
@@ -99,7 +100,9 @@ class BaseAgentNodes:
                     if not is_valid:
                         state["final_answer"] = "Не прошёл валидацию"
                     state["is_valid"] = is_valid
-                    self.cache.save(meta_info="validate_final_answer", query=final_answer, output="", json_data=cache_data)
+                    self.cache.save(
+                        meta_info="validate_final_answer", query=final_answer, output="", json_data=cache_data
+                    )
                     return state
 
             except Exception as e:
