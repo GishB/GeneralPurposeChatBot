@@ -116,8 +116,8 @@ class PostgresClient:
             return None
         stats = self._pool.get_stats()
         self.logger.info(
-            f"Postgres.get_pool_stats: {id(self): pool_size={stats.get('pool_size', 0)}}"
-            f"pool_available={stats.get('pool_available', 0)}"
+            f"Postgres.get_pool_stats: id={id(self)} pool_size={stats.get('pool_size', 0)} "
+            f"pool_available={stats.get('pool_available', 0)} "
             f"request_waiting={stats.get('request_waiting', 0)}"
         )
         return stats

@@ -1,5 +1,9 @@
 # UnionChatBot
 
+![Tests](https://img.shields.io/badge/tests-102%2F102-brightgreen)
+![Coverage](https://img.shields.io/badge/coverage-79%25-green)
+![Python](https://img.shields.io/badge/python-3.12-blue.svg?logo=python&logoColor=white)
+
 `UnionChatBot` - REST-сервис с агентом на базе LangChain/LangGraph и YandexGPT API.
 Проект включает:
 - FastAPI API слой;

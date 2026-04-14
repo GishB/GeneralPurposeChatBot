@@ -7,6 +7,7 @@ from langchain_core.outputs import Generation
 from langchain_redis import RedisSemanticCache
 
 from service.logger import LoggerConfigurator
+from service.logger.context_vars import current_span, current_trace
 
 
 class RedisAdapter:
@@ -36,31 +37,58 @@ class RedisAdapter:
         self.logger.info(f"REDIS_THRESHOLD: {self.redis_threshold}")
         self.logger.info(f"REDIS_TTL: {self.redis_ttl}")
 
+    def _start_span(self, name: str, input_data: dict):
+        span = current_span.get()
+        if span:
+            return span.span(name=name, input=input_data)
+        trace = current_trace.get()
+        if trace:
+            return trace.span(name=name, input=input_data)
+        return None
+
     def save(self, meta_info: str, query: str = "", output: str = "", json_data: Optional[dict] = None):
         """
         output=str в text, json_data=dict в metadata.
         """
-        # self.logger.debug("saving query")
-        metadata = {"json": json_data} if json_data else {}
-        metadata["query"] = query
-        metadata["output"] = output
+        span = self._start_span("redis_save", {"query": query, "meta_info": meta_info})
+        try:
+            metadata = {"json": json_data} if json_data else {}
+            metadata["query"] = query
+            metadata["output"] = output
 
-        json_str = json.dumps(metadata)
+            json_str = json.dumps(metadata)
 
-        result = [Generation(text=json_str)]
-        self.semantic_cache.update(query, meta_info, result)
+            result = [Generation(text=json_str)]
+            self.semantic_cache.update(query, meta_info, result)
+            if span:
+                span.end(output={"status": "saved"})
+        except Exception as e:
+            if span:
+                span.end(level="ERROR", status_message=str(e))
+            raise
 
     def get(self, meta_info: str, query: str = "") -> Optional[Dict[str, Any]]:
         """Возвращает полный dict из JSON в text."""
-        # self.logger.debug("getting query")
-        result = self.semantic_cache.lookup(query, meta_info)
-        if result:
-            try:
-                return json.loads(result[0].text)
-            except json.JSONDecodeError as e:
-                self.logger.error(f"JSON decode error: {e}")
-                return None
-        return None
+        span = self._start_span("redis_get", {"query": query, "meta_info": meta_info})
+        try:
+            result = self.semantic_cache.lookup(query, meta_info)
+            if result:
+                parsed = json.loads(result[0].text)
+                if span:
+                    span.end(output={"hit": True})
+                return parsed
+            if span:
+                span.end(output={"hit": False})
+            return None
+        except json.JSONDecodeError as e:
+            self.logger.error(f"JSON decode error: {e}")
+            if span:
+                span.end(level="ERROR", status_message=str(e))
+            return None
+        except Exception as e:
+            if span:
+                span.end(level="ERROR", status_message=str(e))
+            raise
 
     def health_check(self) -> bool:
         """Simple health check"""

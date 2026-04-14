@@ -5,6 +5,7 @@ import pandas as pd
 from chromadb import QueryResult
 
 from service.logger import LoggerConfigurator
+from service.logger.context_vars import current_span, current_trace
 
 from .utils import BM25Reranker, MyEmbeddingFunction
 
@@ -84,6 +85,15 @@ class ChromaAdapter:
         self.logger.debug("embedding_function initialized")
         return self._embedding_function
 
+    def _start_span(self, name: str, input_data: dict):
+        span = current_span.get()
+        if span:
+            return span.span(name=name, input=input_data)
+        trace = current_trace.get()
+        if trace:
+            return trace.span(name=name, input=input_data)
+        return None
+
     def get_info_from_db(
         self, query: str, collection_name: str, n_results: int = 30, where: dict | None = None, **kwargs
     ) -> QueryResult:
@@ -99,15 +109,33 @@ class ChromaAdapter:
         Returns:
             relevant documents
         """
-        self.logger.debug(f"get_info_from_db called for {collection_name}")
-        collection = self.client.get_collection(name=collection_name, embedding_function=self.embedding_function)
-
-        return collection.query(
-            query_texts=[query],
-            n_results=n_results,
-            include=["documents", "metadatas", "distances"],
-            where=where,
+        span = self._start_span(
+            "chroma_query",
+            {
+                "query": query,
+                "collection": collection_name,
+                "n_results": n_results,
+                "where": where,
+            },
         )
+        try:
+            self.logger.debug(f"get_info_from_db called for {collection_name}")
+            collection = self.client.get_collection(name=collection_name, embedding_function=self.embedding_function)
+
+            result = collection.query(
+                query_texts=[query],
+                n_results=n_results,
+                include=["documents", "metadatas", "distances"],
+                where=where,
+            )
+            if span:
+                docs = result.get("documents", [[]])[0]
+                span.end(output={"documents_returned": len(docs)})
+            return result
+        except Exception as e:
+            if span:
+                span.end(level="ERROR", status_message=str(e))
+            raise
 
     def get_filtered_documents(self, data_raw: Dict[str, Any]) -> dict:
         self.logger.debug(f"get_filtered_documents: documents number {len(data_raw['documents'])}")
@@ -137,41 +165,58 @@ class ChromaAdapter:
 
     def get_info(self, query: str, collection_name: str, topics: list[str] | None = None) -> pd.DataFrame:
         # TO DO: фильтрация по метаданным и потом только query!
-        self.logger.debug(f"called {query} in get_info for {collection_name} and topics {topics}")
-
-        where = None
-        if topics:
-            # один topic можно передать прямо строкой, несколько — через $in
-            if len(topics) == 1:
-                where = {"topic": topics[0]}
-            else:
-                where = {"topic": {"$in": topics}}
-
-        data_raw = self.get_info_from_db(
-            query=query,
-            collection_name=collection_name,
-            n_results=self.max_rag_documents,
-            where=where,
+        span = self._start_span(
+            "chroma_rag",
+            {
+                "query": query,
+                "collection": collection_name,
+                "topics": topics,
+            },
         )
-        filtered_documents = self.get_filtered_documents(data_raw)
+        try:
+            self.logger.debug(f"called {query} in get_info for {collection_name} and topics {topics}")
 
-        if not filtered_documents["documents"]:
-            self.logger.debug(f"no documents found in {collection_name}")
+            where = None
+            if topics:
+                # один topic можно передать прямо строкой, несколько — через $in
+                if len(topics) == 1:
+                    where = {"topic": topics[0]}
+                else:
+                    where = {"topic": {"$in": topics}}
+
+            data_raw = self.get_info_from_db(
+                query=query,
+                collection_name=collection_name,
+                n_results=self.max_rag_documents,
+                where=where,
+            )
+            filtered_documents = self.get_filtered_documents(data_raw)
+
+            if not filtered_documents["documents"]:
+                self.logger.debug(f"no documents found in {collection_name}")
+                if span:
+                    span.end(output={"documents_found": 0})
+                return pd.DataFrame.from_dict(
+                    data={
+                        "documents": [],
+                        "metadatas": [],
+                    }
+                )
+
+            idx_relevant_documents = self.apply_reranker(query=query, documents=filtered_documents["documents"])
+            self.logger.debug(f"Finished get_info for {query} returned {len(idx_relevant_documents)} documents")
+            if span:
+                span.end(output={"documents_found": len(idx_relevant_documents)})
             return pd.DataFrame.from_dict(
                 data={
-                    "documents": [],
-                    "metadatas": [],
+                    "documents": [filtered_documents["documents"][idx] for idx in idx_relevant_documents],
+                    "metadatas": [filtered_documents["metadatas"][idx] for idx in idx_relevant_documents],
                 }
             )
-
-        idx_relevant_documents = self.apply_reranker(query=query, documents=filtered_documents["documents"])
-        self.logger.debug(f"Finished get_info for {query} returned {len(idx_relevant_documents)} documents")
-        return pd.DataFrame.from_dict(
-            data={
-                "documents": [filtered_documents["documents"][idx] for idx in idx_relevant_documents],
-                "metadatas": [filtered_documents["metadatas"][idx] for idx in idx_relevant_documents],
-            }
-        )
+        except Exception as e:
+            if span:
+                span.end(level="ERROR", status_message=str(e))
+            raise
 
     def health_check(self) -> bool:
         """Simple Chroma check"""

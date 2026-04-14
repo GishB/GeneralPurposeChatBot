@@ -1,9 +1,32 @@
+from contextlib import asynccontextmanager
+
 from langchain_core.prompts import ChatPromptTemplate
+from langfuse.callback import CallbackHandler
 
 from agents.profkom_consultant.states import AgentState
+from service.logger.context_vars import current_span, current_trace
 
 
 class BaseAgentNodes:
+    @asynccontextmanager
+    async def _node_span(self, name: str, state: AgentState):
+        trace = current_trace.get()
+        span = None
+        if trace:
+            span = trace.span(name=name, input={"text": state.get("text", "")})
+            current_span.set(span)
+        try:
+            yield span
+        finally:
+            if span:
+                span.end()
+            current_span.set(None)
+
+    def _llm_config(self, span):
+        if span:
+            return {"callbacks": [CallbackHandler(stateful_client=span)]}
+        return {}
+
     async def validate_text(self, state: AgentState) -> AgentState:
         """Проверяем, что текст вопроса пользователя соответсвует публичной политики.
 
@@ -14,39 +37,40 @@ class BaseAgentNodes:
         Return:
             Бинарное значение - спам или нормальный вопрос к агенту.
         """
-        question = state["text"]
-        try:
-            cached_result = self.cache.get(meta_info="validate_input", query=question)
-            if cached_result:
-                self.logger.debug(f"Cached result {cached_result}")
-                state["is_valid"] = cached_result.get("json").get("is_valid")
-                state["final_answer"] = cached_result.get("json").get("final_answer")
+        async with self._node_span("validate_text", state) as span:
+            question = state["text"]
+            try:
+                cached_result = self.cache.get(meta_info="validate_input", query=question)
+                if cached_result:
+                    self.logger.debug(f"Cached result {cached_result}")
+                    state["is_valid"] = cached_result.get("json").get("is_valid")
+                    state["final_answer"] = cached_result.get("json").get("final_answer")
+                    return state
+                else:
+                    self.logger.debug(f"Cached result {cached_result}")
+                    prompt = ChatPromptTemplate.from_template(
+                        self.langfuse_client.get_prompt("policy_validation").get_langchain_prompt()  # TO DO: FIX
+                    )
+                    chain = prompt | self.llm
+                    output = await chain.ainvoke({"text": state["text"]}, config=self._llm_config(span))
+                    output = output.content.strip().lower()
+                    self.logger.info(f"Output: {output}")
+
+                is_valid = "да" in output
+
+                cache_data = {"is_valid": is_valid}
+
+                if not is_valid:
+                    cache_data["final_answer"] = "Не прошёл валидацию"
+                    state["final_answer"] = cache_data["final_answer"]
+
+                state["is_valid"] = is_valid
+                self.logger.debug(f"is_valid: {is_valid}")
+                self.cache.save(meta_info="validate_input", query=question, output="", json_data=cache_data)
                 return state
-            else:
-                self.logger.debug(f"Cached result {cached_result}")
-                prompt = ChatPromptTemplate.from_template(
-                    self.langfuse_client.get_prompt("policy_validation").get_langchain_prompt()  # TO DO: FIX
-                )
-                chain = prompt | self.llm
-                output = await chain.ainvoke({"text": state["text"]})
-                output = output.content.strip().lower()
-                self.logger.info(f"Output: {output}")
 
-            is_valid = "да" in output
-
-            cache_data = {"is_valid": is_valid}
-
-            if not is_valid:
-                cache_data["final_answer"] = "Не прошёл валидацию"
-                state["final_answer"] = cache_data["final_answer"]
-
-            state["is_valid"] = is_valid
-            self.logger.debug(f"is_valid: {is_valid}")
-            self.cache.save(meta_info="validate_input", query=question, output="", json_data=cache_data)
-            return state
-
-        except Exception as e:
-            print(f"Validate error at validate_input: {e}")
+            except Exception as e:
+                self.logger.error(f"Validate error at validate_input: {e}")
 
     async def validate_final_answer(self, state: AgentState) -> AgentState:
         """Проверяем, что текст ответа модели соответсвует публичной политики.
@@ -58,28 +82,31 @@ class BaseAgentNodes:
         Return:
             Бинарное значение - спам или нормальный ответ от агента.
         """
-        final_answer = state.get("final_answer", "")
-        try:
-            cached_result = self.cache.get(meta_info="validate_final_answer", query=final_answer)
-            if cached_result:
-                state["is_valid"] = cached_result.get("json").get("is_valid") or True
-                return state
-            else:
-                prompt = self.langfuse_client.get_prompt("policy_validation").get_langchain_prompt()
-                prompt = ChatPromptTemplate.from_template(prompt)
-                chain = prompt | self.llm
-                output = await chain.ainvoke({"text": final_answer})
+        async with self._node_span("validate_final_answer", state) as span:
+            final_answer = state.get("final_answer", "")
+            try:
+                cached_result = self.cache.get(meta_info="validate_final_answer", query=final_answer)
+                if cached_result:
+                    state["is_valid"] = cached_result.get("json").get("is_valid") or True
+                    return state
+                else:
+                    prompt = self.langfuse_client.get_prompt("policy_validation").get_langchain_prompt()
+                    prompt = ChatPromptTemplate.from_template(prompt)
+                    chain = prompt | self.llm
+                    output = await chain.ainvoke({"text": final_answer}, config=self._llm_config(span))
 
-                is_valid = "да" in output.content.strip().lower()
-                cache_data = {"answer": is_valid}
-                if not is_valid:
-                    state["final_answer"] = "Не прошёл валидацию"
-                state["is_valid"] = is_valid
-                self.cache.save(meta_info="validate_final_answer", query=final_answer, output="", json_data=cache_data)
-                return state
+                    is_valid = "да" in output.content.strip().lower()
+                    cache_data = {"answer": is_valid}
+                    if not is_valid:
+                        state["final_answer"] = "Не прошёл валидацию"
+                    state["is_valid"] = is_valid
+                    self.cache.save(
+                        meta_info="validate_final_answer", query=final_answer, output="", json_data=cache_data
+                    )
+                    return state
 
-        except Exception as e:
-            print(f"Error at validate_final_answer: {e}")
+            except Exception as e:
+                self.logger.error(f"Error at validate_final_answer: {e}")
 
     def update_user_history_context(self, state: AgentState) -> AgentState:
         """Обновляет историю вопросов/ответов: аппендит текущий вопрос + ответ, тримирует до HISTORY_LIMIT.
@@ -101,9 +128,8 @@ class BaseAgentNodes:
             state["model_answers"] = [state["final_answer"]]
 
         if len(state["user_history"]) > self.HISTORY_LIMIT:
-            trim_count = len(state["user_history"]) - self.HISTORY_LIMIT
             state["user_history"] = state["user_history"][-self.HISTORY_LIMIT :]
-            state["model_answers"] = state["model_answers"][-trim_count:]
+            state["model_answers"] = state["model_answers"][-self.HISTORY_LIMIT :]
 
         return {"user_history": state["user_history"], "model_answers": state["model_answers"]}
 
