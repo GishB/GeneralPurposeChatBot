@@ -19,7 +19,7 @@ class BaseAgentNodes:
             yield span
         finally:
             if span:
-                span.end()
+                span.end(output=dict(state))
             current_span.set(None)
 
     def _llm_config(self, span):

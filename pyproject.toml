@@ -1,6 +1,6 @@
 [project]
 name = "UnionChatBot"
-version = "0.3.0"
+version = "0.3.1"
 description = "LangChain based Agent to please them all!"
 readme = "README.md"
 requires-python = "==3.12.*"
@@ -65,6 +65,8 @@ dev = [
     "pytest-asyncio",
     "httpx",
     "pytest-cov>=7.1.0",
+    "deepeval",
+    "openai",
 ]
 
 [tool.ruff]
