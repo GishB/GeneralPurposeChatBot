@@ -65,6 +65,8 @@ dev = [
     "pytest-asyncio",
     "httpx",
     "pytest-cov>=7.1.0",
+    "deepeval",
+    "openai",
 ]
 
 [tool.ruff]
