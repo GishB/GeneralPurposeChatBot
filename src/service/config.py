@@ -201,6 +201,7 @@ class PostgreSettings(BaseAppSettings):
 class RedisSettings(BaseAppSettings):
     port: int = Field(validation_alias="REDIS_PORT", default=6379)
     host: str = Field(validation_alias="REDIS_HOST", default="127.0.0.1")
+    password: str = Field(validation_alias="REDIS_PASSWORD", default="")
 
     redis_threshold: float = Field(validation_alias="REDIS_THRESHOLD", default=0.05)
     redis_ttl: int = Field(validation_alias="REDIS_TTL", default=3600)
@@ -211,6 +212,8 @@ class RedisSettings(BaseAppSettings):
 
     @property
     def redis_url(self):
+        if self.password:
+            return f"redis://:{self.password}@{self.host}:{self.port}"
         return f"redis://{self.host}:{self.port}"
 
 

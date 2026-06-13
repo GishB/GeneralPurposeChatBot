@@ -3,6 +3,7 @@ import time
 from datetime import datetime
 
 from fastapi import Request, status
+from prometheus_client import Counter, Histogram
 from starlette.concurrency import iterate_in_threadpool
 
 from service.context import APP_CTX
@@ -11,9 +12,22 @@ NON_LOGGED_ENDPOINTS = (
     "/like",
     "/dislike",
     "/health",
+    "/ready",
+    "/metrics",
     "/info",
     "/openapi.json",
     "/docs",
+)
+
+REQUEST_COUNT = Counter(
+    "http_requests_total",
+    "Total HTTP requests",
+    ["method", "endpoint", "status_code"],
+)
+REQUEST_LATENCY = Histogram(
+    "http_request_duration_seconds",
+    "HTTP request latency",
+    ["method", "endpoint"],
 )
 
 HEADERS_WHITE_LIST_TO_LOG = (
@@ -150,6 +164,8 @@ async def log_requests(request: Request, call_next):
         response = await call_next(request)
         logger.info(f"Request with no id for {request_path} processing time: {time.time() - start_time: .3f} s")
 
+    REQUEST_LATENCY.labels(method=request.method, endpoint=request_path).observe(time.time() - start_time)
+    REQUEST_COUNT.labels(method=request.method, endpoint=request_path, status_code=str(response.status_code)).inc()
     return response
 
 

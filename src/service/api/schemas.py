@@ -29,5 +29,14 @@ class InfoResponse(BaseModel):
         }
 
 
+class ReadinessResponse(BaseModel):
+    """Ответ для ручки /ready"""
+
+    status: str = Field(default="ready", description="Service readiness check", max_length=10)
+
+    class Config:
+        json_schema_extra = {"example": {"status": "ready"}}
+
+
 class RateResponse(BaseModel):
     rating_result: str = Field(description="Rating that was recorded", max_length=50)

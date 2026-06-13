@@ -29,6 +29,7 @@ class UserRateLimiter:
         self.redis = redis.Redis(
             host=kwargs.get("host", "127.0.0.1"),
             port=kwargs.get("port", 6379),
+            password=kwargs.get("password", None),
             db=kwargs.get("db", 2),
             decode_responses=kwargs.get("decode_responses", True),
         )
