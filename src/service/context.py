@@ -19,6 +19,7 @@ class AppContext(metaclass=Singleton):
             logger=self.logger,
             host=self._redis_base_params.host,
             port=self._redis_base_params.port,
+            password=self._redis_base_params.password,
             RATE_LIMIT_TEMPLATE=self._redis_base_params.rate_limit_template,
             USER_QUERY_LIMIT_TTL_SECONDS=self._redis_base_params.user_ttl_limit,
             USER_QUERY_LIMIT_N=self._redis_base_params.user_counter_limit,

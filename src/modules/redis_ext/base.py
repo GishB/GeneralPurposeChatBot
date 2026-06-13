@@ -28,12 +28,17 @@ class RedisAdapter:
         self.redis_ttl = int(os.getenv("REDIS_TTL", 3600)) if redis_ttl is None else redis_ttl
         self.logger.info(f"Redis url: {self.redis_url}")
         self.embeddings = embeddings
-        self.semantic_cache = RedisSemanticCache(
-            redis_url=self.redis_url,
-            embeddings=embeddings,
-            distance_threshold=self.redis_threshold,
-            ttl=self.redis_ttl,
-        )
+        try:
+            self.semantic_cache = RedisSemanticCache(
+                redis_url=self.redis_url,
+                embeddings=embeddings,
+                distance_threshold=self.redis_threshold,
+                ttl=self.redis_ttl,
+            )
+            self.logger.info("Redis semantic cache initialized")
+        except Exception as e:
+            self.logger.warning(f"Redis semantic cache initialization failed (RediSearch module may be missing): {e}")
+            self.semantic_cache = None
         self.logger.info(f"REDIS_THRESHOLD: {self.redis_threshold}")
         self.logger.info(f"REDIS_TTL: {self.redis_ttl}")
 
@@ -50,6 +55,8 @@ class RedisAdapter:
         """
         output=str в text, json_data=dict в metadata.
         """
+        if self.semantic_cache is None:
+            return
         span = self._start_span("redis_save", {"query": query, "meta_info": meta_info})
         try:
             metadata = {"json": json_data} if json_data else {}
@@ -65,10 +72,12 @@ class RedisAdapter:
         except Exception as e:
             if span:
                 span.end(level="ERROR", status_message=str(e))
-            raise
+            self.logger.warning(f"Redis save failed: {e}")
 
     def get(self, meta_info: str, query: str = "") -> Optional[Dict[str, Any]]:
         """Возвращает полный dict из JSON в text."""
+        if self.semantic_cache is None:
+            return None
         span = self._start_span("redis_get", {"query": query, "meta_info": meta_info})
         try:
             result = self.semantic_cache.lookup(query, meta_info)
@@ -88,8 +97,9 @@ class RedisAdapter:
         except Exception as e:
             if span:
                 span.end(level="ERROR", status_message=str(e))
-            raise
+            self.logger.warning(f"Redis get failed: {e}")
+            return None
 
     def health_check(self) -> bool:
         """Simple health check"""
-        return True if self.semantic_cache else False
+        return True

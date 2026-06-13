@@ -2,6 +2,7 @@ import contextlib
 import typing as tp
 
 from fastapi import FastAPI
+from prometheus_client import make_asgi_app
 
 from .metric_router import router as metric_router
 from .middleware import log_requests
@@ -24,6 +25,10 @@ def create_app() -> FastAPI:
     app_man.include_router(service_router, tags=["Test service routes"])
     app_man.include_router(metric_router, tags=["Feedbacks metric routes"])
     app_man.include_router(v1_router, prefix="/api/v1", tags=["service"])
+
+    prometheus_app = make_asgi_app()
+    app_man.mount("/metrics", prometheus_app)
+
     return app_man
 
 
