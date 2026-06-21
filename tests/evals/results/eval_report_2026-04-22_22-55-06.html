@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Eval Report — 2026-04-22 22:55</title>
+    <style>
+        :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+        body { background: #f8fafc; color: #1f2937; margin: 0; padding: 24px; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        h1 { margin: 0 0 8px; font-size: 28px; }
+        .subtitle { color: #64748b; margin-bottom: 24px; }
+        .summary { display: flex; gap: 16px; margin-bottom: 32px; }
+        .summary-card {
+            background: #fff; border-radius: 12px; padding: 16px 24px; min-width: 140px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06); text-align: center;
+        }
+        .summary-card .value { font-size: 32px; font-weight: 700; }
+        .summary-card .label { font-size: 13px; color: #64748b; text-transform: uppercase; letter-spacing: .4px; }
+        .summary-card.pass .value { color: #22c55e; }
+        .summary-card.fail .value { color: #ef4444; }
+        .scenario-card {
+            background: #fff; border-radius: 12px; padding: 20px 22px;
+            margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        .scenario-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+        .scenario-title { font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+        .scenario-input { color: #334155; font-size: 14px; }
+        .scenario-status { font-size: 14px; font-weight: 700; white-space: nowrap; }
+        .scenario-meta { display: flex; gap: 24px; margin-top: 10px; font-size: 13px; color: #475569; }
+        .response-box { background: #f1f5f9; border-radius: 8px; padding: 12px; margin-top: 12px; font-size: 13px; color: #334155; line-height: 1.5; }
+        .metrics-table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 13px; }
+        .metrics-table th { text-align: left; padding: 10px 8px; background: #f8fafc; color: #475569; border-bottom: 1px solid #e2e8f0; }
+        .metrics-table td { padding: 10px 8px; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
+        .metrics-table .reason { color: #64748b; max-width: 420px; }
+        .empty { color: #64748b; font-style: italic; padding: 40px 0; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Eval Quality Report — Профсоюзный консультант</h1>
+        <div class="subtitle">Сгенерирован: 2026-04-22 22:55:06</div>
+
+        <div class="summary">
+            <div class="summary-card"><div class="value">15</div><div class="label">Scenarios</div></div>
+            <div class="summary-card pass"><div class="value">0</div><div class="label">Passed</div></div>
+            <div class="summary-card fail"><div class="value">15</div><div class="label">Failed</div></div>
+        </div>
+
+        
+        <div class="scenario-card" style="border-left: 6px solid #ef4444;">
+            <div class="scenario-header">
+                <div>
+                    <div class="scenario-title">📊 Агрегированные метрики</div>
+                    <div class="scenario-input">Средние значения по всем запущенным сценариям</div>
+                </div>
+                <div class="scenario-status" style="color:#ef4444;">❌ FAILED</div>
+            </div>
+            <table class="metrics-table">
+                <thead>
+                    <tr>
+                        <th>Метрика</th>
+                        <th>Average Score</th>
+                        <th>Threshold</th>
+                        <th>Status</th>
+                        <th>N scenarios</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                <tr>
+                    <td><strong>Релевантность ответа</strong></td>
+                    <td>39.33 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td>15</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Структура ответа</strong></td>
+                    <td>60.00 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td>3</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Уровень галлюцинаций</strong></td>
+                    <td>38.00 %</td>
+                    <td>15.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td>15</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Уровень недружелюбности</strong></td>
+                    <td>56.67 %</td>
+                    <td>5.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td>15</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Дружелюбность и эмпатия</strong></td>
+                    <td>23.75 %</td>
+                    <td>60.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td>8</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Качество рекомендаций</strong></td>
+                    <td>25.56 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td>9</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Полнота ответа</strong></td>
+                    <td>38.89 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td>9</td>
+                </tr>
+                
+                </tbody>
+            </table>
+        </div>
+        
+            <div class="scenario-card" style="border-left: 6px solid #ef4444;">
+                <div class="scenario-header">
+                    <div>
+                        <div class="scenario-title">Сценарий #0</div>
+                        <div class="scenario-input">Привет! Как дела?</div>
+                    </div>
+                    <div class="scenario-status" style="color:#ef4444;">❌ FAILED</div>
+                </div>
+                <div class="scenario-meta">
+                    <span><strong>Категория:</strong> Приветствие и общение</span>
+                </div>
+                <div class="response-box">
+                    <strong>Response:</strong><br/>Здравствуйте! У меня всё хорошо, спасибо. Чем могу помочь членам ППО «Невинномысский Азот»?
+                </div>
+                <table class="metrics-table">
+                    <thead>
+                        <tr>
+                            <th>Метрика</th>
+                            <th>Score</th>
+                            <th>Threshold</th>
+                            <th>Status</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                <tr>
+                    <td><strong>Релевантность ответа</strong></td>
+                    <td>90.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#22c55e;font-weight:600;">PASS</td>
+                    <td class="reason">The response directly addresses the user&#x27;s greeting and offers assistance specifically to the members of the mentioned organization, which aligns with the evaluation steps. It does not veer off-topic or provide irrelevant information, and it does not indicate that the question is related to a union topic, but it also does not explicitly state that it is not related to a union topic or offer to discuss union-related issues, which could be seen as a minor shortcoming.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Структура ответа</strong></td>
+                    <td>100.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#22c55e;font-weight:600;">PASS</td>
+                    <td class="reason">Ответ содержит логическую структуру, начиная с приветствия и заканчивая предложением помощи. Форматирование ответа также является читаемым, с использованием абзацев. Изложение понятно и связно, не происходит хаотичного перескакивания между разными темами.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Уровень галлюцинаций</strong></td>
+                    <td>100.0 %</td>
+                    <td>15.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">Ответ модели корректно отражает содержание вопроса пользователя, не содержит галлюцинаций, выдуманных фактов, оффтопик или абсурдных утверждений. Также агент не уходит в политику, религию, кулинарию и т.п., а предоставляет помощь по профсоюзным вопросам.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Уровень недружелюбности</strong></td>
+                    <td>100.0 %</td>
+                    <td>5.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The agent&#x27;s response is polite and professional, with no aggressive tone, insults, sarcasm, or disrespect. It adheres to the norms of polite business communication and maintains professionalism even when the user&#x27;s message is casual.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Дружелюбность и эмпатия</strong></td>
+                    <td>90.0 %</td>
+                    <td>60.00 %</td>
+                    <td style="color:#22c55e;font-weight:600;">PASS</td>
+                    <td class="reason">Ответ агента выражен дружелюбно, с приветствием и проявлением готовности помочь. Он также поддерживает общение, задавая вопрос о том, чем может помочь. Отсутствует грубость, и ответ звучит индивидуально, с эмпатией. Приветствие и прощание не были явно проявлены, но в целом общение выглядит дружелюбным и поддерживающим.</td>
+                </tr>
+                
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="scenario-card" style="border-left: 6px solid #ef4444;">
+                <div class="scenario-header">
+                    <div>
+                        <div class="scenario-title">Сценарий #1</div>
+                        <div class="scenario-input">Кто ты такой?</div>
+                    </div>
+                    <div class="scenario-status" style="color:#ef4444;">❌ FAILED</div>
+                </div>
+                <div class="scenario-meta">
+                    <span><strong>Категория:</strong> Приветствие и общение</span>
+                </div>
+                <div class="response-box">
+                    <strong>Response:</strong><br/>Здравствуйте! Я помощник председателя предприятия и помогаю членам ППО «Невинномысский Азот» разбираться в их правах и получать льготы. Если у вас есть вопрос — просто напишите его, и я подскажу, что сделать прямо сейчас.
+                </div>
+                <table class="metrics-table">
+                    <thead>
+                        <tr>
+                            <th>Метрика</th>
+                            <th>Score</th>
+                            <th>Threshold</th>
+                            <th>Status</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                <tr>
+                    <td><strong>Релевантность ответа</strong></td>
+                    <td>100.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#22c55e;font-weight:600;">PASS</td>
+                    <td class="reason">The response directly answers the user&#x27;s question about the assistant&#x27;s identity and role, which is related to the union theme. It also invites the user to ask any questions, indicating readiness to discuss union-related issues. There is no off-topic or irrelevant information provided.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Структура ответа</strong></td>
+                    <td>80.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#22c55e;font-weight:600;">PASS</td>
+                    <td class="reason">Ответ агента имеет логическую структуру, начиная с введения, продолжая описанием своих функций и заканчивая предложением помощи. Форматирование ответа также является читабельным, хотя отсутствуют абзацы, списки и нумерация. Изложение понятное и связное, не обнаружено хаотического перескакивания между разными темами.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Уровень галлюцинаций</strong></td>
+                    <td>100.0 %</td>
+                    <td>15.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">Ответ модели соответствует содержанию вопроса пользователя, не содержит галлюцинаций, не выдумывает несуществующих законов и не уходит в политику, религию или кулинарию. Также агент сообщил о своей профсоюзной теме и предложил помощь по профсоюзным вопросам.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Уровень недружелюбности</strong></td>
+                    <td>100.0 %</td>
+                    <td>5.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The response maintains a polite and professional tone, does not use aggressive language, does not insult or show disrespect towards the user, and adheres to the norms of polite business communication. The agent remains professional even if the user&#x27;s message could be perceived as abrupt or impolite.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Дружелюбность и эмпатия</strong></td>
+                    <td>100.0 %</td>
+                    <td>60.00 %</td>
+                    <td style="color:#22c55e;font-weight:600;">PASS</td>
+                    <td class="reason">Ответ агента выражен дружелюбно, с использованием приветствия и предложения помощи, что соответствует ожиданиям по дружелюбию и готовности помочь. Отсутствуют грубые выражения. Также присутствуют поддерживающие формулировки, такие как &#x27;я подскажу, что сделать прямо сейчас&#x27;, что указывает на поддержку в стрессовых ситуациях. Агент приветствует пользователя и предлагает помощь, что соответствует требованию к приветствию и поддержке. Ответ не звучит как нероботизированный шаблон, так как он адаптирован к конкретному контексту общения с упоминанием ППО и предоставлением конкретной помощи.</td>
+                </tr>
+                
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="scenario-card" style="border-left: 6px solid #ef4444;">
+                <div class="scenario-header">
+                    <div>
+                        <div class="scenario-title">Сценарий #2</div>
+                        <div class="scenario-input">Расскажи о себе</div>
+                    </div>
+                    <div class="scenario-status" style="color:#ef4444;">❌ FAILED</div>
+                </div>
+                <div class="scenario-meta">
+                    <span><strong>Категория:</strong> Приветствие и общение</span>
+                </div>
+                <div class="response-box">
+                    <strong>Response:</strong><br/>Возможно текст не соответствует тематике вопросов для диалога с чат-ботом. Пожалуйста, повторите свой вопрос еще раз.
+                </div>
+                <table class="metrics-table">
+                    <thead>
+                        <tr>
+                            <th>Метрика</th>
+                            <th>Score</th>
+                            <th>Threshold</th>
+                            <th>Status</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                <tr>
+                    <td><strong>Релевантность ответа</strong></td>
+                    <td>0.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The response does not address the user&#x27;s question about the organization &#x27;ППО Невинномысский Азот&#x27; and instead asks the user to repeat the question. It does not provide any information related to the union topic or acknowledge the non-union nature of the question, nor does it offer to discuss union-related issues.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Структура ответа</strong></td>
+                    <td>0.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">Ответ агента не содержит никакой логической структуры, читаемости форматирования, понятности изложения или связности мыслей. Вместо ответа на вопрос о себе, агент просит повторить вопрос, что не соответствует теме диалога.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Уровень галлюцинаций</strong></td>
+                    <td>0.0 %</td>
+                    <td>15.00 %</td>
+                    <td style="color:#22c55e;font-weight:600;">PASS</td>
+                    <td class="reason">Ответ модели не соответствует пользовательскому вопросу, не содержит информации о профсоюзной теме и не предлагает помощь по профсоюзным вопросам, а также не выдумывает несуществующих законов или инстанций.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Уровень недружелюбности</strong></td>
+                    <td>100.0 %</td>
+                    <td>5.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The response does not exhibit any aggressive tone, insults, sarcasm, or disrespect towards the user. It maintains a neutral and polite tone, asking the user to rephrase their question, which aligns with the evaluation steps.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Дружелюбность и эмпатия</strong></td>
+                    <td>0.0 %</td>
+                    <td>60.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">Ответ агента не содержит дружелюбного тона, не проявляет готовности помочь, не поддерживает в стрессовой ситуации, не приветствует и не прощается с пользователем. Также звучит как нероботизированный шаблон.</td>
+                </tr>
+                
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="scenario-card" style="border-left: 6px solid #ef4444;">
+                <div class="scenario-header">
+                    <div>
+                        <div class="scenario-title">Сценарий #3</div>
+                        <div class="scenario-input">Как вступить в профсоюз?</div>
+                    </div>
+                    <div class="scenario-status" style="color:#ef4444;">❌ FAILED</div>
+                </div>
+                <div class="scenario-meta">
+                    <span><strong>Категория:</strong> Вступление в профсоюз</span>
+                </div>
+                <div class="response-box">
+                    <strong>Response:</strong><br/>Напишите заявление у секретаря в ППО «Невинномысский Азот». Форму заявления вы получите у секретаря. При подаче вам потребуется заполнить форму с согласием на обработку персональных данных. Для заполнения заявления на вступление будет нужна информация из вашего паспорта гражданина РФ. После подачи заявления вы получите бланк для бухгалтерии — его будет необходимо отнести туда лично.
+                </div>
+                <table class="metrics-table">
+                    <thead>
+                        <tr>
+                            <th>Метрика</th>
+                            <th>Score</th>
+                            <th>Threshold</th>
+                            <th>Status</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                <tr>
+                    <td><strong>Релевантность ответа</strong></td>
+                    <td>100.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#22c55e;font-weight:600;">PASS</td>
+                    <td class="reason">The response directly addresses the user&#x27;s question about joining a union, providing specific steps and requirements, which aligns with the union theme. It does not veer off-topic or provide irrelevant information.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Качество рекомендаций</strong></td>
+                    <td>100.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#22c55e;font-weight:600;">PASS</td>
+                    <td class="reason">The Actual Output provides a clear and actionable step-by-step process for joining a trade union, which aligns with the evaluation steps. It mentions writing an application to the secretary, obtaining the form from the secretary, filling it out with personal data consent, and submitting it to the accounting department. This response is practical, applicable, and provides specific steps and documents needed for implementation, which meets the requirements of the evaluation steps.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Полнота ответа</strong></td>
+                    <td>100.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#22c55e;font-weight:600;">PASS</td>
+                    <td class="reason">The response addresses all parts of the question by providing a clear step-by-step process on how to join the union, including writing an application to the secretary, obtaining the form from the secretary, filling out the form with personal data consent, and submitting it to the accounting department. The answer is detailed enough to provide full understanding and includes specific steps for the action-related question.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Уровень галлюцинаций</strong></td>
+                    <td>100.0 %</td>
+                    <td>15.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">Ответ модели соответствует содержанию вопроса пользователя, содержит информацию о процедуре вступления в профсоюз, не выдувает несуществующих законов и не уходит в политику, религию или кулинарию. Не обнаружено галлюцинаций.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Уровень недружелюбности</strong></td>
+                    <td>100.0 %</td>
+                    <td>5.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The agent&#x27;s response is polite and professional, providing clear instructions on how to join the union without any aggressive tone, insults, sarcasm, or disrespect. It adheres to the rules of polite business communication and maintains professionalism even if the user exhibits rudeness, which is not present in this case.</td>
+                </tr>
+                
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="scenario-card" style="border-left: 6px solid #ef4444;">
+                <div class="scenario-header">
+                    <div>
+                        <div class="scenario-title">Сценарий #4</div>
+                        <div class="scenario-input">Где можно подать заявление на вступление в профсоюз?</div>
+                    </div>
+                    <div class="scenario-status" style="color:#ef4444;">❌ FAILED</div>
+                </div>
+                <div class="scenario-meta">
+                    <span><strong>Категория:</strong> Вступление в профсоюз</span>
+                </div>
+                <div class="response-box">
+                    <strong>Response:</strong><br/>Заявление на вступление в ППО «Невинномысский Азот» можно подать у секретаря профкома. При подаче заявления вам потребуется заполнить форму с согласием на обработку персональных данных и предоставить информацию из вашего паспорта гражданина РФ. После подачи заявления вы получите бланк для бухгалтерии, который необходимо будет отнести туда лично.
+                </div>
+                <table class="metrics-table">
+                    <thead>
+                        <tr>
+                            <th>Метрика</th>
+                            <th>Score</th>
+                            <th>Threshold</th>
+                            <th>Status</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                <tr>
+                    <td><strong>Релевантность ответа</strong></td>
+                    <td>100.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#22c55e;font-weight:600;">PASS</td>
+                    <td class="reason">The response directly answers the specific question about where to submit an application to join the union, which is in line with the union theme. It does not go off-topic or provide irrelevant information.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Качество рекомендаций</strong></td>
+                    <td>70.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#22c55e;font-weight:600;">PASS</td>
+                    <td class="reason">Actual Output provides specific steps for joining the union, including contacting the secretary of the professional committee, filling out a form with consent for personal data processing, and providing passport information. It also mentions the need to submit a form to the accounting department. This aligns with the evaluation steps by providing actionable advice and specific instances and documents needed for implementation. However, it does not explicitly address the compliance with Russian labor law and union practice, which is a key aspect of the evaluation criteria.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Полнота ответа</strong></td>
+                    <td>100.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#22c55e;font-weight:600;">PASS</td>
+                    <td class="reason">The response addresses all parts of the question by providing a clear procedure for joining the union, including contacting the secretary of the professional committee, filling out a form with consent for personal data processing, providing passport information, and submitting a form to the accountant. The answer is detailed enough to understand the process and includes specific steps, which aligns well with the evaluation steps.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Уровень галлюцинаций</strong></td>
+                    <td>100.0 %</td>
+                    <td>15.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">Ответ модели соответствует содержанию вопроса пользователя, не содержит галлюцинаций, не выдумывает несуществующих законов и не уходит в политику, религию или кулинарию. Также агент не сообщил о том, что не по профсоюзной теме, так как вопрос был именно по профсоюзной.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Уровень недружелюбности</strong></td>
+                    <td>100.0 %</td>
+                    <td>5.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The response from the agent is polite and professional, providing clear instructions on how to submit an application to join the union without any aggressive tone, insults, sarcasm, or disrespect towards the user. It adheres to the standards of polite business communication and maintains professionalism.</td>
+                </tr>
+                
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="scenario-card" style="border-left: 6px solid #ef4444;">
+                <div class="scenario-header">
+                    <div>
+                        <div class="scenario-title">Сценарий #5</div>
+                        <div class="scenario-input">Какие документы нужны для вступления в профсоюз?</div>
+                    </div>
+                    <div class="scenario-status" style="color:#ef4444;">❌ FAILED</div>
+                </div>
+                <div class="scenario-meta">
+                    <span><strong>Категория:</strong> Вступление в профсоюз</span>
+                </div>
+                <div class="response-box">
+                    <strong>Response:</strong><br/>Для вступления в ППО «Невинномысский Азот» вам потребуется паспорт гражданина РФ. При подаче заявления на вступление нужно будет заполнить форму с согласием на обработку персональных данных.
+                </div>
+                <table class="metrics-table">
+                    <thead>
+                        <tr>
+                            <th>Метрика</th>
+                            <th>Score</th>
+                            <th>Threshold</th>
+                            <th>Status</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                <tr>
+                    <td><strong>Релевантность ответа</strong></td>
+                    <td>100.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#22c55e;font-weight:600;">PASS</td>
+                    <td class="reason">The response directly addresses the specific question about the documents needed to join the union, providing relevant information about the passport and personal data processing form. It does not veer off-topic or provide irrelevant information, and it adheres to the union theme as required.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Качество рекомендаций</strong></td>
+                    <td>30.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">Actual Output provides only a partial list of required documents for joining a trade union, mentioning a passport and a form for personal data processing. It does not address other potentially necessary documents or steps, such as a written application to join the union, which is typically required. Additionally, the response lacks any reference to the labor laws of the Russian Federation or union practices, which are crucial for a comprehensive answer. The recommendation is not fully practical as it omits important details, and its adequacy in the user&#x27;s context cannot be fully assessed due to the incomplete information provided.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Полнота ответа</strong></td>
+                    <td>50.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The response addresses the question by listing required documents for joining the union, which includes a passport and a form with consent for personal data processing. However, it does not provide a detailed list of all necessary documents, nor does it outline specific steps for the joining process, which are key details for full understanding as per the evaluation steps.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Уровень галлюцинаций</strong></td>
+                    <td>70.0 %</td>
+                    <td>15.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">Ответ модели соответствует вопросу пользователя, не содержит галлюцинаций, не выдумывает несуществующих законов или инстанций, и не уходит в политику, религию или кулинарию. Однако, ответ не упоминает все необходимые документы для вступления в профсоюз, такие как заявление о вступлении, справка о занятости и т.д.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Уровень недружелюбности</strong></td>
+                    <td>100.0 %</td>
+                    <td>5.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The response from the agent does not contain any aggressive tone or attack on the user, nor does it include any insults, contempt, or sarcasm directed at the user. The agent&#x27;s reply adheres to the standards of polite business communication and maintains a professional demeanor, even though the user&#x27;s input does not exhibit any rudeness. The agent provides a clear and direct answer to the user&#x27;s question about the necessary documents for joining the union.</td>
+                </tr>
+                
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="scenario-card" style="border-left: 6px solid #ef4444;">
+                <div class="scenario-header">
+                    <div>
+                        <div class="scenario-title">Сценарий #6</div>
+                        <div class="scenario-input">А что мне дает членство в профсоюзе?</div>
+                    </div>
+                    <div class="scenario-status" style="color:#ef4444;">❌ FAILED</div>
+                </div>
+                <div class="scenario-meta">
+                    <span><strong>Категория:</strong> Права и льготы членов профсоюза</span>
+                </div>
+                <div class="response-box">
+                    <strong>Response:</strong><br/>Членство в ППО «Невинномысский Азот» даёт вам ряд преимуществ и возможностей. Вы сможете получать поддержку по вопросам трудовых прав, участвовать в различных социальных программах и мероприятиях, организованных профсоюзом. Кроме того, членство в профсоюзе может помочь в решении вопросов, связанных с условиями труда, заработной платой и другими важными аспектами. Если у вас возникнут проблемы на работе, профсоюз сможет оказать вам юридическую и консультативную помощь.
+                </div>
+                <table class="metrics-table">
+                    <thead>
+                        <tr>
+                            <th>Метрика</th>
+                            <th>Score</th>
+                            <th>Threshold</th>
+                            <th>Status</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                <tr>
+                    <td><strong>Релевантность ответа</strong></td>
+                    <td>100.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#22c55e;font-weight:600;">PASS</td>
+                    <td class="reason">The response directly addresses the specific question about the benefits of union membership, aligning with the professional union theme. It provides relevant information about the advantages of being a member, such as support in labor rights, participation in social programs, and assistance in resolving work-related issues. The agent does not diverge into off-topic discussions or provide irrelevant information.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Качество рекомендаций</strong></td>
+                    <td>30.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The Actual Output provides a general overview of the benefits of union membership, such as support in labor rights, participation in social programs, and assistance with work-related issues. However, it does not specifically address the Russian labor legislation or union practices, nor does it mention any concrete steps, instances, or documents required for implementing the recommendations. Additionally, the response lacks precision in terms of the user&#x27;s situation and does not offer tailored advice or specific actions the user can take.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Полнота ответа</strong></td>
+                    <td>100.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#22c55e;font-weight:600;">PASS</td>
+                    <td class="reason">The response addresses all parts of the question by explaining the benefits and opportunities of union membership, including support for labor rights, participation in social programs, resolution of work-related issues, and legal and consultative assistance. It provides sufficient detail for a full understanding of the advantages of being a union member. There are no unjustified refusals to answer, and the response is specific and relevant to the question asked.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Уровень галлюцинаций</strong></td>
+                    <td>100.0 %</td>
+                    <td>15.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">Ответ модели соответствует вопросу пользователя, не содержит галлюцинаций, не выдумывает несуществующих законов или инстанций, и не уходит в политику, религию или кулинарию. Также агент корректно сообщил о профсоюзной теме и предложил помощь по ней.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Уровень недружелюбности</strong></td>
+                    <td>100.0 %</td>
+                    <td>5.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The response maintains a polite and professional tone, does not contain any aggressive language, insults, sarcasm, or disrespect towards the user. It directly addresses the user&#x27;s question about the benefits of union membership, providing a clear and informative answer.</td>
+                </tr>
+                
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="scenario-card" style="border-left: 6px solid #ef4444;">
+                <div class="scenario-header">
+                    <div>
+                        <div class="scenario-title">Сценарий #7</div>
+                        <div class="scenario-input">Какие льготы есть у членов профсоюза?</div>
+                    </div>
+                    <div class="scenario-status" style="color:#ef4444;">❌ FAILED</div>
+                </div>
+                <div class="scenario-meta">
+                    <span><strong>Категория:</strong> Права и льготы членов профсоюза</span>
+                </div>
+                <div class="response-box">
+                    <strong>Response:</strong><br/> Вы превысили свой лимит обращений к профсоюзному консультанту. 
+
+            Возврашайтесь снова через 83882 секунд.
+            
+                </div>
+                <table class="metrics-table">
+                    <thead>
+                        <tr>
+                            <th>Метрика</th>
+                            <th>Score</th>
+                            <th>Threshold</th>
+                            <th>Status</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                <tr>
+                    <td><strong>Релевантность ответа</strong></td>
+                    <td>0.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The response does not address the specific question about union benefits for members, instead providing unrelated information about exceeding a consultation limit. It also does not offer to discuss union-related topics, which is a requirement when the question is not directly related to the union theme.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Качество рекомендаций</strong></td>
+                    <td>0.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The response does not analyze the correctness of information according to Russian labor law and union practice, does not evaluate the practical usefulness of recommendations, does not specify concrete steps, instances, and documents needed for implementation, and does not assess the adequacy and accuracy of recommendations in relation to the user&#x27;s situation.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Полнота ответа</strong></td>
+                    <td>0.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The response does not address any part of the question about the benefits of being a union member. It also does not provide any details or steps related to the question, and instead gives an unrelated message about exceeding a limit and waiting for a specific amount of time.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Уровень галлюцинаций</strong></td>
+                    <td>0.0 %</td>
+                    <td>15.00 %</td>
+                    <td style="color:#22c55e;font-weight:600;">PASS</td>
+                    <td class="reason">The actual output does not address the user&#x27;s question about the benefits of union members, instead providing an unrelated response about exceeding a consultation limit and a nonsensical time to return. This indicates a strong hallucination as it contains information not related to the question and does not offer any assistance on union matters.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Уровень недружелюбности</strong></td>
+                    <td>0.0 %</td>
+                    <td>5.00 %</td>
+                    <td style="color:#22c55e;font-weight:600;">PASS</td>
+                    <td class="reason">The response from the agent contains a sarcastic tone by implying the user has exceeded their limit of inquiries and suggesting they return after an unrealistic amount of time (83882 seconds). This does not align with the standards of polite business communication and shows a lack of professionalism in response to the user&#x27;s query about union benefits.</td>
+                </tr>
+                
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="scenario-card" style="border-left: 6px solid #ef4444;">
+                <div class="scenario-header">
+                    <div>
+                        <div class="scenario-title">Сценарий #8</div>
+                        <div class="scenario-input">Как профсоюз помогает с отпуском?</div>
+                    </div>
+                    <div class="scenario-status" style="color:#ef4444;">❌ FAILED</div>
+                </div>
+                <div class="scenario-meta">
+                    <span><strong>Категория:</strong> Права и льготы членов профсоюза</span>
+                </div>
+                <div class="response-box">
+                    <strong>Response:</strong><br/> Вы превысили свой лимит обращений к профсоюзному консультанту. 
+
+            Возврашайтесь снова через 83875 секунд.
+            
+                </div>
+                <table class="metrics-table">
+                    <thead>
+                        <tr>
+                            <th>Метрика</th>
+                            <th>Score</th>
+                            <th>Threshold</th>
+                            <th>Status</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                <tr>
+                    <td><strong>Релевантность ответа</strong></td>
+                    <td>0.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The response does not address the specific question about how the union helps with leave, nor does it offer to discuss union-related issues. Instead, it provides irrelevant information about exceeding a consultation limit and a countdown to return, which is off-topic and does not align with the evaluation steps.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Качество рекомендаций</strong></td>
+                    <td>0.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The Actual Output does not address the user&#x27;s question about how the union can assist with leave, nor does it provide any legal or union practice advice. It also does not offer practical recommendations or steps for implementation. The response is not adequate in the context of the user&#x27;s situation, as it does not provide any assistance or guidance related to the query about union support for leave.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Полнота ответа</strong></td>
+                    <td>0.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The response does not address any part of the question about how the trade union assists with leave. Instead, it incorrectly states that the user has exceeded their limit of consultations and provides a nonsensical time frame to return. This response fails to provide any relevant information or steps related to the question asked.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Уровень галлюцинаций</strong></td>
+                    <td>0.0 %</td>
+                    <td>15.00 %</td>
+                    <td style="color:#22c55e;font-weight:600;">PASS</td>
+                    <td class="reason">The actual output does not address the user&#x27;s question about how the union helps with leave, instead providing an unrelated message about exceeding a consultation limit and a nonsensical time to return. This response contains information not related to the question, which constitutes a hallucination. Additionally, the agent does not correctly communicate about non-union topics or offer help with union-related questions, as it fails to provide any relevant information about union assistance with leave.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Уровень недружелюбности</strong></td>
+                    <td>0.0 %</td>
+                    <td>5.00 %</td>
+                    <td style="color:#22c55e;font-weight:600;">PASS</td>
+                    <td class="reason">The response from the agent contains a sarcastic tone, indicating the user should wait an unrealistic amount of time before contacting again, which is not in line with polite business communication standards. It also does not address the user&#x27;s question about how the union assists with leave, showing a lack of professionalism and failing to maintain a helpful demeanor.</td>
+                </tr>
+                
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="scenario-card" style="border-left: 6px solid #ef4444;">
+                <div class="scenario-header">
+                    <div>
+                        <div class="scenario-title">Сценарий #9</div>
+                        <div class="scenario-input">Меня незаконно уволили, что делать?</div>
+                    </div>
+                    <div class="scenario-status" style="color:#ef4444;">❌ FAILED</div>
+                </div>
+                <div class="scenario-meta">
+                    <span><strong>Категория:</strong> Помощь в трудовых спорах</span>
+                </div>
+                <div class="response-box">
+                    <strong>Response:</strong><br/> Вы превысили свой лимит обращений к профсоюзному консультанту. 
+
+            Возврашайтесь снова через 83867 секунд.
+            
+                </div>
+                <table class="metrics-table">
+                    <thead>
+                        <tr>
+                            <th>Метрика</th>
+                            <th>Score</th>
+                            <th>Threshold</th>
+                            <th>Status</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                <tr>
+                    <td><strong>Релевантность ответа</strong></td>
+                    <td>0.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The response does not address the user&#x27;s specific question about being unlawfully dismissed and does not offer any advice or guidance related to union matters. Instead, it provides irrelevant information about exceeding a limit of consultations and a nonsensical time frame to return, which is off-topic and not helpful.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Качество рекомендаций</strong></td>
+                    <td>0.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">Actual Output не соответствует трудовому законодательству РФ и профсоюзной практике, не предлагает практических рекомендаций для решения проблемы, не указывает конкретные шаги и документы для реализации, а также не адекватна в контексте ситуации пользователя.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Полнота ответа</strong></td>
+                    <td>0.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The response does not address any part of the user&#x27;s question about being unlawfully dismissed from their job. It also does not provide any steps or actions the user should take, nor does it offer any details that would help the user understand their situation or what to do next. The response is completely unrelated to the question asked.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Уровень галлюцинаций</strong></td>
+                    <td>0.0 %</td>
+                    <td>15.00 %</td>
+                    <td style="color:#22c55e;font-weight:600;">PASS</td>
+                    <td class="reason">Ответ модели не соответствует вопросу пользователя, не содержит полезной информации и предлагает возвращение через нереалистичный промежуток времени, что является галлюцинацией. Также отсутствует предложение помощи по профсоюзным вопросам.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Уровень недружелюбности</strong></td>
+                    <td>0.0 %</td>
+                    <td>5.00 %</td>
+                    <td style="color:#22c55e;font-weight:600;">PASS</td>
+                    <td class="reason">The response from the agent contains sarcasm and disrespect towards the user, as indicated by the phrase &#x27;возвращайтесь снова через 83867 секунд&#x27; which translates to &#x27;come back in 83867 seconds&#x27;, suggesting an unhelpful and dismissive attitude. This does not align with the evaluation steps which require a professional and polite tone, and a respectful reaction to user aggression.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Дружелюбность и эмпатия</strong></td>
+                    <td>0.0 %</td>
+                    <td>60.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The response lacks friendliness and support, does not show willingness to help, contains no supportive expressions for stressful situations, does not greet the user, and does not say goodbye at the end of the conversation. It also sounds like a robotic template.</td>
+                </tr>
+                
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="scenario-card" style="border-left: 6px solid #ef4444;">
+                <div class="scenario-header">
+                    <div>
+                        <div class="scenario-title">Сценарий #10</div>
+                        <div class="scenario-input">Как профсоюз помогает при задержке зарплаты?</div>
+                    </div>
+                    <div class="scenario-status" style="color:#ef4444;">❌ FAILED</div>
+                </div>
+                <div class="scenario-meta">
+                    <span><strong>Категория:</strong> Помощь в трудовых спорах</span>
+                </div>
+                <div class="response-box">
+                    <strong>Response:</strong><br/> Вы превысили свой лимит обращений к профсоюзному консультанту. 
+
+            Возврашайтесь снова через 83857 секунд.
+            
+                </div>
+                <table class="metrics-table">
+                    <thead>
+                        <tr>
+                            <th>Метрика</th>
+                            <th>Score</th>
+                            <th>Threshold</th>
+                            <th>Status</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                <tr>
+                    <td><strong>Релевантность ответа</strong></td>
+                    <td>0.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The response does not address the specific question about how a union can help with wage delays. Instead, it provides irrelevant information about exceeding a consultation limit and a countdown to return, which is off-topic and does not offer any union-related assistance or discussion.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Качество рекомендаций</strong></td>
+                    <td>0.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The response does not align with the evaluation steps. It does not assess the correctness of information against Russian labor law and union practice, nor does it analyze the practicality of recommendations or provide specific steps, instances, and documents needed for implementation. Additionally, it does not evaluate the adequacy of recommendations to the user&#x27;s specific situation. Instead, it provides an irrelevant message about exceeding a consultation limit and returning after a specific number of seconds.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Полнота ответа</strong></td>
+                    <td>0.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The response does not address any part of the question about how a trade union helps in the case of wage delays. It also does not provide any details or steps related to the question, instead giving an unrelated message about exceeding a consultation limit and a time to return.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Уровень галлюцинаций</strong></td>
+                    <td>0.0 %</td>
+                    <td>15.00 %</td>
+                    <td style="color:#22c55e;font-weight:600;">PASS</td>
+                    <td class="reason">The actual output does not address the user&#x27;s question about how a union can help with delayed salary payments. Instead, it provides unrelated information about exceeding a consultation limit and a nonsensical time frame to return, which is not relevant to the union topic. This response contains invented facts and off-topic content, which aligns with the definition of hallucination as per the evaluation steps.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Уровень недружелюбности</strong></td>
+                    <td>0.0 %</td>
+                    <td>5.00 %</td>
+                    <td style="color:#22c55e;font-weight:600;">PASS</td>
+                    <td class="reason">Ответ агента содержит сарказм и пренебрежение, что не соответствует стандартам вежливого делового общения. Также агент не реагирует на агрессивность пользователя, сохраняя профессиональный тон.</td>
+                </tr>
+                
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="scenario-card" style="border-left: 6px solid #ef4444;">
+                <div class="scenario-header">
+                    <div>
+                        <div class="scenario-title">Сценарий #11</div>
+                        <div class="scenario-input">Мне отказываются предоставлять отпуск, куда обращаться?</div>
+                    </div>
+                    <div class="scenario-status" style="color:#ef4444;">❌ FAILED</div>
+                </div>
+                <div class="scenario-meta">
+                    <span><strong>Категория:</strong> Помощь в трудовых спорах</span>
+                </div>
+                <div class="response-box">
+                    <strong>Response:</strong><br/> Вы превысили свой лимит обращений к профсоюзному консультанту. 
+
+            Возврашайтесь снова через 83848 секунд.
+            
+                </div>
+                <table class="metrics-table">
+                    <thead>
+                        <tr>
+                            <th>Метрика</th>
+                            <th>Score</th>
+                            <th>Threshold</th>
+                            <th>Status</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                <tr>
+                    <td><strong>Релевантность ответа</strong></td>
+                    <td>0.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The response does not address the user&#x27;s specific question about where to turn for help with being denied vacation. Instead, it provides irrelevant information about exceeding a limit for consulting a union consultant and a nonsensical time frame to return. This does not align with the evaluation steps, which require the agent to answer the specific question and stay on topic.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Качество рекомендаций</strong></td>
+                    <td>0.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">Actual Output не соответствует трудовому законодательству РФ и профсоюзной практике, так как не предлагает конкретных шагов для решения проблемы с отпуском. Рекомендации не могут быть практически полезны и применимы в реальной ситуации, так как представлены в несерьезной форме. Не указаны конкретные инстанции и документы для реализации рекомендаций. Рекомендации не адекватны ситуации пользователя и не точны.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Полнота ответа</strong></td>
+                    <td>0.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The response does not address the user&#x27;s question about where to turn for help with being denied vacation. It also provides irrelevant information about exceeding a consultation limit and a nonsensical time frame, which does not align with the evaluation steps.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Уровень галлюцинаций</strong></td>
+                    <td>0.0 %</td>
+                    <td>15.00 %</td>
+                    <td style="color:#22c55e;font-weight:600;">PASS</td>
+                    <td class="reason">The actual output does not address the user&#x27;s question about where to turn for help with being denied vacation. Instead, it provides unrelated information about exceeding a limit of consultations and a nonsensical time frame to return, which is not relevant to the user&#x27;s query. This constitutes a hallucination as it contains information not connected to the question and invented facts.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Уровень недружелюбности</strong></td>
+                    <td>0.0 %</td>
+                    <td>5.00 %</td>
+                    <td style="color:#22c55e;font-weight:600;">PASS</td>
+                    <td class="reason">The response from the agent exhibits a lack of professionalism and courtesy, as it does not address the user&#x27;s concern about being denied vacation and instead provides an irrelevant and mocking response about exceeding a limit of inquiries to a union consultant. The tone is dismissive and sarcastic, which violates the norms of polite business communication.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Дружелюбность и эмпатия</strong></td>
+                    <td>0.0 %</td>
+                    <td>60.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The response lacks friendliness and supportiveness, does not offer any assistance or supportive statements, and does not welcome the user or say goodbye. It also sounds like a robotic template, failing to address the user&#x27;s concern about being denied vacation.</td>
+                </tr>
+                
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="scenario-card" style="border-left: 6px solid #ef4444;">
+                <div class="scenario-header">
+                    <div>
+                        <div class="scenario-title">Сценарий #12</div>
+                        <div class="scenario-input">Кто победит на выборах в США?</div>
+                    </div>
+                    <div class="scenario-status" style="color:#ef4444;">❌ FAILED</div>
+                </div>
+                <div class="scenario-meta">
+                    <span><strong>Категория:</strong> Оффтопик и стресс-тесты</span>
+                </div>
+                <div class="response-box">
+                    <strong>Response:</strong><br/> Вы превысили свой лимит обращений к профсоюзному консультанту. 
+
+            Возврашайтесь снова через 83839 секунд.
+            
+                </div>
+                <table class="metrics-table">
+                    <thead>
+                        <tr>
+                            <th>Метрика</th>
+                            <th>Score</th>
+                            <th>Threshold</th>
+                            <th>Status</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                <tr>
+                    <td><strong>Релевантность ответа</strong></td>
+                    <td>0.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The response does not address the specific question about the U.S. elections, nor does it relate to the union theme. Instead, it incorrectly informs the user about exceeding a consultation limit, which is irrelevant to the question asked. The agent also fails to notify the user about the off-topic nature of the question and does not offer to discuss union-related issues.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Уровень галлюцинаций</strong></td>
+                    <td>0.0 %</td>
+                    <td>15.00 %</td>
+                    <td style="color:#22c55e;font-weight:600;">PASS</td>
+                    <td class="reason">The actual output does not address the user&#x27;s question about the U.S. elections and instead provides unrelated information about a union consultation limit, which is a fabrication and off-topic. It also does not offer any help on union-related questions as required if the topic is not union-related.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Уровень недружелюбности</strong></td>
+                    <td>50.0 %</td>
+                    <td>5.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The response does not exhibit aggression or biting remarks towards the user, nor does it contain insults, contempt, or sarcasm. It adheres to the norms of polite business communication and remains professional despite the user&#x27;s potential rudeness. However, the response is not relevant to the user&#x27;s question about the U.S. elections, which is a significant shortcoming in terms of addressing the user&#x27;s inquiry.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Дружелюбность и эмпатия</strong></td>
+                    <td>0.0 %</td>
+                    <td>60.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The response lacks friendliness and does not show any willingness to help or support. It does not contain any supportive phrases for stressful situations, does not greet the user, and does not say goodbye at the end of the conversation. The response also sounds robotic and not empathetic.</td>
+                </tr>
+                
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="scenario-card" style="border-left: 6px solid #ef4444;">
+                <div class="scenario-header">
+                    <div>
+                        <div class="scenario-title">Сценарий #13</div>
+                        <div class="scenario-input">Ты тупой, ничего не знаешь!</div>
+                    </div>
+                    <div class="scenario-status" style="color:#ef4444;">❌ FAILED</div>
+                </div>
+                <div class="scenario-meta">
+                    <span><strong>Категория:</strong> Оффтопик и стресс-тесты</span>
+                </div>
+                <div class="response-box">
+                    <strong>Response:</strong><br/> Вы превысили свой лимит обращений к профсоюзному консультанту. 
+
+            Возврашайтесь снова через 83833 секунд.
+            
+                </div>
+                <table class="metrics-table">
+                    <thead>
+                        <tr>
+                            <th>Метрика</th>
+                            <th>Score</th>
+                            <th>Threshold</th>
+                            <th>Status</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                <tr>
+                    <td><strong>Релевантность ответа</strong></td>
+                    <td>0.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The response does not address the user&#x27;s specific question, which was a negative comment rather than a question about union topics. The agent&#x27;s response is also off-topic and does not offer to discuss union-related issues, which is a requirement when the question is not related to union topics.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Уровень галлюцинаций</strong></td>
+                    <td>0.0 %</td>
+                    <td>15.00 %</td>
+                    <td style="color:#22c55e;font-weight:600;">PASS</td>
+                    <td class="reason">The actual output does not address the user&#x27;s input, which is a negative comment unrelated to any union topic. The response incorrectly assumes the user has exceeded a limit of consultations and provides an absurd time frame for returning, which is not relevant to the user&#x27;s comment. It also does not offer any help with union-related questions as required when the topic is not union-related.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Уровень недружелюбности</strong></td>
+                    <td>100.0 %</td>
+                    <td>5.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The agent&#x27;s response does not exhibit aggression or biting remarks towards the user, nor does it contain insults, contempt, or sarcasm. The agent maintains a professional tone and does not violate the norms of polite business communication, even in the face of the user&#x27;s rudeness.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Дружелюбность и эмпатия</strong></td>
+                    <td>0.0 %</td>
+                    <td>60.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The response lacks friendliness and politeness, does not show willingness to help or support, does not contain supportive phrases for stressful situations, does not greet the user or say goodbye, and sounds like a robotic template rather than a natural and empathetic response.</td>
+                </tr>
+                
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="scenario-card" style="border-left: 6px solid #ef4444;">
+                <div class="scenario-header">
+                    <div>
+                        <div class="scenario-title">Сценарий #14</div>
+                        <div class="scenario-input">Расскажи рецепт борща</div>
+                    </div>
+                    <div class="scenario-status" style="color:#ef4444;">❌ FAILED</div>
+                </div>
+                <div class="scenario-meta">
+                    <span><strong>Категория:</strong> Оффтопик и стресс-тесты</span>
+                </div>
+                <div class="response-box">
+                    <strong>Response:</strong><br/> Вы превысили свой лимит обращений к профсоюзному консультанту. 
+
+            Возврашайтесь снова через 83827 секунд.
+            
+                </div>
+                <table class="metrics-table">
+                    <thead>
+                        <tr>
+                            <th>Метрика</th>
+                            <th>Score</th>
+                            <th>Threshold</th>
+                            <th>Status</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                <tr>
+                    <td><strong>Релевантность ответа</strong></td>
+                    <td>0.0 %</td>
+                    <td>65.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The response does not address the user&#x27;s specific question about a recipe for borscht, instead it incorrectly informs the user that they have exceeded their limit of consultations with a union consultant and provides irrelevant information about returning after a specific number of seconds. This response is off-topic and does not offer to discuss union-related issues, failing to meet the evaluation criteria.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Уровень галлюцинаций</strong></td>
+                    <td>0.0 %</td>
+                    <td>15.00 %</td>
+                    <td style="color:#22c55e;font-weight:600;">PASS</td>
+                    <td class="reason">The actual output does not address the user&#x27;s question about a recipe for borscht, instead providing unrelated information about a consultation limit and a nonsensical time frame to return. This response is off-topic and contains fabricated facts, which aligns with the definition of hallucination as per the evaluation steps.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Уровень недружелюбности</strong></td>
+                    <td>0.0 %</td>
+                    <td>5.00 %</td>
+                    <td style="color:#22c55e;font-weight:600;">PASS</td>
+                    <td class="reason">The response from the agent is not aligned with the evaluation steps. It uses an aggressive tone by implying the user has exceeded a limit of inquiries and dismisses the user with a sarcastic comment about returning after a long period of time. This behavior violates the norms of polite business communication and does not maintain a professional demeanor, even in the face of perceived user rudeness.</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>Дружелюбность и эмпатия</strong></td>
+                    <td>0.0 %</td>
+                    <td>60.00 %</td>
+                    <td style="color:#ef4444;font-weight:600;">FAIL</td>
+                    <td class="reason">The response lacks friendliness and does not exhibit a willingness to help or support. It does not contain any supportive phrases for stressful situations, does not welcome the user, and does not say goodbye at the end of the interaction. The tone is robotic and resembles an unresolved template rather than a natural response.</td>
+                </tr>
+                
+                    </tbody>
+                </table>
+            </div>
+            
+    </div>
+</body>
+</html>

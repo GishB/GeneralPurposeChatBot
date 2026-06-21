@@ -71,6 +71,7 @@ async def chat(
             "text": request.organisation + " | " + request.text,
             "status": AgentStatus.ACTIVE,
         }
+        trace = None
         try:
             client = await APP_CTX.get_postgres_client()
             async with client.get_user_checkpointer() as checkpointer:
@@ -98,10 +99,17 @@ async def chat(
                     input=agent_payload,
                     config=config,
                 )
+                if trace:
+                    trace.update(
+                        input=agent_payload,
+                        output=dict(result),
+                    )
                 logger.debug(f"Ответ сгенерирован. Его длина {len(result['final_answer'])} символов")
             return AgentChatResponse(response=result["final_answer"])
 
         except Exception as e:
+            if trace:
+                trace.update(input=agent_payload, output={"error": str(e)})
             logger.critical(
                 f"""Ошибка агента:
                      [user_id={headers.get("x-user-id")}],

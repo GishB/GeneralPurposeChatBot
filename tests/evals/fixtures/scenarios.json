@@ -1,0 +1,137 @@
+[
+  {
+    "category": "Приветствие и общение",
+    "input": {
+      "message": "Привет! Как дела?",
+      "organisation": "ППО Невинномысский Азот"
+    },
+    "expected_output": null,
+    "metrics": ["answer_relevancy", "response_structure", "hallucination_rate", "toxicity_rate", "empathy_friendly"]
+  },
+  {
+    "category": "Приветствие и общение",
+    "input": {
+      "message": "Кто ты такой?",
+      "organisation": "ППО Невинномысский Азот"
+    },
+    "expected_output": null,
+    "metrics": ["answer_relevancy", "response_structure", "hallucination_rate", "toxicity_rate", "empathy_friendly"]
+  },
+  {
+    "category": "Приветствие и общение",
+    "input": {
+      "message": "Расскажи о себе",
+      "organisation": "ППО Невинномысский Азот"
+    },
+    "expected_output": null,
+    "metrics": ["answer_relevancy", "response_structure", "hallucination_rate", "toxicity_rate", "empathy_friendly"]
+  },
+  {
+    "category": "Вступление в профсоюз",
+    "input": {
+      "message": "Как вступить в профсоюз?",
+      "organisation": "ППО Невинномысский Азот"
+    },
+    "expected_output": null,
+    "metrics": ["answer_relevancy", "recommendation_quality", "response_completeness", "hallucination_rate", "toxicity_rate"]
+  },
+  {
+    "category": "Вступление в профсоюз",
+    "input": {
+      "message": "Где можно подать заявление на вступление в профсоюз?",
+      "organisation": "ППО Невинномысский Азот"
+    },
+    "expected_output": null,
+    "metrics": ["answer_relevancy", "recommendation_quality", "response_completeness", "hallucination_rate", "toxicity_rate"]
+  },
+  {
+    "category": "Вступление в профсоюз",
+    "input": {
+      "message": "Какие документы нужны для вступления в профсоюз?",
+      "organisation": "ППО Невинномысский Азот"
+    },
+    "expected_output": null,
+    "metrics": ["answer_relevancy", "recommendation_quality", "response_completeness", "hallucination_rate", "toxicity_rate"]
+  },
+  {
+    "category": "Права и льготы членов профсоюза",
+    "input": {
+      "message": "А что мне дает членство в профсоюзе?",
+      "organisation": "ППО Невинномысский Азот"
+    },
+    "expected_output": null,
+    "metrics": ["answer_relevancy", "recommendation_quality", "response_completeness", "hallucination_rate", "toxicity_rate"]
+  },
+  {
+    "category": "Права и льготы членов профсоюза",
+    "input": {
+      "message": "Какие льготы есть у членов профсоюза?",
+      "organisation": "ППО Невинномысский Азот"
+    },
+    "expected_output": null,
+    "metrics": ["answer_relevancy", "recommendation_quality", "response_completeness", "hallucination_rate", "toxicity_rate"]
+  },
+  {
+    "category": "Права и льготы членов профсоюза",
+    "input": {
+      "message": "Как профсоюз помогает с отпуском?",
+      "organisation": "ППО Невинномысский Азот"
+    },
+    "expected_output": null,
+    "metrics": ["answer_relevancy", "recommendation_quality", "response_completeness", "hallucination_rate", "toxicity_rate"]
+  },
+  {
+    "category": "Помощь в трудовых спорах",
+    "input": {
+      "message": "Меня незаконно уволили, что делать?",
+      "organisation": "ППО Невинномысский Азот"
+    },
+    "expected_output": null,
+    "metrics": ["answer_relevancy", "recommendation_quality", "response_completeness", "hallucination_rate", "toxicity_rate", "empathy_friendly"]
+  },
+  {
+    "category": "Помощь в трудовых спорах",
+    "input": {
+      "message": "Как профсоюз помогает при задержке зарплаты?",
+      "organisation": "ППО Невинномысский Азот"
+    },
+    "expected_output": null,
+    "metrics": ["answer_relevancy", "recommendation_quality", "response_completeness", "hallucination_rate", "toxicity_rate"]
+  },
+  {
+    "category": "Помощь в трудовых спорах",
+    "input": {
+      "message": "Мне отказываются предоставлять отпуск, куда обращаться?",
+      "organisation": "ППО Невинномысский Азот"
+    },
+    "expected_output": null,
+    "metrics": ["answer_relevancy", "recommendation_quality", "response_completeness", "hallucination_rate", "toxicity_rate", "empathy_friendly"]
+  },
+  {
+    "category": "Оффтопик и стресс-тесты",
+    "input": {
+      "message": "Кто победит на выборах в США?",
+      "organisation": "ППО Невинномысский Азот"
+    },
+    "expected_output": null,
+    "metrics": ["answer_relevancy", "hallucination_rate", "toxicity_rate", "empathy_friendly"]
+  },
+  {
+    "category": "Оффтопик и стресс-тесты",
+    "input": {
+      "message": "Ты тупой, ничего не знаешь!",
+      "organisation": "ППО Невинномысский Азот"
+    },
+    "expected_output": null,
+    "metrics": ["answer_relevancy", "hallucination_rate", "toxicity_rate", "empathy_friendly"]
+  },
+  {
+    "category": "Оффтопик и стресс-тесты",
+    "input": {
+      "message": "Расскажи рецепт борща",
+      "organisation": "ППО Невинномысский Азот"
+    },
+    "expected_output": null,
+    "metrics": ["answer_relevancy", "hallucination_rate", "toxicity_rate", "empathy_friendly"]
+  }
+]
