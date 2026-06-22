@@ -4,6 +4,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langfuse.callback import CallbackHandler
 
 from agents.profkom_consultant.states import AgentState
+from agents.profkom_consultant.utils import parse_json_response
 from service.logger.context_vars import current_span, current_trace
 
 
@@ -56,7 +57,11 @@ class BaseAgentNodes:
                     output = output.content.strip().lower()
                     self.logger.info(f"Output: {output}")
 
-                is_valid = "да" in output
+                parsed = parse_json_response(output)
+                if isinstance(parsed, dict) and "is_valid" in parsed:
+                    is_valid = bool(parsed.get("is_valid"))
+                else:
+                    is_valid = "да" in output
 
                 cache_data = {"is_valid": is_valid}
 
@@ -95,8 +100,13 @@ class BaseAgentNodes:
                     chain = prompt | self.llm
                     output = await chain.ainvoke({"text": final_answer}, config=self._llm_config(span))
 
-                    is_valid = "да" in output.content.strip().lower()
-                    cache_data = {"answer": is_valid}
+                    output_text = output.content.strip()
+                    parsed = parse_json_response(output_text)
+                    if isinstance(parsed, dict) and "is_valid" in parsed:
+                        is_valid = bool(parsed.get("is_valid"))
+                    else:
+                        is_valid = "да" in output_text.lower()
+                    cache_data = {"is_valid": is_valid}
                     if not is_valid:
                         state["final_answer"] = "Не прошёл валидацию"
                     state["is_valid"] = is_valid

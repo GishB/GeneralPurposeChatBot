@@ -177,12 +177,11 @@ class ChromaAdapter:
             self.logger.debug(f"called {query} in get_info for {collection_name} and topics {topics}")
 
             where = None
+            # NOTE: documents synced from Yandex.Disk do not carry a "topic" metadata field,
+            # so topic-based filtering would always return empty results. Disable it here
+            # and rely on semantic search + reranker instead.
             if topics:
-                # один topic можно передать прямо строкой, несколько — через $in
-                if len(topics) == 1:
-                    where = {"topic": topics[0]}
-                else:
-                    where = {"topic": {"$in": topics}}
+                self.logger.debug(f"Ignoring topic filter, topics={topics}")
 
             data_raw = self.get_info_from_db(
                 query=query,
