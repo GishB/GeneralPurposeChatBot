@@ -1,5 +1,6 @@
 import os
 import time
+from concurrent.futures import ThreadPoolExecutor
 from itertools import islice
 from typing import Any, Iterable
 
@@ -63,9 +64,23 @@ class MyEmbeddingFunction(EmbeddingFunction):
 
         # Set default retry logic and process long documents
         self.max_retries = kwargs.get("max_retries", 5)
-        self.request_timeout = kwargs.get("request_timeout", 1)  # seconds
-        self.batch_size = kwargs.get("batch_size", 16)
-        self.sleep_between_batches = kwargs.get("sleep_between_batches", 2)
+        # Allow runtime tuning via env vars; defaults chosen to be robust on slow networks.
+        self.request_timeout = kwargs.get(
+            "request_timeout",
+            float(os.getenv("EMBEDDING_REQUEST_TIMEOUT", "15")),
+        )  # seconds
+        self.batch_size = kwargs.get(
+            "batch_size",
+            int(os.getenv("EMBEDDING_BATCH_SIZE", "32")),
+        )
+        self.sleep_between_batches = kwargs.get(
+            "sleep_between_batches",
+            float(os.getenv("EMBEDDING_SLEEP_BETWEEN_BATCHES", "0.2")),
+        )
+        self.max_workers = kwargs.get(
+            "max_workers",
+            int(os.getenv("EMBEDDING_MAX_WORKERS", "4")),
+        )
 
     def _get_single_embedding(self, text: str) -> np.ndarray:
         """Получить эмбеддинг для одного текста с ретраями и обрезкой по длине."""
@@ -134,8 +149,8 @@ class MyEmbeddingFunction(EmbeddingFunction):
                 time.sleep(self.sleep_between_batches)
 
             self.logger.info(f"Embedding batch {batch_idx}, size={len(batch)}")
-            for text in batch:
-                emb = self._get_single_embedding(text)
-                embeddings.append(emb)
+            with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+                batch_embeddings = list(executor.map(self._get_single_embedding, batch))
+            embeddings.extend(batch_embeddings)
 
         return np.array(embeddings)
