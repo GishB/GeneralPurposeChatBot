@@ -85,8 +85,8 @@ async def info():
     dist = distribution("UnionChatBot")
 
     return schemas.InfoResponse(
-        name=str(dist.metadata["Name"]),
-        description=str(dist.metadata["Description"]),
+        name=str(dist.metadata.get("Name", "UnionChatBot")),
+        description=str(dist.metadata.get("Description", "")),
         type="REST API",
         version=str(dist.version),
     )

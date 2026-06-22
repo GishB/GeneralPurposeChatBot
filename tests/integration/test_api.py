@@ -26,7 +26,6 @@ def test_ready_endpoint(http_client):
     assert response.json() == {"status": "ready"}
 
 
-@pytest.mark.xfail(reason="App bug: distribution metadata lacks 'Description' key")
 def test_info_endpoint(http_client):
     """``GET /info`` returns service metadata."""
     response = http_client.get("/info")
