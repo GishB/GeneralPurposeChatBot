@@ -127,25 +127,39 @@ def postgres_endpoint(postgres_container: PostgresContainer | None, integration_
     """Return a psycopg-compatible connection string.
 
     In local mode the testcontainer is used. In cluster mode we expect
-    ``kubectl port-forward svc/sevenelement-db-rw 5432:5432`` to be active.
+    ``kubectl port-forward svc/sevenelement-db-rw 5432:5432`` to be active and
+    credentials exported via environment variables.
     """
     if integration_mode == "local":
         url = postgres_container.get_connection_url()
         return url.replace("+psycopg2", "").replace("+asyncpg", "")
-    return "postgresql://postgres:postgres@127.0.0.1:5432/postgres"
+
+    user = os.getenv("PG_USER", "postgres")
+    password = urllib.parse.quote_plus(os.getenv("PG_PASSWORD", "postgres"))
+    db = os.getenv("POSTGRES_DB", "postgres")
+    host = os.getenv("PG_HOST", "127.0.0.1")
+    port = os.getenv("PG_PORT", "5432")
+    return f"postgresql://{user}:{password}@{host}:{port}/{db}"
 
 
 @pytest.fixture(scope="session")
 def redis_url(redis_container: RedisContainer | None, integration_mode: str) -> str:
     """Redis URL for rate limiter / semantic cache tests.
 
-    In cluster mode we expect ``kubectl port-forward svc/redis-stack 6379:6379``.
+    In cluster mode we expect ``kubectl port-forward svc/redis-stack 6379:6379``
+    and ``REDIS_PASSWORD`` exported.
     """
     if integration_mode == "local":
         host_exposed = redis_container.get_container_host_ip()
         port_exposed = redis_container.get_exposed_port(6379)
         return f"redis://{host_exposed}:{port_exposed}"
-    return os.getenv("REDIS_URL", "redis://127.0.0.1:6379")
+
+    password = os.getenv("REDIS_PASSWORD", "")
+    host = os.getenv("REDIS_HOST", "127.0.0.1")
+    port = os.getenv("REDIS_PORT", "6379")
+    if password:
+        return f"redis://:{urllib.parse.quote_plus(password)}@{host}:{port}"
+    return f"redis://{host}:{port}"
 
 
 # --------------------------------------------------------------------------- #
@@ -307,8 +321,22 @@ def redis_rate_limiter(redis_settings, logger):
 
 
 @pytest.fixture
-def mock_embeddings():
-    """Fake embeddings object compatible with RedisSemanticCache init."""
+def mock_embeddings(integration_mode: str):
+    """Embeddings object compatible with RedisSemanticCache.
+
+    In local mode a deterministic FakeEmbeddings is used. In cluster mode we
+    must use the real YandexGPT embeddings so that the vector dimensions match
+    the existing ``llmcache`` index in Redis Stack.
+    """
+    if integration_mode == "cluster":
+        from langchain_community.embeddings.yandex import YandexGPTEmbeddings
+        from service.config import APP_CONFIG
+
+        return YandexGPTEmbeddings(
+            folder_id=APP_CONFIG.llm.openai_folder_id,
+            iam_token=APP_CONFIG.llm.openai_api_key,
+        )
+
     from langchain_core.embeddings import FakeEmbeddings
 
     return FakeEmbeddings(size=128)

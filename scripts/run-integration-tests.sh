@@ -5,8 +5,8 @@
 #   bash scripts/run-integration-tests.sh
 #   bash scripts/run-integration-tests.sh -k test_postgres
 #
-# The script fetches YandexGPT and Langfuse credentials from the
-# unionchatbot-env Secret if they are not already exported.
+# The script fetches YandexGPT, Langfuse, Postgres and Redis credentials from
+# k8s ConfigMap/Secret if they are not already exported.
 
 set -euo pipefail
 
@@ -44,6 +44,33 @@ if [[ -z "${LANGFUSE_SECRET_KEY:-}" || -z "${LANGFUSE_PUBLIC_KEY:-}" ]]; then
   export LANGFUSE_PUBLIC_KEY
   LANGFUSE_SECRET_KEY="$(fetch_secret "${NAMESPACE}" "unionchatbot-env" "LANGFUSE_SECRET_KEY")"
   LANGFUSE_PUBLIC_KEY="$(fetch_secret "${NAMESPACE}" "unionchatbot-env" "LANGFUSE_PUBLIC_KEY")"
+fi
+
+fetch_configmap() {
+  local ns="$1"
+  local cm="$2"
+  local key="$3"
+  kubectl get configmap "${cm}" -n "${ns}" -o "jsonpath={.data.${key}}"
+}
+
+if [[ -z "${PG_USER:-}" || -z "${POSTGRES_DB:-}" ]]; then
+  echo "[setup] Fetching Postgres config from k8s configmap ${NAMESPACE}/unionchatbot-config"
+  export PG_USER
+  export POSTGRES_DB
+  PG_USER="$(fetch_configmap "${NAMESPACE}" "unionchatbot-config" "PG_USER")"
+  POSTGRES_DB="$(fetch_configmap "${NAMESPACE}" "unionchatbot-config" "POSTGRES_DB")"
+fi
+
+if [[ -z "${PG_PASSWORD:-}" ]]; then
+  echo "[setup] Fetching Postgres password from k8s secret ${NAMESPACE}/unionchatbot-env"
+  export PG_PASSWORD
+  PG_PASSWORD="$(fetch_secret "${NAMESPACE}" "unionchatbot-env" "PG_PASSWORD")"
+fi
+
+if [[ -z "${REDIS_PASSWORD:-}" ]]; then
+  echo "[setup] Fetching Redis password from k8s secret ${NAMESPACE}/unionchatbot-env"
+  export REDIS_PASSWORD
+  REDIS_PASSWORD="$(fetch_secret "${NAMESPACE}" "unionchatbot-env" "REDIS_PASSWORD")"
 fi
 
 # --------------------------------------------------------------------------- #
@@ -89,4 +116,4 @@ done
 # --------------------------------------------------------------------------- #
 
 echo "[setup] Running integration tests (cluster mode)..."
-UNION_TEST_MODE=cluster uv run pytest tests/integration -m cluster -v "$@"
+UNION_TEST_MODE=cluster uv run pytest tests/integration -v "$@"
