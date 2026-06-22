@@ -73,6 +73,7 @@ class RedisAdapter:
             if span:
                 span.end(level="ERROR", status_message=str(e))
             self.logger.warning(f"Redis save failed: {e}")
+            raise
 
     def get(self, meta_info: str, query: str = "") -> Optional[Dict[str, Any]]:
         """Возвращает полный dict из JSON в text."""
@@ -98,8 +99,8 @@ class RedisAdapter:
             if span:
                 span.end(level="ERROR", status_message=str(e))
             self.logger.warning(f"Redis get failed: {e}")
-            return None
+            raise
 
     def health_check(self) -> bool:
         """Simple health check"""
-        return True
+        return self.semantic_cache is not None
