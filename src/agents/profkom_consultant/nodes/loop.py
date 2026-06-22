@@ -1,8 +1,7 @@
-import re
-
 from langchain_core.prompts import ChatPromptTemplate
 
 from ..states import AgentState, AgentStatus
+from ..utils import parse_json_response
 
 
 class ThinkTwiceNodes:
@@ -34,9 +33,15 @@ class ThinkTwiceNodes:
                 },
                 config=self._llm_config(span),
             )
-            response = "DONE" in response.content.strip().upper()
+            response_text = response.content.strip()
+            parsed = parse_json_response(response_text)
+            if isinstance(parsed, dict) and "verdict" in parsed:
+                is_done = str(parsed.get("verdict", "")).strip().upper() == "DONE"
+            else:
+                is_done = "DONE" in response_text.upper()
+                self.logger.warning(f"check_user_answer returned non-JSON: {response_text[:200]}")
 
-            if response:
+            if is_done:
                 state["status"] = AgentStatus.DONE
                 state["counter_loop"] = 0
                 state["additional_info"] = ""
@@ -81,8 +86,12 @@ class ThinkTwiceNodes:
 
             response = response.content.strip()
 
-            content = re.search(r"<ЗАДАЧИ.*?>(.*?)</ЗАДАЧИ>", response, re.IGNORECASE | re.DOTALL)
-            content = content.group(1) if content else response
+            parsed = parse_json_response(response)
+            if isinstance(parsed, dict) and "parts" in parsed:
+                parts = [p.strip() for p in parsed.get("parts", []) if isinstance(p, str) and p.strip()]
+            else:
+                parts = [response.strip()] if response.strip() else []
+                self.logger.warning(f"generate_additional_questions returned non-JSON: {response[:200]}")
 
-            data = {"parts": [p.strip() for p in content.split("<PART>") if p.strip()]}
+            data = {"parts": parts}
             return data

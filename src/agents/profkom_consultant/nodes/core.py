@@ -1,10 +1,10 @@
 import asyncio
-import re
 from typing import Any
 
 from langchain_core.prompts import ChatPromptTemplate
 
 from agents.profkom_consultant.states import AgentState
+from agents.profkom_consultant.utils import parse_json_response
 from service.logger import LoggerConfigurator
 
 from .base import BaseAgentNodes
@@ -86,10 +86,14 @@ class UnionAgent(BaseAgentNodes, ThinkTwiceNodes):
                     )
                     response = response.content.strip()
 
-                    content = re.search(r"<ЗАДАЧИ.*?>(.*?)</ЗАДАЧИ>", response, re.IGNORECASE | re.DOTALL)
-                    content = content.group(1) if content else response
+                    parsed = parse_json_response(response)
+                    if isinstance(parsed, dict) and "parts" in parsed:
+                        parts = [p.strip() for p in parsed.get("parts", []) if isinstance(p, str) and p.strip()]
+                    else:
+                        parts = [response.strip()] if response.strip() else []
+                        self.logger.warning(f"decompose_question returned non-JSON: {response[:200]}")
 
-                    cache_data = {"parts": [p.strip() for p in content.split("<PART>") if p.strip()]}
+                    cache_data = {"parts": parts}
                     self.cache.save(
                         meta_info="decompose_question_" + state["user_id"],
                         query=question,
