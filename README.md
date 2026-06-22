@@ -271,6 +271,35 @@ docker compose -f mlops/docker/docker-compose.yml down
 
 Если нужен запуск через HTTPS и `/chat`, добавьте nginx как reverse-proxy с конфигами из `experiments/nginx`.
 
+## Интеграционные тесты
+
+Набор интеграционных тестов находится в `tests/integration/`.
+Они поддерживают два режима запуска: локальный (через testcontainers) и против k8s-кластера (через `kubectl port-forward`).
+
+### Локальный запуск
+
+```bash
+uv sync --dev
+UNION_TEST_MODE=local uv run pytest tests/integration -v
+```
+
+Локально поднимаются контейнеры Postgres и Redis Stack, тестируются модули Postgres и Redis.
+Тесты, требующие Langfuse, Chroma и YandexGPT API, пропускаются, если не заданы соответствующие переменные окружения.
+
+### Запуск против Kubernetes-кластера
+
+```bash
+bash scripts/run-integration-tests.sh
+```
+
+Скрипт автоматически:
+- заберёт ключи YandexGPT и Langfuse из Secret `unionchatbot-env`;
+- запустит `kubectl port-forward` для `redis-stack`, `sevenelement-db-rw`, `langfuse-web`, `chromadb` и `general-purpose-chatbot`;
+- выполнит `pytest` в режиме `cluster`;
+- по завершении остановит все port-forward процессы.
+
+Требования: `kubectl` настроен на целевой кластер, Docker запущен (для `uv run`).
+
 ## Полезные материалы в репозитории
 
 - `experiments/yandex_api` - эксперименты с YandexGPT API.

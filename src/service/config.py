@@ -92,8 +92,8 @@ class YandexGPTSettings(BaseAppSettings):
     max_retries: int = Field(validation_alias="LLM_MAX_RETRIES", default=5)
     # profanity_check: bool = Field(validation_alias="PROFANCIE_CHECK", default=False)
 
-    openai_api_key: str = Field(validation_alias="OPENAI_API_KEY", default=None)
-    openai_folder_id: str = Field(validation_alias="OPENAI_FOLDER_ID", default=None)
+    openai_api_key: str = Field(validation_alias="OPENAI_API_KEY", default="")
+    openai_folder_id: str = Field(validation_alias="OPENAI_FOLDER_ID", default="")
     openai_api_base: str = Field(validation_alias="OPENAI_API_BASE", default="https://llm.api.cloud.yandex.net/v1")
 
     @property
@@ -130,8 +130,8 @@ class ChromaSettings(BaseAppSettings):
     host: str = Field(validation_alias="CHROMA_HOST", default="127.0.0.1")
     port: int = Field(validation_alias="CHROMA_PORT", default=443)
     similarity_filter_score: float = Field(validation_alias="SIMILARITY_FILTER", default=1.5)
-    openai_api_key: str = Field(validation_alias="OPENAI_API_KEY", default=None)
-    openai_folder_id: str = Field(validation_alias="OPENAI_FOLDER_ID", default=None)
+    openai_api_key: str = Field(validation_alias="OPENAI_API_KEY", default="")
+    openai_folder_id: str = Field(validation_alias="OPENAI_FOLDER_ID", default="")
     chroma_max_rag_documents: int = Field(validation_alias="CHROMA_MAX_RAG_DOCUMENTS", default=42)
     collection_name: str = Field(validation_alias="COLLECTION_NAME", default="PRODUCTION_PROFKOM")
     embeding_api: str = Field(
