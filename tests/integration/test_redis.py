@@ -32,16 +32,28 @@ def test_redis_rate_limiter_allows_under_limit(redis_rate_limiter):
     assert current == 1
 
 
-def test_redis_rate_limiter_blocks_over_limit(redis_rate_limiter):
+def test_redis_rate_limiter_blocks_over_limit(logger, redis_settings):
     """Requests are blocked once the limit is exceeded."""
-    user_id = "integration-test-user"
-    limit = redis_rate_limiter.USER_QUERY_LIMIT_N
+    from modules.redis_ext.utils import UserRateLimiter
+
+    limit = 5
+    limiter = UserRateLimiter(
+        logger=logger,
+        host=redis_settings.host,
+        port=redis_settings.port,
+        password=redis_settings.password,
+        RATE_LIMIT_TEMPLATE="msg_count:{user_id}",
+        USER_QUERY_LIMIT_TTL_SECONDS=60,
+        USER_QUERY_LIMIT_N=limit,
+    )
+    user_id = "integration-test-user-over-limit"
+    limiter.reset_counter(user_id)
 
     for _ in range(limit):
-        allowed, _ = redis_rate_limiter.check_and_increment(user_id)
+        allowed, _ = limiter.check_and_increment(user_id)
         assert allowed is True
 
-    allowed, current = redis_rate_limiter.check_and_increment(user_id)
+    allowed, current = limiter.check_and_increment(user_id)
     assert allowed is False
     assert current == limit + 1
 
