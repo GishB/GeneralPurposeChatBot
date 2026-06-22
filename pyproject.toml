@@ -66,6 +66,19 @@ dev = [
     "pytest-asyncio",
     "httpx",
     "pytest-cov>=7.1.0",
+    "testcontainers>=4.0",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+pythonpath = ["src"]
+markers = [
+    "integration: integration tests against real services",
+    "local: runnable locally with testcontainers",
+    "cluster: requires kubectl port-forward to k8s services",
+    "yandex: calls real YandexGPT API (may incur costs)",
+    "langfuse: requires running Langfuse instance",
+    "chroma: requires ChromaDB instance",
 ]
 
 [tool.ruff]
