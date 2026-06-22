@@ -33,6 +33,7 @@ class TestUserRateLimiterInit:
             MockRedis.assert_called_once_with(
                 host="127.0.0.1",
                 port=6379,
+                password=None,
                 db=2,
                 decode_responses=True,
             )
@@ -50,6 +51,7 @@ class TestUserRateLimiterInit:
             MockRedis.assert_called_once_with(
                 host="h",
                 port=1234,
+                password=None,
                 db=7,
                 decode_responses=False,
             )
