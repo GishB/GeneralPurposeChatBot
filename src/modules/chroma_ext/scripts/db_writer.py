@@ -124,3 +124,49 @@ def sync_docx_directory_to_collection(
             collection.delete(where={"source": src})  # удаляем все чанки этого файла [web:34][web:41]
 
     logger.info("Sync finished")
+
+
+def main() -> None:
+    """CLI entry point for syncing a local .docx directory to Chroma."""
+    import os
+    import sys
+    import tempfile
+
+    import pytz
+
+    from service.logger.context_vars import ContextVarsContainer
+
+    if len(sys.argv) < 2:
+        print("Usage: python -m modules.chroma_ext.scripts.db_writer <root_dir>")
+        sys.exit(1)
+
+    root_dir = sys.argv[1]
+    collection_name = os.getenv("COLLECTION_NAME", "PRODUCTION_PROFKOM")
+
+    tmpdir = tempfile.mkdtemp(prefix="chroma-sync-")
+    logger_cfg = LoggerConfigurator(
+        log_lvl=20,  # INFO
+        log_file_path=os.path.join(tmpdir, "app.log"),
+        metric_file_path=os.path.join(tmpdir, "app-metric.log"),
+        audit_file_path=os.path.join(tmpdir, "events.log"),
+        audit_host_ip="127.0.0.1",
+        audit_host_uid="chroma-sync",
+        context_vars_container=ContextVarsContainer(),
+        timezone=pytz.UTC,
+        rotation="10 MB",
+    )
+
+    sync_docx_directory_to_collection(
+        logger=logger_cfg.async_logger,
+        root_dir=root_dir,
+        collection_name=collection_name,
+        api_key=os.getenv("OPENAI_API_KEY"),
+        folder_id=os.getenv("OPENAI_FOLDER_ID"),
+        api_url=os.getenv("EMBEDDING_API"),
+        host=os.getenv("CHROMA_HOST", "127.0.0.1"),
+        port=int(os.getenv("CHROMA_PORT", "8000")),
+    )
+
+
+if __name__ == "__main__":
+    main()
