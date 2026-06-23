@@ -81,7 +81,24 @@ async def chat(
                     name="chat",
                     user_id=headers.get("x-user-id"),
                     session_id=headers.get("x-trace-id"),
-                    metadata={"stage": APP_CONFIG.app.stage},
+                    input={
+                        "user_id": headers.get("x-user-id"),
+                        "organisation": request.organisation,
+                        "text": request.text,
+                        "headers": {
+                            "x-trace-id": headers.get("x-trace-id"),
+                            "x-request-time": headers.get("x-request-time"),
+                            "x-source-name": headers.get("x-source-id"),
+                            "x-user-id": headers.get("x-user-id"),
+                        },
+                    },
+                    metadata={
+                        "stage": APP_CONFIG.app.stage,
+                        "source": headers.get("x-source-id"),
+                        "request_time": headers.get("x-request-time"),
+                        "organisation": request.organisation,
+                    },
+                    tags=[APP_CONFIG.app.stage, headers.get("x-source-id") or "unknown"],
                 )
                 current_trace.set(trace)
 
@@ -94,12 +111,23 @@ async def chat(
                     },
                 }
 
-                result = await agent_graph.ainvoke(
-                    input=agent_payload,
-                    config=config,
-                )
-                logger.debug(f"Ответ сгенерирован. Его длина {len(result['final_answer'])} символов")
-            return AgentChatResponse(response=result["final_answer"])
+                try:
+                    result = await agent_graph.ainvoke(
+                        input=agent_payload,
+                        config=config,
+                    )
+                    final_answer = result["final_answer"]
+                    trace.update(output={"response": final_answer})
+                    logger.debug(f"Ответ сгенерирован. Его длина {len(final_answer)} символов")
+                    return AgentChatResponse(response=final_answer)
+                except Exception as e:
+                    trace.update(
+                        output={"error": str(e)},
+                        metadata={"error_type": e.__class__.__name__},
+                    )
+                    raise
+                finally:
+                    current_trace.set(None)
 
         except Exception as e:
             logger.critical(
