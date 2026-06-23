@@ -117,22 +117,3 @@ async def test_chat_rate_limit(async_client, monkeypatch, mock_headers):
     assert "42" in data["response"]
 
 
-@pytest.mark.anyio
-@pytest.mark.parametrize("greeting", ["привет", "Привет!", "Здравствуйте", "hello"])
-async def test_chat_greeting_fast_path(async_client, monkeypatch, mock_headers, greeting):
-    rate_limiter_mock = MagicMock()
-    rate_limiter_mock.check_and_increment.return_value = (True, 1)
-    monkeypatch.setattr(APP_CTX, "get_ratelimiter", AsyncMock(return_value=rate_limiter_mock))
-
-    # Ensure the agent graph is never built or invoked for greetings.
-    monkeypatch.setattr(APP_CTX, "get_postgres_client", AsyncMock)
-
-    payload = {"text": greeting, "organisation": "ППО Невинномысский Азот"}
-
-    response = await async_client.post("/api/v1/chat", json=payload, headers=mock_headers)
-
-    assert response.status_code == 200
-    data = response.json()
-    assert "Здравствуйте" in data["response"]
-    assert "ППО" not in data["response"]
-    assert "профсоюз" not in data["response"].lower()

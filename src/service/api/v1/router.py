@@ -13,11 +13,8 @@ from service.context import APP_CTX
 from service.logger.context_vars import current_trace
 
 from . import schemas
-from .greetings import is_greeting
 from .schemas import AgentChatRequest, AgentChatResponse, FailedDependecyResponse, YandexGPTAPITestResponse
 from .utils import common_headers
-
-STATIC_GREETING_RESPONSE = "Здравствуйте! Чем могу помочь?"
 
 router = APIRouter()
 logger = APP_CTX.get_logger()
@@ -68,10 +65,6 @@ async def chat(
     allowed, current = rate_limiter.check_and_increment(user_id=headers.get("x-user-id"))
     if allowed:
         logger.debug(f"Длина запроса на входе: {len(request.text)}")
-
-        if is_greeting(request.text):
-            logger.debug("Greeting detected; returning static fast-path response")
-            return AgentChatResponse(response=STATIC_GREETING_RESPONSE)
 
         agent_payload = {
             "user_id": headers.get("x-user-id"),
