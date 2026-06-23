@@ -68,8 +68,9 @@ async def test_chat_success(async_client, monkeypatch, mock_headers):
     postgres_mock.get_user_checkpointer.return_value = checkpointer_cm
     monkeypatch.setattr(APP_CTX, "get_postgres_client", AsyncMock(return_value=postgres_mock))
 
+    trace_mock = MagicMock()
     langfuse_mock = MagicMock()
-    langfuse_mock.client.trace.return_value = MagicMock()
+    langfuse_mock.client.trace.return_value = trace_mock
     monkeypatch.setattr(APP_CTX, "get_langfuse", AsyncMock(return_value=langfuse_mock))
 
     agent_mock = MagicMock()
@@ -95,6 +96,20 @@ async def test_chat_success(async_client, monkeypatch, mock_headers):
     graph_mock.ainvoke.assert_awaited_once()
     call_kwargs = graph_mock.ainvoke.call_args.kwargs
     assert call_kwargs["input"]["status"] == AgentStatus.ACTIVE
+
+    langfuse_mock.client.trace.assert_called_once()
+    trace_call_kwargs = langfuse_mock.client.trace.call_args.kwargs
+    assert trace_call_kwargs["name"] == "chat"
+    assert trace_call_kwargs["user_id"] == "test-user-id"
+    assert trace_call_kwargs["session_id"] == "test-trace-id"
+    assert trace_call_kwargs["input"]["organisation"] == "ППО Невинномысский Азот"
+    assert trace_call_kwargs["input"]["text"] == "Как вступить в профсоюз?"
+    assert trace_call_kwargs["metadata"]["source"] == "pytest"
+    assert "pytest" in trace_call_kwargs["tags"]
+
+    trace_mock.update.assert_called_once()
+    update_call_kwargs = trace_mock.update.call_args.kwargs
+    assert update_call_kwargs["output"]["response"] == "Это ответ агента"
 
 
 @pytest.mark.anyio
