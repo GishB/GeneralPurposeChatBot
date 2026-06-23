@@ -22,7 +22,7 @@ def _group_by_source(chunks: List[DocumentChunk]):
 
 def _collect_current_sources(root_dir: str) -> set[str]:
     root = Path(root_dir)
-    return {str(p) for p in root.rglob("*.docx")}
+    return {str(p.relative_to(root)).replace(os.sep, "/") for p in root.rglob("*.docx")}
 
 
 def sync_docx_directory_to_collection(
