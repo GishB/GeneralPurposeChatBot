@@ -131,7 +131,7 @@ def load_docx_with_metadata(
                 chunk_text = base_chunk_text
 
             metadata: dict[str, Any] = {
-                "source": str(path),
+                "source": rel_path_str,
                 "rel_path": rel_path_str,
                 "topic": topic,
                 "filename": path.name,
