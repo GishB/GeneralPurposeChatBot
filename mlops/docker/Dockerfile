@@ -13,7 +13,7 @@ ENV LC_ALL=en_US.UTF-8 \
     UV_HOME=/opt/app-root/uv \
     UV_VENV=/opt/app-root/.venv
 
-# Устанавливаем системные пакеты и uv через pip
+# Устанавливаем системные зависимости и uv
 RUN apt-get update && apt-get install -y curl ca-certificates build-essential libpq-dev && \
     pip install --no-cache-dir uv && \
     rm -rf /var/lib/apt/lists/*
