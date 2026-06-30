@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from langchain_core.prompts import ChatPromptTemplate
 from langfuse.callback import CallbackHandler
 
+from agents.profkom_consultant.progress import NODE_STEP_MESSAGES
 from agents.profkom_consultant.states import AgentState
 from agents.profkom_consultant.utils import parse_json_response
 from service.logger.context_vars import current_span, current_trace
@@ -16,12 +17,33 @@ class BaseAgentNodes:
         if trace:
             span = trace.span(name=name, input={"text": state.get("text", "")})
             current_span.set(span)
+        await self._report_step(state, name)
         try:
             yield span
         finally:
             if span:
                 span.end()
             current_span.set(None)
+
+    async def _report_step(self, state: AgentState, step_key: str) -> None:
+        """Сообщить о текущем шаге агента в job store (async handshake).
+
+        Args:
+            state: Текущее состояние агента;
+            step_key: Техническое имя ноды.
+        """
+        job_id = state.get("job_id")
+        if not job_id:
+            return
+        message = NODE_STEP_MESSAGES.get(step_key, "Обрабатываю ваш вопрос…")
+        try:
+            # Ленивый импорт, чтобы избежать циклического импорта на старте.
+            from service.context import APP_CTX
+
+            job_store = await APP_CTX.get_job_store()
+            await job_store.set_step(job_id, step_key, message)
+        except Exception as e:
+            self.logger.warning(f"Failed to report step {step_key} for job {job_id}: {e}")
 
     def _llm_config(self, span):
         if span:

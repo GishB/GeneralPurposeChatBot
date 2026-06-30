@@ -60,6 +60,7 @@ async def _run_generation_inline(body: AgentChatRequest, headers: dict) -> str:
         "user_id": headers.get("x-user-id"),
         "text": body.organisation + " | " + body.text,
         "status": AgentStatus.ACTIVE,
+        "job_id": headers.get("x-trace-id"),
     }
 
     client = await APP_CTX.get_postgres_client()
@@ -265,11 +266,13 @@ async def chat_status(job_id: str, headers: dict = Depends(common_headers)):
         ).model_dump()
 
     if job["status"] == "processing":
+        step_message = job.get("current_step_message") or _progress_message(elapsed_ms)
         return ChatJobStatusResponse(
             status="processing",
             job_id=job_id,
             elapsed_ms=elapsed_ms,
-            message=_progress_message(elapsed_ms),
+            message=step_message,
+            current_step=job.get("current_step"),
         ).model_dump()
 
     if job["status"] == "done":
@@ -277,6 +280,7 @@ async def chat_status(job_id: str, headers: dict = Depends(common_headers)):
             status="done",
             job_id=job_id,
             response=job.get("response"),
+            current_step=job.get("current_step"),
         ).model_dump()
 
     return ChatJobStatusResponse(
@@ -284,4 +288,5 @@ async def chat_status(job_id: str, headers: dict = Depends(common_headers)):
         job_id=job_id,
         code=job.get("code"),
         error=job.get("error"),
+        current_step=job.get("current_step"),
     ).model_dump()
