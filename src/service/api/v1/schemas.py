@@ -2,6 +2,8 @@
 Здесь расположены Pydantic модели для описания ответов, тел запросов, возвращаемых ошибок и т.д.
 """
 
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 
@@ -33,6 +35,25 @@ class AgentChatResponse(BaseModel):
 
     class Config:
         extra = "forbid"
+
+
+class ChatJobAccepted(BaseModel):
+    """Ответ на асинхронный запрос создания задачи генерации."""
+
+    job_id: str = Field(..., description="Идентификатор задачи, равен x-trace-id")
+    status: Literal["processing"] = Field(default="processing")
+
+
+class ChatJobStatusResponse(BaseModel):
+    """Текущий статус асинхронной задачи генерации."""
+
+    status: Literal["processing", "done", "error", "not_found"]
+    job_id: str | None = Field(default=None)
+    elapsed_ms: int | None = Field(default=None)
+    message: str | None = Field(default=None)
+    response: str | None = Field(default=None)
+    code: str | None = Field(default=None)
+    error: str | None = Field(default=None)
 
 
 class FailedDependecyResponse(BaseModel):

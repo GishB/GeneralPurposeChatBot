@@ -33,6 +33,11 @@ class AppSettings(BaseAppSettings):
     name: str = Field(validation_alias="PROJECT_NAME", default="KarlMarksAlive")
     timezone: str = Field(validation_alias="TIMEZONE", default="Europe/Moscow")
     stage: str = Field(validation_alias="STAGE", default="dev")
+    chat_max_generation_seconds: int = Field(
+        validation_alias="CHAT_MAX_GENERATION_SECONDS", default=300
+    )
+    chat_job_ttl_seconds: int = Field(validation_alias="CHAT_JOB_TTL_SECONDS", default=900)
+    chat_job_redis_db: int = Field(validation_alias="CHAT_JOB_REDIS_DB", default=3)
 
 
 class LogSettings(BaseAppSettings):
@@ -98,6 +103,8 @@ class LLMSettings(BaseAppSettings):
 
     openrouter_referer: str = Field(validation_alias="OPENROUTER_REFERER", default="")
     openrouter_title: str = Field(validation_alias="OPENROUTER_TITLE", default="UnionChatBot")
+    openrouter_provider_order: str = Field(validation_alias="OPENROUTER_PROVIDER_ORDER", default="")
+    openrouter_allow_fallbacks: bool = Field(validation_alias="OPENROUTER_ALLOW_FALLBACKS", default=True)
 
     fallback_llm_model_name: str = Field(validation_alias="FALLBACK_LLM_MODEL_NAME", default="yandexgpt")
     fallback_llm_api_base: str = Field(
@@ -147,6 +154,28 @@ class LLMSettings(BaseAppSettings):
             return {"reasoning": {"enabled": False}}
         return {"reasoning": {"effort": effort}}
 
+    @property
+    def openrouter_extra_body(self) -> dict | None:
+        """Дополнительное тело запроса для OpenRouter.
+
+        Включает провайдер-роутинг и отключение reasoning.
+        """
+        extra: dict[str, Any] = {}
+        if self.openrouter_provider_order:
+            extra["provider"] = {
+                "order": [p.strip() for p in self.openrouter_provider_order.split(",") if p.strip()],
+                "allow_fallbacks": self.openrouter_allow_fallbacks,
+            }
+        reasoning = self._reasoning_extra_body(self.reasoning_effort)
+        if reasoning:
+            extra.update(reasoning)
+        return extra if extra else None
+
+    @property
+    def openrouter_extra_body_no_provider(self) -> dict | None:
+        """extra_body без провайдер-роутинга — для моделей с дефолтным провайдером."""
+        return self._reasoning_extra_body(self.reasoning_effort)
+
     def base_params_with_reasoning(self, effort: str) -> dict:
         """base_params с заданным уровнем reasoning (только для primary/OpenRouter)."""
         params = {
@@ -156,7 +185,7 @@ class LLMSettings(BaseAppSettings):
             "openai_api_base": self.api_base,
             "max_retries": self.max_retries,
         }
-        extra_body = self._reasoning_extra_body(effort)
+        extra_body = self.openrouter_extra_body
         if extra_body is not None:
             params["extra_body"] = extra_body
         headers = {}
@@ -188,7 +217,7 @@ class LLMSettings(BaseAppSettings):
             "openai_api_base": self.api_base,
             "max_retries": self.max_retries,
         }
-        extra_body = self._reasoning_extra_body(self.validation_reasoning_effort)
+        extra_body = self.openrouter_extra_body_no_provider
         if extra_body is not None:
             params["extra_body"] = extra_body
         headers = {}
