@@ -47,9 +47,10 @@ def pytest_configure(config) -> None:
     config.addinivalue_line("markers", "integration: integration tests against real services")
     config.addinivalue_line("markers", "local: runnable locally with testcontainers")
     config.addinivalue_line("markers", "cluster: requires kubectl port-forward to k8s services")
-    config.addinivalue_line("markers", "yandex: calls real YandexGPT API (may incur costs)")
+    config.addinivalue_line("markers", "yandex: legacy marker, kept for compatibility")
+    config.addinivalue_line("markers", "llm: calls real LLM API (may incur costs)")
     config.addinivalue_line("markers", "langfuse: requires running Langfuse instance")
-    config.addinivalue_line("markers", "chroma: requires ChromaDB instance")
+    config.addinivalue_line("markers", "chroma: requires running ChromaDB instance")
 
 
 @pytest.fixture(scope="session")
@@ -227,17 +228,18 @@ def langfuse_settings(integration_mode: str) -> "LangFuseSettings | None":
 
 
 @pytest.fixture(scope="session")
-def yandex_settings() -> "YandexGPTSettings":
-    """YandexGPT settings from environment."""
-    from service.config import YandexGPTSettings
+def llm_settings() -> "LLMSettings":
+    """LLM settings from environment (OpenRouter by default)."""
+    from service.config import LLMSettings
 
-    return YandexGPTSettings(
-        MODEL_NAME=os.getenv("MODEL_NAME", "yandexgpt"),
-        TEMPERATURE=float(os.getenv("TEMPERATURE", "0.1")),
+    return LLMSettings(
+        LLM_MODEL_NAME=os.getenv("LLM_MODEL_NAME", "deepseek/deepseek-chat"),
+        LLM_TEMPERATURE=float(os.getenv("LLM_TEMPERATURE", "0.1")),
         LLM_MAX_RETRIES=int(os.getenv("LLM_MAX_RETRIES", "3")),
-        OPENAI_API_KEY=os.getenv("OPENAI_API_KEY", ""),
-        OPENAI_FOLDER_ID=os.getenv("OPENAI_FOLDER_ID", ""),
-        OPENAI_API_BASE=os.getenv("OPENAI_API_BASE", "https://llm.api.cloud.yandex.net/v1"),
+        LLM_API_KEY=os.getenv("LLM_API_KEY", ""),
+        LLM_API_BASE=os.getenv("LLM_API_BASE", "https://openrouter.ai/api/v1"),
+        OPENROUTER_REFERER=os.getenv("OPENROUTER_REFERER", ""),
+        OPENROUTER_TITLE=os.getenv("OPENROUTER_TITLE", "UnionChatBot"),
     )
 
 
@@ -329,12 +331,12 @@ def mock_embeddings(integration_mode: str):
     the existing ``llmcache`` index in Redis Stack.
     """
     if integration_mode == "cluster":
-        from langchain_community.embeddings.yandex import YandexGPTEmbeddings
         from service.config import APP_CONFIG
+        from langchain_community.embeddings.yandex import YandexGPTEmbeddings
 
         return YandexGPTEmbeddings(
-            folder_id=APP_CONFIG.llm.openai_folder_id,
-            iam_token=APP_CONFIG.llm.openai_api_key,
+            folder_id=APP_CONFIG.chroma.openai_folder_id,
+            iam_token=APP_CONFIG.chroma.openai_api_key,
         )
 
     from langchain_core.embeddings import FakeEmbeddings

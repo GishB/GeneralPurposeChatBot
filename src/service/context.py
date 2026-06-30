@@ -1,10 +1,10 @@
 import pytz
 from langchain_community.embeddings.yandex import YandexGPTEmbeddings
-from langchain_openai import ChatOpenAI
 
 from agents.profkom_consultant import UnionAgent
 from modules.chroma_ext import ChromaAdapter
 from modules.langfuse_ext import LangfuseClient
+from modules.llm_ext import FallbackChatOpenAI
 from modules.postgres_ext import PostgresClient
 from modules.redis_ext import RedisAdapter, UserRateLimiter
 from service.base import Singleton
@@ -29,7 +29,7 @@ class AppContext(metaclass=Singleton):
     def profkom_agent(self):
         return UnionAgent(
             logger=self.logger,
-            llms={"default": ChatOpenAI(**self.get_yandexgpt_base_params())},
+            llms={"default": self.fallback_llm, "reasoning": self.reasoning_llm},
             cache=self.redis_ext,
             langfuse_client=self.langfuse_ext.client,
             chroma_client=self.chroma_ext,
@@ -37,6 +37,23 @@ class AppContext(metaclass=Singleton):
                 "COLLECTION_NAME": self._chroma_base_params.collection_name,
                 "HISTORY_LIMIT": self._postgres_base_params.history_limit,
             },
+        )
+
+    @property
+    def fallback_llm(self):
+        return FallbackChatOpenAI(
+            primary_params=self.get_llm_base_params(),
+            fallback_params=self._llm_base_params.fallback_params,
+            logger=self.logger,
+        )
+
+    @property
+    def reasoning_llm(self):
+        """LLM с включённым reasoning (low) — только для нод summary и критики."""
+        return FallbackChatOpenAI(
+            primary_params=self._llm_base_params.reasoning_node_params,
+            fallback_params=self._llm_base_params.fallback_params,
+            logger=self.logger,
         )
 
     @property
@@ -69,16 +86,16 @@ class AppContext(metaclass=Singleton):
         )
 
     @property
-    def yandexgpt_embeddings_client(self):
+    def embeddings_client(self):
         return YandexGPTEmbeddings(
-            folder_id=self._yandexgpt_base_params.openai_folder_id, iam_token=self._yandexgpt_base_params.openai_api_key
+            folder_id=self._chroma_base_params.openai_folder_id, iam_token=self._chroma_base_params.openai_api_key
         )
 
     @property
     def redis_ext(self):
         return RedisAdapter(
             logger=self.logger,
-            embeddings=self.yandexgpt_embeddings_client,
+            embeddings=self.embeddings_client,
             redis_url=self._redis_base_params.redis_url,
             redis_threshold=self._redis_base_params.redis_threshold,
             redis_ttl=self._redis_base_params.redis_ttl,
@@ -101,12 +118,12 @@ class AppContext(metaclass=Singleton):
         self._langfuse_base_params = secrets.langfuse
         self._postgres_base_params = secrets.postgres
         self._chroma_base_params = secrets.chroma
-        self._yandexgpt_base_params = secrets.llm
+        self._llm_base_params = secrets.llm
         self._redis_base_params = secrets.redis
 
         self._langfuse_client: LangfuseClient | None = None
         self._chroma_client: ChromaAdapter | None = None
-        self._yandexgpt_embeddings: YandexGPTEmbeddings | None = None
+        self._embeddings: YandexGPTEmbeddings | None = None
         self._redis_ext: RedisAdapter | None = None
         self._postgres_ext: PostgresClient | None = None
         self._profkom_agent: UnionAgent | None = None
@@ -140,10 +157,10 @@ class AppContext(metaclass=Singleton):
             self._redis_ext = self.redis_ext
         return self._redis_ext
 
-    async def get_yandexgpt_embeddings(self):
-        if not self._yandexgpt_embeddings:
-            self._yandexgpt_embeddings = self.yandexgpt_embeddings_client
-        return self._yandexgpt_embeddings
+    async def get_embeddings(self):
+        if not self._embeddings:
+            self._embeddings = self.embeddings_client
+        return self._embeddings
 
     def get_agent(self) -> UnionAgent:
         """Simple get for Agent Graph.
@@ -161,8 +178,8 @@ class AppContext(metaclass=Singleton):
             await self._postgres_ext.ensure_pool()
         return self._postgres_ext
 
-    def get_yandexgpt_base_params(self):
-        return self._yandexgpt_base_params.base_params
+    def get_llm_base_params(self):
+        return self._llm_base_params.base_params
 
     def get_context_vars_container(self):
         return self.context_vars_container
@@ -185,7 +202,7 @@ class AppContext(metaclass=Singleton):
 
         self.get_agent()
 
-        await self.get_yandexgpt_embeddings()
+        await self.get_embeddings()
         self.logger.info("All connections checked. Application is up and ready.")
 
     async def on_shutdown(self):

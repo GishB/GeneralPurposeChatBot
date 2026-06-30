@@ -4,16 +4,16 @@
 
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
-from langchain_openai import ChatOpenAI
 
 # from langgraph.checkpoint.memory import MemorySaver
 from agents.profkom_consultant import AgentStatus, build_builder
+from modules.llm_ext import FallbackChatOpenAI
 from service.config import APP_CONFIG
 from service.context import APP_CTX
 from service.logger.context_vars import current_trace
 
 from . import schemas
-from .schemas import AgentChatRequest, AgentChatResponse, FailedDependecyResponse, YandexGPTAPITestResponse
+from .schemas import AgentChatRequest, AgentChatResponse, FailedDependecyResponse, LLMAPITestResponse
 from .utils import common_headers
 
 router = APIRouter()
@@ -23,23 +23,27 @@ logger = APP_CTX.get_logger()
 @router.post(
     "/test_invoke",
     status_code=status.HTTP_200_OK,
-    response_model=YandexGPTAPITestResponse,
+    response_model=LLMAPITestResponse,
     responses={
         status.HTTP_424_FAILED_DEPENDENCY: {
-            "description": "Ошибка при попытке обратиться к YandexGPTAPI",
+            "description": "Ошибка при попытке обратиться к LLM API",
             "model": schemas.FailedDependecyResponse,
         },
     },
 )
-async def yandex_gptapi_test(
-    request: schemas.YandexGPTAPITestRequest,
+async def llm_api_test(
+    request: schemas.LLMAPITestRequest,
     headers: dict = Depends(common_headers),
-    yandexgpt_base_params=Depends(APP_CTX.get_yandexgpt_base_params),
+    llm_base_params=Depends(APP_CTX.get_llm_base_params),
 ):
-    yandexgpt_client = ChatOpenAI(**yandexgpt_base_params)
+    llm_client = FallbackChatOpenAI(
+        primary_params=llm_base_params,
+        fallback_params=APP_CONFIG.llm.fallback_params,
+        logger=logger,
+    )
     logger.debug(f"Generation an answer based on the givern question... for {headers.get('header_x_user_id')}")
     try:
-        answer = yandexgpt_client.invoke(request.question)
+        answer = llm_client.invoke(request.question)
         logger.debug(f"Generated answer: {answer}")
     except Exception as e:
         logger.error(f"Generation an answer failed with exception: {e}")
@@ -47,7 +51,7 @@ async def yandex_gptapi_test(
             status_code=status.HTTP_424_FAILED_DEPENDENCY,
             content=FailedDependecyResponse(error_description=str(e)).model_dump(),
         )
-    return schemas.YandexGPTAPITestResponse(answer=answer.content)
+    return schemas.LLMAPITestResponse(answer=answer.content)
 
 
 @router.post("/chat", status_code=status.HTTP_200_OK, response_model=AgentChatResponse)

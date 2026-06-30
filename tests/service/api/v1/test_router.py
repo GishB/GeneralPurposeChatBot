@@ -17,7 +17,7 @@ async def test_test_invoke_success(async_client, monkeypatch, mock_headers):
     router_module = sys.modules["service.api.v1.router"]
     monkeypatch.setattr(
         router_module,
-        "ChatOpenAI",
+        "FallbackChatOpenAI",
         lambda **kwargs: MagicMock(invoke=lambda question: FakeMessage("Mocked answer")),
     )
 
@@ -36,12 +36,12 @@ async def test_test_invoke_success(async_client, monkeypatch, mock_headers):
 @pytest.mark.anyio
 async def test_test_invoke_failed_dependency(async_client, monkeypatch, mock_headers):
     def _raise(*args, **kwargs):
-        raise RuntimeError("YandexGPT down")
+        raise RuntimeError("LLM down")
 
     router_module = sys.modules["service.api.v1.router"]
     monkeypatch.setattr(
         router_module,
-        "ChatOpenAI",
+        "FallbackChatOpenAI",
         lambda **kwargs: MagicMock(invoke=_raise),
     )
 
@@ -50,7 +50,7 @@ async def test_test_invoke_failed_dependency(async_client, monkeypatch, mock_hea
 
     assert response.status_code == 424
     data = response.json()
-    assert "YandexGPT down" in data["error_description"]
+    assert "LLM down" in data["error_description"]
 
 
 @pytest.mark.anyio

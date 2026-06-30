@@ -39,7 +39,7 @@ def test_chat_endpoint_smoke(http_client):
     """``POST /api/v1/chat`` returns a response without hitting rate limit.
 
     This is a smoke test: it checks that the full pipeline (Redis, Postgres,
-    Langfuse, Chroma, YandexGPT) is wired together. The exact answer content is
+    Langfuse, Chroma, LLM) is wired together. The exact answer content is
     not asserted.
     """
     user_id = "integration-test-user"

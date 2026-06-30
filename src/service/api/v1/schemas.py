@@ -41,25 +41,25 @@ class FailedDependecyResponse(BaseModel):
     )
 
 
-class YandexGPTAPITestResponse(BaseModel):
+class LLMAPITestResponse(BaseModel):
     """
     Ответ для роута /test_invoke
     """
 
-    answer: str = Field(description="Ответ от YandexGPTAPI на вопрос пользователя")
+    answer: str = Field(description="Ответ от LLM API на вопрос пользователя")
 
 
-class YandexGPTAPITestRequest(BaseModel):
+class LLMAPITestRequest(BaseModel):
     question: str = Field(
-        description="Вопрос к GigaChat от пользователя", min_length=4, max_length=500, examples=["Кто ты воин?"]
+        description="Вопрос к LLM от пользователя", min_length=4, max_length=500, examples=["Кто ты воин?"]
     )
 
     generation_params: dict | None = Field(
-        description="Параметры для генерации ответа YandexGPTAPI.",
+        description="Параметры для генерации ответа LLM API.",
         default={},
         examples=[
             {
-                "model": "yandexgpt",
+                "model": "deepseek/deepseek-chat",
                 "temperature": 0.32,
                 "max_tokens": 2048,
                 "top_p": 0.16,

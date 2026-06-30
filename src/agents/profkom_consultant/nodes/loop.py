@@ -23,7 +23,7 @@ class ThinkTwiceNodes:
         async with self._node_span("check_user_answer", state) as span:
             prompt = self.langfuse_client.get_prompt("check_user_answer").get_langchain_prompt()
             prompt = ChatPromptTemplate.from_template(prompt)
-            chain = prompt | self.llm
+            chain = prompt | self.reasoning_llm
             response = await chain.ainvoke(
                 {
                     "question": state["text"],
