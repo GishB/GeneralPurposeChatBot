@@ -20,3 +20,8 @@ class AgentState(TypedDict, total=False):
     # loop-контроля
     status: AgentStatus
     counter_loop: int
+
+    # async handshake
+    job_id: str | None
+    current_step: str | None
+    current_step_message: str | None

@@ -58,13 +58,17 @@ class ChatJobStore:
             self.logger.debug(f"ChatJobStore create {job_id}: created={bool(created)}")
         return bool(created)
 
+    async def set_step(self, job_id: str, step_key: str, message: str) -> None:
+        """Обновить человекочитаемый шаг выполнения задачи."""
+        await self._patch(job_id, current_step=step_key, current_step_message=message)
+
     async def set_done(self, job_id: str, response: str) -> None:
         """Отметить задачу как выполненную и сохранить ответ."""
-        await self._patch(job_id, status="done", response=response)
+        await self._patch(job_id, status="done", response=response, current_step="done", current_step_message="Ответ готов")
 
     async def set_error(self, job_id: str, code: str, error: str) -> None:
         """Отметить задачу как завершившуюся с ошибкой."""
-        await self._patch(job_id, status="error", code=code, error=error)
+        await self._patch(job_id, status="error", code=code, error=error, current_step="error", current_step_message="Произошла ошибка")
 
     async def get(self, job_id: str) -> dict[str, Any] | None:
         """Получить текущий статус задачи."""

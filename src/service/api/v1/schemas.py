@@ -51,6 +51,7 @@ class ChatJobStatusResponse(BaseModel):
     job_id: str | None = Field(default=None)
     elapsed_ms: int | None = Field(default=None)
     message: str | None = Field(default=None)
+    current_step: str | None = Field(default=None)
     response: str | None = Field(default=None)
     code: str | None = Field(default=None)
     error: str | None = Field(default=None)

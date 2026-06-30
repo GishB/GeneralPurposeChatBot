@@ -142,6 +142,8 @@ async def test_chat_async_creates_job_and_returns_status(async_client, monkeypat
                 "code": None,
                 "user_id": user_id,
                 "organisation": organisation,
+                "current_step": None,
+                "current_step_message": None,
             }
             return True
 
@@ -153,6 +155,10 @@ async def test_chat_async_creates_job_and_returns_status(async_client, monkeypat
             job_state[job_id]["status"] = "error"
             job_state[job_id]["code"] = code
             job_state[job_id]["error"] = error
+
+        async def set_step(self, job_id, step_key, message):
+            job_state[job_id]["current_step"] = step_key
+            job_state[job_id]["current_step_message"] = message
 
         async def get(self, job_id):
             return job_state.get(job_id)
