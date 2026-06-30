@@ -259,6 +259,35 @@ async def test_chat_status_not_found(async_client, monkeypatch, async_headers):
 
 
 @pytest.mark.anyio
+async def test_chat_status_without_user_id_header(async_client, monkeypatch, async_headers):
+    """GET-опрос статуса не должен требовать x-user-id и не должен возвращать 422.
+
+    Backend опрашивает статус только по job_id и не присылает x-user-id на GET.
+    """
+    rate_limiter_mock = MagicMock()
+    rate_limiter_mock.check_and_increment.return_value = (True, 1)
+    monkeypatch.setattr(APP_CTX, "get_ratelimiter", AsyncMock(return_value=rate_limiter_mock))
+
+    class FakeJobStore:
+        async def get(self, job_id):
+            return None
+
+        async def health_check(self):
+            return True
+
+    monkeypatch.setattr(APP_CTX, "get_job_store", AsyncMock(return_value=FakeJobStore()))
+
+    # Заголовки без x-user-id — именно так backend опрашивает статус.
+    poll_headers = {k: v for k, v in async_headers.items() if k != "x-user-id"}
+
+    response = await async_client.get("/api/v1/chat/non-existent", headers=poll_headers)
+
+    assert response.status_code != 422
+    assert response.status_code == 404
+    assert response.json()["status"] == "not_found"
+
+
+@pytest.mark.anyio
 async def test_chat_rate_limit(async_client, monkeypatch, mock_headers):
     rate_limiter_mock = MagicMock()
     rate_limiter_mock.check_and_increment.return_value = (False, 10)
