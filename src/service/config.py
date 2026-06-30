@@ -2,8 +2,8 @@ import os
 from logging import DEBUG, INFO
 
 from dotenv import find_dotenv, load_dotenv
-from pydantic import Field, field_validator
-from pydantic_settings import BaseSettings
+from pydantic import Field, field_validator, model_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 load_dotenv(find_dotenv())
 
@@ -12,6 +12,8 @@ class BaseAppSettings(BaseSettings):
     """
     Базовый класс для настроек.
     """
+
+    model_config = SettingsConfigDict(populate_by_name=True)
 
     local: bool = Field(validation_alias="LOCAL", default=False)
     debug: bool = Field(validation_alias="DEBUG", default=False)
@@ -82,31 +84,102 @@ class LogSettings(BaseAppSettings):
         return DEBUG if self.debug else INFO
 
 
-class YandexGPTSettings(BaseAppSettings):
+class LLMSettings(BaseAppSettings):
     """
-    Настройки YandexGPTFoundation models.
+    Настройки провайдера LLM (OpenRouter / DeepSeek / OpenAI-совместимые API).
     """
 
-    model_name: str = Field(validation_alias="MODEL_NAME", default="yandexgpt")
-    temperature: float = Field(validation_alias="TEMPERATURE", default=0.1)
+    model_name: str = Field(validation_alias="LLM_MODEL_NAME", default="deepseek/deepseek-chat")
+    temperature: float = Field(validation_alias="LLM_TEMPERATURE", default=0.1)
     max_retries: int = Field(validation_alias="LLM_MAX_RETRIES", default=5)
-    # profanity_check: bool = Field(validation_alias="PROFANCIE_CHECK", default=False)
 
-    openai_api_key: str = Field(validation_alias="OPENAI_API_KEY", default="")
-    openai_folder_id: str = Field(validation_alias="OPENAI_FOLDER_ID", default="")
-    openai_api_base: str = Field(validation_alias="OPENAI_API_BASE", default="https://llm.api.cloud.yandex.net/v1")
+    api_key: str = Field(validation_alias="LLM_API_KEY", default="")
+    api_base: str = Field(validation_alias="LLM_API_BASE", default="https://openrouter.ai/api/v1")
 
-    @property
-    def model(self):
-        return f"gpt://{self.openai_folder_id}/{self.model_name}"
+    openrouter_referer: str = Field(validation_alias="OPENROUTER_REFERER", default="")
+    openrouter_title: str = Field(validation_alias="OPENROUTER_TITLE", default="UnionChatBot")
+
+    fallback_llm_model_name: str = Field(validation_alias="FALLBACK_LLM_MODEL_NAME", default="yandexgpt")
+    fallback_llm_api_base: str = Field(
+        validation_alias="FALLBACK_LLM_API_BASE", default="https://llm.api.cloud.yandex.net/v1"
+    )
+
+    @model_validator(mode="before")
+    @classmethod
+    def _fallback_to_openai_env(cls, data):
+        """Поддержка старых переменных OPENAI_* для обратной совместимости."""
+        if isinstance(data, dict):
+            if not data.get("LLM_API_KEY") and not data.get("api_key"):
+                data["LLM_API_KEY"] = os.getenv("OPENAI_API_KEY", "")
+            if not data.get("LLM_API_BASE") and not data.get("api_base"):
+                data["LLM_API_BASE"] = os.getenv("OPENAI_API_BASE", "https://openrouter.ai/api/v1")
+            if not data.get("LLM_MODEL_NAME") and not data.get("model_name"):
+                data["LLM_MODEL_NAME"] = os.getenv("MODEL_NAME", "deepseek/deepseek-chat")
+        return data
+
+    reasoning_effort: str = Field(validation_alias="LLM_REASONING_EFFORT", default="none")
+    reasoning_effort_summary_critique: str = Field(
+        validation_alias="LLM_REASONING_EFFORT_SUMMARY_CRITIQUE", default="low"
+    )
+
+    @staticmethod
+    def _reasoning_extra_body(effort: str) -> dict | None:
+        """OpenRouter `reasoning` для заданного уровня усилий.
+
+        Args:
+            effort: "none"/"off" — выключить reasoning; "minimal"/"low"/"medium"/"high" —
+                задать бюджет; "" — оставить дефолт модели.
+
+        Returns:
+            extra_body для ChatOpenAI или None, если параметр слать не нужно.
+        """
+        effort = (effort or "").strip().lower()
+        if not effort:
+            return None
+        if effort in ("none", "off", "disabled", "false"):
+            return {"reasoning": {"enabled": False}}
+        return {"reasoning": {"effort": effort}}
+
+    def base_params_with_reasoning(self, effort: str) -> dict:
+        """base_params с заданным уровнем reasoning (только для primary/OpenRouter)."""
+        params = {
+            "model": self.model_name,
+            "temperature": self.temperature,
+            "openai_api_key": self.api_key,
+            "openai_api_base": self.api_base,
+            "max_retries": self.max_retries,
+        }
+        extra_body = self._reasoning_extra_body(effort)
+        if extra_body is not None:
+            params["extra_body"] = extra_body
+        headers = {}
+        if self.openrouter_referer:
+            headers["HTTP-Referer"] = self.openrouter_referer
+        if self.openrouter_title:
+            headers["X-Title"] = self.openrouter_title
+        if headers:
+            params["default_headers"] = headers
+        return params
 
     @property
     def base_params(self):
+        """Параметры primary-LLM по умолчанию (reasoning отключён)."""
+        return self.base_params_with_reasoning(self.reasoning_effort)
+
+    @property
+    def reasoning_node_params(self):
+        """Параметры primary-LLM для нод summary/критики (reasoning low)."""
+        return self.base_params_with_reasoning(self.reasoning_effort_summary_critique)
+
+    @property
+    def fallback_params(self):
+        if not self.fallback_llm_api_base or not self.fallback_llm_model_name:
+            return None
         return {
-            "model": self.model,
+            "model": self.fallback_llm_model_name,
             "temperature": self.temperature,
-            "openai_api_key": self.openai_api_key,
-            "openai_api_base": self.openai_api_base,
+            "openai_api_key": os.getenv("OPENAI_API_KEY", ""),
+            "openai_api_base": self.fallback_llm_api_base,
             "max_retries": self.max_retries,
         }
 
@@ -223,7 +296,7 @@ class Secrets:
     """
 
     app: AppSettings = AppSettings()
-    llm: YandexGPTSettings = YandexGPTSettings()
+    llm: LLMSettings = LLMSettings()
     postgres: PostgreSettings = PostgreSettings()
     log: LogSettings = LogSettings()
     chroma: ChromaSettings = ChromaSettings()

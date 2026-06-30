@@ -12,7 +12,7 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3.12",
 ]
-keywords = ["YandexGPT API", "LLM", "RAG", "LangChain"]
+keywords = ["OpenRouter", "DeepSeek", "LLM", "RAG", "LangChain"]
 dependencies = [
     "scikit-learn>=1.8.0",
     "fastapi~=0.121.2",
@@ -76,7 +76,8 @@ markers = [
     "integration: integration tests against real services",
     "local: runnable locally with testcontainers",
     "cluster: requires kubectl port-forward to k8s services",
-    "yandex: calls real YandexGPT API (may incur costs)",
+    "yandex: legacy marker, kept for compatibility",
+    "llm: calls real LLM API (may incur costs)",
     "langfuse: requires running Langfuse instance",
     "chroma: requires ChromaDB instance",
 ]

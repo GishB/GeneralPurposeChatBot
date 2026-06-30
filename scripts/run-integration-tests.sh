@@ -5,8 +5,8 @@
 #   bash scripts/run-integration-tests.sh
 #   bash scripts/run-integration-tests.sh -k test_postgres
 #
-# The script fetches YandexGPT, Langfuse, Postgres and Redis credentials from
-# k8s ConfigMap/Secret if they are not already exported.
+# The script fetches LLM (OpenRouter), Yandex embeddings, Langfuse, Postgres and
+# Redis credentials from k8s ConfigMap/Secret if they are not already exported.
 
 set -euo pipefail
 
@@ -30,8 +30,14 @@ fetch_secret() {
   kubectl get secret "${secret}" -n "${ns}" -o "jsonpath={.data.${key}}" | base64 -d
 }
 
+if [[ -z "${LLM_API_KEY:-}" ]]; then
+  echo "[setup] Fetching LLM API key from k8s secret ${NAMESPACE}/unionchatbot-env"
+  export LLM_API_KEY
+  LLM_API_KEY="$(fetch_secret "${NAMESPACE}" "unionchatbot-env" "LLM_API_KEY")"
+fi
+
 if [[ -z "${OPENAI_API_KEY:-}" || -z "${OPENAI_FOLDER_ID:-}" ]]; then
-  echo "[setup] Fetching YandexGPT credentials from k8s secret ${NAMESPACE}/unionchatbot-env"
+  echo "[setup] Fetching Yandex embeddings credentials from k8s secret ${NAMESPACE}/unionchatbot-env"
   export OPENAI_API_KEY
   export OPENAI_FOLDER_ID
   OPENAI_API_KEY="$(fetch_secret "${NAMESPACE}" "unionchatbot-env" "OPENAI_API_KEY")"
