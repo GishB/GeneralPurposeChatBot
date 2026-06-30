@@ -52,7 +52,7 @@ class BaseAgentNodes:
                     prompt = ChatPromptTemplate.from_template(
                         self.langfuse_client.get_prompt("policy_validation").get_langchain_prompt()  # TO DO: FIX
                     )
-                    chain = prompt | self.llm
+                    chain = prompt | self.validation_llm
                     output = await chain.ainvoke({"text": state["text"]}, config=self._llm_config(span))
                     output = output.content.strip().lower()
                     self.logger.info(f"Output: {output}")
@@ -97,7 +97,7 @@ class BaseAgentNodes:
                 else:
                     prompt = self.langfuse_client.get_prompt("policy_validation").get_langchain_prompt()
                     prompt = ChatPromptTemplate.from_template(prompt)
-                    chain = prompt | self.llm
+                    chain = prompt | self.validation_llm
                     output = await chain.ainvoke({"text": final_answer}, config=self._llm_config(span))
 
                     output_text = output.content.strip()

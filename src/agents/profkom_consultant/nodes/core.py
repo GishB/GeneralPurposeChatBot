@@ -26,6 +26,7 @@ class UnionAgent(BaseAgentNodes, ThinkTwiceNodes):
         self.logger.info(f"Initializing {__name__}")
         self.llm = llms.get("default")
         self.reasoning_llm = llms.get("reasoning") or self.llm
+        self.validation_llm = llms.get("validation") or self.llm
         self.logger.info(f"LLM keys {llms.keys()}")
 
         self.cache = cache

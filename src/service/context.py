@@ -29,7 +29,11 @@ class AppContext(metaclass=Singleton):
     def profkom_agent(self):
         return UnionAgent(
             logger=self.logger,
-            llms={"default": self.fallback_llm, "reasoning": self.reasoning_llm},
+            llms={
+                "default": self.fallback_llm,
+                "reasoning": self.reasoning_llm,
+                "validation": self.validation_llm,
+            },
             cache=self.redis_ext,
             langfuse_client=self.langfuse_ext.client,
             chroma_client=self.chroma_ext,
@@ -52,6 +56,15 @@ class AppContext(metaclass=Singleton):
         """LLM с включённым reasoning (low) — только для нод summary и критики."""
         return FallbackChatOpenAI(
             primary_params=self._llm_base_params.reasoning_node_params,
+            fallback_params=self._llm_base_params.fallback_params,
+            logger=self.logger,
+        )
+
+    @property
+    def validation_llm(self):
+        """Быстрая LLM для нод валидации (вход/выход) — без reasoning."""
+        return FallbackChatOpenAI(
+            primary_params=self._llm_base_params.validation_params,
             fallback_params=self._llm_base_params.fallback_params,
             logger=self.logger,
         )

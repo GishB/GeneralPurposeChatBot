@@ -122,6 +122,13 @@ class LLMSettings(BaseAppSettings):
         validation_alias="LLM_REASONING_EFFORT_SUMMARY_CRITIQUE", default="low"
     )
 
+    validation_model_name: str = Field(
+        validation_alias="LLM_VALIDATION_MODEL_NAME", default="nvidia/nemotron-3-nano-30b-a3b"
+    )
+    validation_reasoning_effort: str = Field(
+        validation_alias="LLM_VALIDATION_REASONING_EFFORT", default="none"
+    )
+
     @staticmethod
     def _reasoning_extra_body(effort: str) -> dict | None:
         """OpenRouter `reasoning` для заданного уровня усилий.
@@ -170,6 +177,28 @@ class LLMSettings(BaseAppSettings):
     def reasoning_node_params(self):
         """Параметры primary-LLM для нод summary/критики (reasoning low)."""
         return self.base_params_with_reasoning(self.reasoning_effort_summary_critique)
+
+    @property
+    def validation_params(self):
+        """Параметры LLM для нод валидации (быстрая/cheap модель, reasoning off)."""
+        params = {
+            "model": self.validation_model_name,
+            "temperature": self.temperature,
+            "openai_api_key": self.api_key,
+            "openai_api_base": self.api_base,
+            "max_retries": self.max_retries,
+        }
+        extra_body = self._reasoning_extra_body(self.validation_reasoning_effort)
+        if extra_body is not None:
+            params["extra_body"] = extra_body
+        headers = {}
+        if self.openrouter_referer:
+            headers["HTTP-Referer"] = self.openrouter_referer
+        if self.openrouter_title:
+            headers["X-Title"] = self.openrouter_title
+        if headers:
+            params["default_headers"] = headers
+        return params
 
     @property
     def fallback_params(self):
