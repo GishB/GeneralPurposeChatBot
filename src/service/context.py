@@ -7,12 +7,24 @@ from modules.langfuse_ext import LangfuseClient
 from modules.llm_ext import FallbackChatOpenAI
 from modules.postgres_ext import PostgresClient
 from modules.redis_ext import RedisAdapter, UserRateLimiter
+from modules.redis_ext.job_store import ChatJobStore
 from service.base import Singleton
 from service.config import APP_CONFIG, Secrets
 from service.logger import ContextVarsContainer, LoggerConfigurator
 
 
 class AppContext(metaclass=Singleton):
+    @property
+    def job_store(self) -> ChatJobStore:
+        return ChatJobStore(
+            host=self._redis_base_params.host,
+            port=self._redis_base_params.port,
+            password=self._redis_base_params.password,
+            db=APP_CONFIG.app.chat_job_redis_db,
+            ttl=APP_CONFIG.app.chat_job_ttl_seconds,
+            logger=self.logger,
+        )
+
     @property
     def rate_limiter(self) -> UserRateLimiter:
         return UserRateLimiter(
@@ -141,6 +153,7 @@ class AppContext(metaclass=Singleton):
         self._postgres_ext: PostgresClient | None = None
         self._profkom_agent: UnionAgent | None = None
         self._rate_limiter: UserRateLimiter | None = None
+        self._job_store: ChatJobStore | None = None
 
         self.logger.info("App context initialized.")
         self.logger.info(f"{self.__class__.__name__}")
@@ -159,6 +172,11 @@ class AppContext(metaclass=Singleton):
         if not self._chroma_client:
             self._chroma_client = self.chroma_ext
         return self._chroma_client
+
+    async def get_job_store(self) -> ChatJobStore:
+        if not self._job_store:
+            self._job_store = self.job_store
+        return self._job_store
 
     async def get_ratelimiter(self) -> UserRateLimiter:
         if not self._rate_limiter:
@@ -212,6 +230,8 @@ class AppContext(metaclass=Singleton):
         self.logger.info(f"Postgres is healthy {self._postgres_ext.health_check()}")
         await self.get_ratelimiter()
         self.logger.info(f"Rate Limiter is healthy {self._rate_limiter.health_check()}")
+        await self.get_job_store()
+        self.logger.info(f"Job store is healthy {self._job_store.health_check()}")
 
         self.get_agent()
 
