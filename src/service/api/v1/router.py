@@ -248,8 +248,14 @@ async def chat(
 
 
 @router.get("/chat/{job_id}")
-async def chat_status(job_id: str, headers: dict = Depends(common_headers)):
-    """Опрос статуса асинхронной задачи генерации."""
+async def chat_status(job_id: str):
+    """Опрос статуса асинхронной задачи генерации.
+
+    Поиск задачи выполняется только по job_id (path-параметр), поэтому
+    системные заголовки здесь не требуются. В частности, x-user-id не
+    запрашивается: опрашивающий клиент (backend) его не присылает на GET,
+    а корреляция логов по x-trace-id обеспечивается middleware.
+    """
     job_store = await APP_CTX.get_job_store()
     job = await job_store.get(job_id)
     if job is None:
