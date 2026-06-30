@@ -190,10 +190,14 @@ async def chat(
     allowed, current = rate_limiter.check_and_increment(user_id=headers.get("x-user-id"))
     if not allowed:
         ttl = rate_limiter.ttl(user_id=headers.get("x-user-id"))
-        return AgentChatResponse(
-            response=f""" Вы превысили свой лимит обращений к профсоюзному консультанту. \n
-            Возврашайтесь снова через {ttl} секунд.
-            """
+        return JSONResponse(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            content={
+                "status": "error",
+                "code": "RATE_LIMIT_EXCEEDED",
+                "message": f"Вы превысили лимит обращений к профсоюзному консультанту. Возвращайтесь снова через {ttl} секунд.",
+                "retry_after": ttl,
+            },
         )
 
     logger.debug(f"Длина запроса на входе: {len(body.text)}")
