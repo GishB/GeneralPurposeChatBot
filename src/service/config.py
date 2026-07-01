@@ -334,6 +334,7 @@ class ChromaSettings(BaseAppSettings):
     openai_api_key: str = Field(validation_alias="OPENAI_API_KEY", default="")
     openai_folder_id: str = Field(validation_alias="OPENAI_FOLDER_ID", default="")
     chroma_max_rag_documents: int = Field(validation_alias="CHROMA_MAX_RAG_DOCUMENTS", default=42)
+    chroma_topk_documents: int = Field(validation_alias="CHROMA_TOPK_DOCUMENTS", default=5)
     collection_name: str = Field(validation_alias="COLLECTION_NAME", default="PRODUCTION_PROFKOM")
     embeding_api: str = Field(
         validation_alias="EMBEDDING_API",
@@ -380,6 +381,8 @@ class PostgreSettings(BaseAppSettings):
     history_limit: int = Field(validation_alias="HISTORY_LIMIT", default=10)
 
     loop_max_generation: int = Field(validation_alias="LOOP_MAX_GENERATION", default=2)
+
+    answer_max_concurrent: int = Field(validation_alias="ANSWER_MAX_CONCURRENT", default=8)
 
     @property
     def encoded_pass(self) -> str:

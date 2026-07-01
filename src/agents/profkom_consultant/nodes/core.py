@@ -38,10 +38,12 @@ class UnionAgent(BaseAgentNodes, ThinkTwiceNodes):
         self.HISTORY_LIMIT = kwargs.get("HISTORY_LIMIT", 10)
         self.COLLECTION_NAME = kwargs.get("COLLECTION_NAME", "PRODUCTION_PROFKOM")
         self.MAX_LOOP_GENERATION = kwargs.get("LOOP_MAX_GENERATION", self.MAX_LOOP_GENERATION)
+        self.ANSWER_MAX_CONCURRENT = kwargs.get("ANSWER_MAX_CONCURRENT", 8)
 
         self.logger.info(f"HISTORY_LIMIT: {self.HISTORY_LIMIT}")
         self.logger.info(f"COLLECTION_NAME: {self.COLLECTION_NAME}")
         self.logger.info(f"MAX_LOOP_GENERATION: {self.MAX_LOOP_GENERATION}")
+        self.logger.info(f"ANSWER_MAX_CONCURRENT: {self.ANSWER_MAX_CONCURRENT}")
 
     async def _detect_topics_for_question(self, question: str) -> str:
         """Detects topics based on question.
@@ -110,7 +112,7 @@ class UnionAgent(BaseAgentNodes, ThinkTwiceNodes):
             except Exception as e:
                 self.logger.error(f"Error at decompose_question: {e}")
 
-    async def answer_parts_async(self, state: AgentState, max_concurrent: int = 8) -> AgentState:
+    async def answer_parts_async(self, state: AgentState) -> AgentState:
         """Генерируем асинхронные ответы на список вопросов.
 
         Note:
@@ -121,7 +123,7 @@ class UnionAgent(BaseAgentNodes, ThinkTwiceNodes):
         """
         async with self._node_span("answer_parts_async", state) as span:
             state["answers"] = []
-            semaphore = asyncio.Semaphore(max_concurrent)
+            semaphore = asyncio.Semaphore(self.ANSWER_MAX_CONCURRENT)
 
             prompt = self.langfuse_client.get_prompt("query_worker").get_langchain_prompt()
             prompt = ChatPromptTemplate.from_template(prompt)
