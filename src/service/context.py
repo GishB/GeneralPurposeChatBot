@@ -54,6 +54,7 @@ class AppContext(metaclass=Singleton):
             **{
                 "COLLECTION_NAME": self._chroma_base_params.collection_name,
                 "HISTORY_LIMIT": self._postgres_base_params.history_limit,
+                "LOOP_MAX_GENERATION": self._postgres_base_params.loop_max_generation,
             },
         )
 

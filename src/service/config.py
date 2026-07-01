@@ -379,6 +379,8 @@ class PostgreSettings(BaseAppSettings):
 
     history_limit: int = Field(validation_alias="HISTORY_LIMIT", default=10)
 
+    loop_max_generation: int = Field(validation_alias="LOOP_MAX_GENERATION", default=2)
+
     @property
     def encoded_pass(self) -> str:
         from urllib.parse import quote_plus

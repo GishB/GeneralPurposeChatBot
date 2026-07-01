@@ -7,7 +7,7 @@ from ..utils import parse_json_response
 class ThinkTwiceNodes:
     """Класс свойств умного размышления для агента."""
 
-    MAX_LOOP_GENERATION = 3
+    MAX_LOOP_GENERATION = 2
 
     async def check_user_answer(self, state: AgentState) -> AgentState:
         """Проверяет, покрыт ли исходный вопрос (text) в final_answer.
@@ -18,7 +18,7 @@ class ThinkTwiceNodes:
         Returns:
             Dict с обновлённым status и counter_loop.
             - status="DONE" если final_answer релевантен text.
-            - status="AGAIN" + counter_loop +=1 если нет (max 3).
+            - status="AGAIN" + counter_loop +=1 если нет (max 2).
         """
         async with self._node_span("check_user_answer", state) as span:
             prompt = self.langfuse_client.get_prompt("check_user_answer").get_langchain_prompt()
