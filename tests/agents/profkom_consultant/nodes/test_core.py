@@ -57,6 +57,28 @@ class TestSummaryLLMWiring:
         assert agent.summary_llm is reasoning
 
 
+class TestCriticLLMWiring:
+    def test_critic_role_is_exposed(self):
+        sentinel = object()
+        agent = _build_agent(
+            {
+                "default": object(),
+                "reasoning": object(),
+                "validation": object(),
+                "summary": object(),
+                "critic": sentinel,
+            }
+        )
+
+        assert agent.critic_llm is sentinel
+
+    def test_critic_falls_back_to_reasoning(self):
+        reasoning = object()
+        agent = _build_agent({"default": object(), "reasoning": reasoning})
+
+        assert agent.critic_llm is reasoning
+
+
 class TestCollectFinalAnswerUsesSummaryLLM:
     async def test_collect_final_answer_invokes_summary_llm(self):
         summary_llm = FakeLLM("SUMMARY")

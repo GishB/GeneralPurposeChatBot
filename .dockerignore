@@ -33,3 +33,22 @@ venv/
 .venv/
 env/
 ENV/
+
+# Логи и артефакты покрытия/сборки
+*.log
+coverage.xml
+dist/
+*.egg-info/
+
+# Тесты и документация (в рантайм-образ не нужны)
+tests/
+docs/
+*.md
+!README.md
+
+# Кэши инструментов и планы
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.kimi-plans/
+.pre-commit-config.yaml

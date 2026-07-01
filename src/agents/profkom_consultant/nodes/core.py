@@ -28,6 +28,7 @@ class UnionAgent(BaseAgentNodes, ThinkTwiceNodes):
         self.reasoning_llm = llms.get("reasoning") or self.llm
         self.validation_llm = llms.get("validation") or self.llm
         self.summary_llm = llms.get("summary") or self.reasoning_llm
+        self.critic_llm = llms.get("critic") or self.reasoning_llm
         self.logger.info(f"LLM keys {llms.keys()}")
 
         self.cache = cache

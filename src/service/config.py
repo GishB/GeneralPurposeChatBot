@@ -143,6 +143,13 @@ class LLMSettings(BaseAppSettings):
         validation_alias="LLM_SUMMARY_REASONING_EFFORT", default="low"
     )
 
+    critic_model_name: str = Field(
+        validation_alias="LLM_CRITIC_MODEL_NAME", default="deepseek/deepseek-v4-pro"
+    )
+    critic_reasoning_effort: str = Field(
+        validation_alias="LLM_CRITIC_REASONING_EFFORT", default="low"
+    )
+
     @staticmethod
     def _reasoning_extra_body(effort: str) -> dict | None:
         """OpenRouter `reasoning` для заданного уровня усилий.
@@ -253,6 +260,34 @@ class LLMSettings(BaseAppSettings):
             "max_retries": self.max_retries,
         }
         extra_body = self._reasoning_extra_body(self.summary_reasoning_effort)
+        if extra_body is not None:
+            params["extra_body"] = extra_body
+        headers = {}
+        if self.openrouter_referer:
+            headers["HTTP-Referer"] = self.openrouter_referer
+        if self.openrouter_title:
+            headers["X-Title"] = self.openrouter_title
+        if headers:
+            params["default_headers"] = headers
+        return params
+
+    @property
+    def critic_params(self):
+        """Параметры LLM для ноды критики (check_user_answer, собственная модель, без провайдер-роутинга).
+
+        Note:
+            extra_body берётся из `_reasoning_extra_body`, поэтому НЕ содержит
+            `provider.order` — это обязательно, иначе провайдеры из прод-конфига не
+            обслуживают модель критики и запрос падает с 404.
+        """
+        params = {
+            "model": self.critic_model_name,
+            "temperature": self.temperature,
+            "openai_api_key": self.api_key,
+            "openai_api_base": self.api_base,
+            "max_retries": self.max_retries,
+        }
+        extra_body = self._reasoning_extra_body(self.critic_reasoning_effort)
         if extra_body is not None:
             params["extra_body"] = extra_body
         headers = {}
