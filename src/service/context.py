@@ -46,6 +46,7 @@ class AppContext(metaclass=Singleton):
                 "reasoning": self.reasoning_llm,
                 "validation": self.validation_llm,
                 "summary": self.summary_llm,
+                "critic": self.critic_llm,
             },
             cache=self.redis_ext,
             langfuse_client=self.langfuse_ext.client,
@@ -87,6 +88,15 @@ class AppContext(metaclass=Singleton):
         """LLM для ноды суммаризации — собственная модель без провайдер-роутинга."""
         return FallbackChatOpenAI(
             primary_params=self._llm_base_params.summary_params,
+            fallback_params=self._llm_base_params.fallback_params,
+            logger=self.logger,
+        )
+
+    @property
+    def critic_llm(self):
+        """LLM для ноды критики (check_user_answer) — собственная модель без провайдер-роутинга."""
+        return FallbackChatOpenAI(
+            primary_params=self._llm_base_params.critic_params,
             fallback_params=self._llm_base_params.fallback_params,
             logger=self.logger,
         )
