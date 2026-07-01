@@ -73,7 +73,9 @@ class ThinkTwiceNodes:
         async with self._node_span("generate_additional_questions", state) as span:
             prompt = self.langfuse_client.get_prompt("generate_additional_questions").get_langchain_prompt()
             prompt = ChatPromptTemplate.from_template(prompt)
-            chain = prompt | self.llm
+            # Регенерация после провала flash: доген вопросов выполняем сильной моделью
+            # (роль critic = v4-pro, тот же think-twice кластер), чтобы второй заход был качественнее.
+            chain = prompt | self.critic_llm
             response = await chain.ainvoke(
                 {
                     "question": state["text"],
