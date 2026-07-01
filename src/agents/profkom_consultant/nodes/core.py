@@ -27,6 +27,7 @@ class UnionAgent(BaseAgentNodes, ThinkTwiceNodes):
         self.llm = llms.get("default")
         self.reasoning_llm = llms.get("reasoning") or self.llm
         self.validation_llm = llms.get("validation") or self.llm
+        self.summary_llm = llms.get("summary") or self.reasoning_llm
         self.logger.info(f"LLM keys {llms.keys()}")
 
         self.cache = cache
@@ -169,7 +170,7 @@ class UnionAgent(BaseAgentNodes, ThinkTwiceNodes):
                 answers_text = "\n".join(f"{i + 1}. {ans}" for i, ans in enumerate(state["answers"]) if ans)
                 prompt = self.langfuse_client.get_prompt("summary_response").get_langchain_prompt()
                 prompt = ChatPromptTemplate.from_template(prompt)
-                chain = prompt | self.reasoning_llm
+                chain = prompt | self.summary_llm
                 # TO DO: CHECK что у нас огромный промпт не ломает ответ
                 response = await chain.ainvoke(
                     {

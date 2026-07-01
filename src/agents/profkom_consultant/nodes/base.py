@@ -98,6 +98,9 @@ class BaseAgentNodes:
 
             except Exception as e:
                 self.logger.error(f"Validate error at validate_input: {e}")
+                state["is_valid"] = False
+                state["final_answer"] = "Не удалось обработать запрос. Пожалуйста, повторите свой вопрос ещё раз."
+                return state
 
     async def validate_final_answer(self, state: AgentState) -> AgentState:
         """Проверяем, что текст ответа модели соответсвует публичной политики.
@@ -114,7 +117,10 @@ class BaseAgentNodes:
             try:
                 cached_result = self.cache.get(meta_info="validate_final_answer", query=final_answer)
                 if cached_result:
-                    state["is_valid"] = cached_result.get("json").get("is_valid") or True
+                    cached_valid = bool(cached_result.get("json", {}).get("is_valid"))
+                    state["is_valid"] = cached_valid
+                    if not cached_valid:
+                        state["final_answer"] = "Не прошёл валидацию"
                     return state
                 else:
                     prompt = self.langfuse_client.get_prompt("policy_validation").get_langchain_prompt()
@@ -139,6 +145,9 @@ class BaseAgentNodes:
 
             except Exception as e:
                 self.logger.error(f"Error at validate_final_answer: {e}")
+                state["is_valid"] = False
+                state["final_answer"] = "Не удалось обработать запрос. Пожалуйста, повторите свой вопрос ещё раз."
+                return state
 
     def update_user_history_context(self, state: AgentState) -> AgentState:
         """Обновляет историю вопросов/ответов: аппендит текущий вопрос + ответ, тримирует до HISTORY_LIMIT.
