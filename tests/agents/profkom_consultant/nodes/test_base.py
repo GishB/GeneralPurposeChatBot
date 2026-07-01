@@ -50,3 +50,28 @@ class TestUpdateUserHistoryContext:
         assert len(result["user_history"]) == len(result["model_answers"])
         assert result["user_history"][-1] == "вопрос 3"
         assert result["model_answers"][-1] == "ответ 3"
+
+
+class TestValidateFinalAnswer:
+    def _agent(self, cached):
+        instance = BaseAgentNodes.__new__(BaseAgentNodes)
+        instance.logger = MagicMock()
+        instance.cache = MagicMock()
+        instance.cache.get.return_value = cached
+        return instance
+
+    async def test_cached_invalid_stays_false(self):
+        agent = self._agent({"json": {"is_valid": False}})
+
+        result = await agent.validate_final_answer({"final_answer": "какой-то ответ"})
+
+        assert result["is_valid"] is False
+        assert result["final_answer"] == "Не прошёл валидацию"
+
+    async def test_cached_valid_stays_true(self):
+        agent = self._agent({"json": {"is_valid": True}})
+
+        result = await agent.validate_final_answer({"final_answer": "нормальный ответ"})
+
+        assert result["is_valid"] is True
+

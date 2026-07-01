@@ -130,10 +130,17 @@ class LLMSettings(BaseAppSettings):
     )
 
     validation_model_name: str = Field(
-        validation_alias="LLM_VALIDATION_MODEL_NAME", default="nvidia/nemotron-3-nano-30b-a3b"
+        validation_alias="LLM_VALIDATION_MODEL_NAME", default="deepseek/deepseek-v4-flash"
     )
     validation_reasoning_effort: str = Field(
         validation_alias="LLM_VALIDATION_REASONING_EFFORT", default="none"
+    )
+
+    summary_model_name: str = Field(
+        validation_alias="LLM_SUMMARY_MODEL_NAME", default="deepseek/deepseek-v4-pro"
+    )
+    summary_reasoning_effort: str = Field(
+        validation_alias="LLM_SUMMARY_REASONING_EFFORT", default="low"
     )
 
     @staticmethod
@@ -218,6 +225,34 @@ class LLMSettings(BaseAppSettings):
             "max_retries": self.max_retries,
         }
         extra_body = self.openrouter_extra_body_no_provider
+        if extra_body is not None:
+            params["extra_body"] = extra_body
+        headers = {}
+        if self.openrouter_referer:
+            headers["HTTP-Referer"] = self.openrouter_referer
+        if self.openrouter_title:
+            headers["X-Title"] = self.openrouter_title
+        if headers:
+            params["default_headers"] = headers
+        return params
+
+    @property
+    def summary_params(self):
+        """Параметры LLM для ноды суммаризации (собственная модель, без провайдер-роутинга).
+
+        Note:
+            extra_body берётся из `_reasoning_extra_body`, поэтому НЕ содержит
+            `provider.order` — это обязательно, иначе провайдеры из прод-конфига не
+            обслуживают модель суммаризации и запрос падает с 404.
+        """
+        params = {
+            "model": self.summary_model_name,
+            "temperature": self.temperature,
+            "openai_api_key": self.api_key,
+            "openai_api_base": self.api_base,
+            "max_retries": self.max_retries,
+        }
+        extra_body = self._reasoning_extra_body(self.summary_reasoning_effort)
         if extra_body is not None:
             params["extra_body"] = extra_body
         headers = {}
