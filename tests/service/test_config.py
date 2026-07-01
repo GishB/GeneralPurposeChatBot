@@ -1,4 +1,18 @@
-from service.config import LLMSettings
+from service.config import ChromaSettings, LLMSettings, PostgreSettings
+
+
+class TestChromaDefaults:
+    def test_topk_documents_default(self):
+        settings = ChromaSettings()
+
+        assert settings.chroma_topk_documents == 5
+
+
+class TestPostgresDefaults:
+    def test_answer_max_concurrent_default(self):
+        settings = PostgreSettings()
+
+        assert settings.answer_max_concurrent == 8
 
 
 class TestSummaryParams:

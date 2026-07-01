@@ -36,6 +36,25 @@ def _build_agent(llms: dict) -> UnionAgent:
     )
 
 
+class TestAnswerMaxConcurrentWiring:
+    def test_kwarg_sets_attribute(self):
+        agent = UnionAgent(
+            logger=MagicMock(),
+            llms={"default": object(), "reasoning": object()},
+            cache=MagicMock(),
+            langfuse_client=MagicMock(),
+            chroma_client=MagicMock(),
+            ANSWER_MAX_CONCURRENT=3,
+        )
+
+        assert agent.ANSWER_MAX_CONCURRENT == 3
+
+    def test_defaults_to_eight(self):
+        agent = _build_agent({"default": object(), "reasoning": object()})
+
+        assert agent.ANSWER_MAX_CONCURRENT == 8
+
+
 class TestSummaryLLMWiring:
     def test_summary_role_is_exposed(self):
         sentinel = object()

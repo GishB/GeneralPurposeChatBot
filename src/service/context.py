@@ -55,6 +55,7 @@ class AppContext(metaclass=Singleton):
                 "COLLECTION_NAME": self._chroma_base_params.collection_name,
                 "HISTORY_LIMIT": self._postgres_base_params.history_limit,
                 "LOOP_MAX_GENERATION": self._postgres_base_params.loop_max_generation,
+                "ANSWER_MAX_CONCURRENT": self._postgres_base_params.answer_max_concurrent,
             },
         )
 
@@ -126,6 +127,7 @@ class AppContext(metaclass=Singleton):
                 "API_KEY": self._chroma_base_params.openai_api_key,
                 "FOLDER_ID": self._chroma_base_params.openai_folder_id,
                 "CHROMA_MAX_RAG_DOCUMENTS": self._chroma_base_params.chroma_max_rag_documents,
+                "CHROMA_TOPK_DOCUMENTS": self._chroma_base_params.chroma_topk_documents,
                 "CHROMA_HOST": self._chroma_base_params.host,
                 "CHROMA_PORT": self._chroma_base_params.port,
             },
