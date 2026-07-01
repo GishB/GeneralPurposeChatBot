@@ -37,9 +37,11 @@ class UnionAgent(BaseAgentNodes, ThinkTwiceNodes):
 
         self.HISTORY_LIMIT = kwargs.get("HISTORY_LIMIT", 10)
         self.COLLECTION_NAME = kwargs.get("COLLECTION_NAME", "PRODUCTION_PROFKOM")
+        self.MAX_LOOP_GENERATION = kwargs.get("LOOP_MAX_GENERATION", self.MAX_LOOP_GENERATION)
 
         self.logger.info(f"HISTORY_LIMIT: {self.HISTORY_LIMIT}")
         self.logger.info(f"COLLECTION_NAME: {self.COLLECTION_NAME}")
+        self.logger.info(f"MAX_LOOP_GENERATION: {self.MAX_LOOP_GENERATION}")
 
     async def _detect_topics_for_question(self, question: str) -> str:
         """Detects topics based on question.
