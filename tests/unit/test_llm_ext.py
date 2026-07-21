@@ -105,3 +105,15 @@ def test_fallback_raises_when_no_fallback():
 
     with pytest.raises(RuntimeError, match="Primary LLM failed and no fallback"):
         wrapper.invoke("hello")
+
+
+def test_identifying_params_masks_api_keys():
+    wrapper = _build_wrapper(FakePrimary(), fallback=FakeFallback())
+
+    params = wrapper._identifying_params
+
+    assert params["primary"]["openai_api_key"] == "***"
+    assert params["fallback"]["openai_api_key"] == "***"
+    assert params["primary"]["model"] == "primary"
+    # исходные параметры не мутируют
+    assert wrapper.primary_params["openai_api_key"] == "pk"
