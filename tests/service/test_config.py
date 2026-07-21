@@ -40,6 +40,36 @@ class TestSummaryParams:
             assert "provider" not in extra_body
 
 
+class TestFallbackParams:
+    def test_default_fallback_uses_simple_model(self):
+        settings = LLMSettings()
+
+        assert settings.fallback_params["model"] == settings.fallback_llm_model_name
+
+    def test_complex_fallback_uses_complex_model(self):
+        settings = LLMSettings()
+
+        assert settings.fallback_params_complex["model"] == settings.fallback_llm_model_name_complex
+
+    def test_fallback_api_key_preferred_over_openai_env(self, monkeypatch):
+        monkeypatch.setenv("OPENAI_API_KEY", "env-key")
+        settings = LLMSettings(fallback_llm_api_key="explicit-key")
+
+        assert settings.fallback_params["openai_api_key"] == "explicit-key"
+
+    def test_fallback_api_key_falls_back_to_openai_env(self, monkeypatch):
+        monkeypatch.setenv("OPENAI_API_KEY", "env-key")
+        settings = LLMSettings(fallback_llm_api_key="")
+
+        assert settings.fallback_params["openai_api_key"] == "env-key"
+
+    def test_fallback_disabled_without_api_base(self):
+        settings = LLMSettings(fallback_llm_api_base="")
+
+        assert settings.fallback_params is None
+        assert settings.fallback_params_complex is None
+
+
 class TestCriticParams:
     def test_uses_dedicated_critic_model(self):
         settings = LLMSettings()

@@ -12,6 +12,15 @@ from langchain_core.outputs import ChatResult
 from langchain_openai import ChatOpenAI
 from openai import AuthenticationError, PermissionDeniedError, RateLimitError
 
+_KEY_PARAMS = ("openai_api_key", "api_key")
+
+
+def _mask_api_keys(params: dict[str, Any] | None) -> dict[str, Any] | None:
+    """Возвращает копию параметров с замаскированными значениями API-ключей."""
+    if params is None:
+        return None
+    return {k: ("***" if k in _KEY_PARAMS and v else v) for k, v in params.items()}
+
 
 class FallbackChatOpenAI(BaseChatModel):
     """ChatOpenAI-совместимая обёртка с fallback на YandexGPT.
@@ -89,7 +98,11 @@ class FallbackChatOpenAI(BaseChatModel):
 
     @property
     def _identifying_params(self) -> dict[str, Any]:
-        return {"primary": self.primary_params, "fallback": self.fallback_params}
+        """Параметры для сериализации/логов с замаскированными API-ключами."""
+        return {
+            "primary": _mask_api_keys(self.primary_params),
+            "fallback": _mask_api_keys(self.fallback_params),
+        }
 
     def invoke(self, input_value: Any, config: Any | None = None) -> BaseMessage:
         return self._try_invoke("invoke", input_value, config)

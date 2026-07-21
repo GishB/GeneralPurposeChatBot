@@ -1,5 +1,6 @@
 import os
 from logging import DEBUG, INFO
+from typing import Any
 
 from dotenv import find_dotenv, load_dotenv
 from pydantic import Field, field_validator, model_validator
@@ -106,10 +107,16 @@ class LLMSettings(BaseAppSettings):
     openrouter_provider_order: str = Field(validation_alias="OPENROUTER_PROVIDER_ORDER", default="")
     openrouter_allow_fallbacks: bool = Field(validation_alias="OPENROUTER_ALLOW_FALLBACKS", default=True)
 
-    fallback_llm_model_name: str = Field(validation_alias="FALLBACK_LLM_MODEL_NAME", default="yandexgpt")
+    fallback_llm_model_name: str = Field(
+        validation_alias="FALLBACK_LLM_MODEL_NAME", default="gpt://folder-id/deepseek-v4-flash"
+    )
+    fallback_llm_model_name_complex: str = Field(
+        validation_alias="FALLBACK_LLM_MODEL_NAME_COMPLEX", default="gpt://folder-id/gpt-oss-120b"
+    )
     fallback_llm_api_base: str = Field(
         validation_alias="FALLBACK_LLM_API_BASE", default="https://llm.api.cloud.yandex.net/v1"
     )
+    fallback_llm_api_key: str = Field(validation_alias="FALLBACK_LLM_API_KEY", default="")
 
     @model_validator(mode="before")
     @classmethod
@@ -299,17 +306,38 @@ class LLMSettings(BaseAppSettings):
             params["default_headers"] = headers
         return params
 
-    @property
-    def fallback_params(self):
-        if not self.fallback_llm_api_base or not self.fallback_llm_model_name:
+    def _fallback_params_for(self, model_name: str) -> dict | None:
+        """Параметры fallback-LLM (Yandex Foundation Models) для заданной модели.
+
+        Args:
+            model_name: URI модели вида ``gpt://<folder_id>/<model>``.
+
+        Returns:
+            Словарь параметров для ChatOpenAI или None, если fallback выключен.
+
+        Note:
+            Ключ берётся из ``FALLBACK_LLM_API_KEY``, при его отсутствии — из
+            ``OPENAI_API_KEY`` (обратная совместимость с embeddings-конфигом).
+        """
+        if not self.fallback_llm_api_base or not model_name:
             return None
         return {
-            "model": self.fallback_llm_model_name,
+            "model": model_name,
             "temperature": self.temperature,
-            "openai_api_key": os.getenv("OPENAI_API_KEY", ""),
+            "openai_api_key": self.fallback_llm_api_key or os.getenv("OPENAI_API_KEY", ""),
             "openai_api_base": self.fallback_llm_api_base,
             "max_retries": self.max_retries,
         }
+
+    @property
+    def fallback_params(self):
+        """Fallback для простых нод (default/reasoning/validation) — deepseek-v4-flash."""
+        return self._fallback_params_for(self.fallback_llm_model_name)
+
+    @property
+    def fallback_params_complex(self):
+        """Fallback для сложных нод (summary/critic) — gpt-oss-120b."""
+        return self._fallback_params_for(self.fallback_llm_model_name_complex)
 
 
 class LangFuseSettings(BaseAppSettings):

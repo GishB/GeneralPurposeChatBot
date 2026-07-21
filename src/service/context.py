@@ -90,7 +90,7 @@ class AppContext(metaclass=Singleton):
         """LLM для ноды суммаризации — собственная модель без провайдер-роутинга."""
         return FallbackChatOpenAI(
             primary_params=self._llm_base_params.summary_params,
-            fallback_params=self._llm_base_params.fallback_params,
+            fallback_params=self._llm_base_params.fallback_params_complex,
             logger=self.logger,
         )
 
@@ -99,7 +99,7 @@ class AppContext(metaclass=Singleton):
         """LLM для ноды критики (check_user_answer) — собственная модель без провайдер-роутинга."""
         return FallbackChatOpenAI(
             primary_params=self._llm_base_params.critic_params,
-            fallback_params=self._llm_base_params.fallback_params,
+            fallback_params=self._llm_base_params.fallback_params_complex,
             logger=self.logger,
         )
 
