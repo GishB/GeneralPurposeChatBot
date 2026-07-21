@@ -69,10 +69,10 @@ class AppContext(metaclass=Singleton):
 
     @property
     def reasoning_llm(self):
-        """LLM с включённым reasoning (low) — только для нод summary и критики."""
+        """LLM с включённым reasoning (low) — для ноды декомпозиции вопроса."""
         return FallbackChatOpenAI(
             primary_params=self._llm_base_params.reasoning_node_params,
-            fallback_params=self._llm_base_params.fallback_params,
+            fallback_params=self._llm_base_params.fallback_params_decompose,
             logger=self.logger,
         )
 

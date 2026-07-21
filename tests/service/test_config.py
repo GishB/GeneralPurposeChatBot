@@ -51,6 +51,11 @@ class TestFallbackParams:
 
         assert settings.fallback_params_complex["model"] == settings.fallback_llm_model_name_complex
 
+    def test_decompose_fallback_uses_decompose_model(self):
+        settings = LLMSettings()
+
+        assert settings.fallback_params_decompose["model"] == settings.fallback_llm_model_name_decompose
+
     def test_fallback_api_key_preferred_over_openai_env(self, monkeypatch):
         monkeypatch.setenv("OPENAI_API_KEY", "env-key")
         settings = LLMSettings(fallback_llm_api_key="explicit-key")

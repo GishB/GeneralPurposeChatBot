@@ -113,6 +113,9 @@ class LLMSettings(BaseAppSettings):
     fallback_llm_model_name_complex: str = Field(
         validation_alias="FALLBACK_LLM_MODEL_NAME_COMPLEX", default="gpt://folder-id/gpt-oss-120b"
     )
+    fallback_llm_model_name_decompose: str = Field(
+        validation_alias="FALLBACK_LLM_MODEL_NAME_DECOMPOSE", default="gpt://folder-id/qwen3-235b-a22b-fp8"
+    )
     fallback_llm_api_base: str = Field(
         validation_alias="FALLBACK_LLM_API_BASE", default="https://llm.api.cloud.yandex.net/v1"
     )
@@ -331,13 +334,18 @@ class LLMSettings(BaseAppSettings):
 
     @property
     def fallback_params(self):
-        """Fallback для простых нод (default/reasoning/validation) — deepseek-v4-flash."""
+        """Fallback для простых нод (default/validation) — deepseek-v4-flash."""
         return self._fallback_params_for(self.fallback_llm_model_name)
 
     @property
     def fallback_params_complex(self):
         """Fallback для сложных нод (summary/critic) — gpt-oss-120b."""
         return self._fallback_params_for(self.fallback_llm_model_name_complex)
+
+    @property
+    def fallback_params_decompose(self):
+        """Fallback для ноды декомпозиции (decompose_question) — qwen3-235b-a22b-fp8."""
+        return self._fallback_params_for(self.fallback_llm_model_name_decompose)
 
 
 class LangFuseSettings(BaseAppSettings):
