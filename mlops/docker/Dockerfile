@@ -34,6 +34,12 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv build && "$UV_VENV/bin/pip" install --no-cache-dir dist/*.whl
 
+# Прогрев кэша tiktoken: BPE-файлы (cl100k_base для BM25Reranker, o200k_base
+# для токен-счётчиков langchain_openai) скачиваются сейчас, а не при старте
+# пода — иначе под REGISTRY_ONLY старт падает с ConnectionReset.
+ENV TIKTOKEN_CACHE_DIR=/opt/app-root/.cache/tiktoken
+RUN "$UV_VENV/bin/python" -c "import tiktoken; tiktoken.get_encoding('cl100k_base'); tiktoken.get_encoding('o200k_base')"
+
 ################################################################################
 # Final — чистый slim, только рантайм: venv + src + libpq5, без компилятора/uv/pip-кэша
 ################################################################################
@@ -48,6 +54,7 @@ ENV LC_ALL=C.UTF-8 \
     PYTHONHASHSEED=random \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
+    TIKTOKEN_CACHE_DIR=/opt/app-root/.cache/tiktoken \
     PATH="/opt/app-root/.venv/bin:$PATH"
 
 # Только рантайм-библиотека для psycopg + непривилегированный пользователь.
@@ -63,6 +70,7 @@ WORKDIR /opt/app-root
 
 COPY --from=builder --chown=1001:1001 /opt/app-root/.venv /opt/app-root/.venv
 COPY --from=builder --chown=1001:1001 /opt/app-root/src  /opt/app-root/src
+COPY --from=builder --chown=1001:1001 /opt/app-root/.cache/tiktoken /opt/app-root/.cache/tiktoken
 
 USER 1001
 ENTRYPOINT ["python3", "src/service/__main__.py"]
