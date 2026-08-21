@@ -3,7 +3,7 @@
 ################################################################################
 # Builder — компилятор и uv живут только здесь, в финальный образ не попадают
 ################################################################################
-FROM python:3.12-slim AS builder
+FROM cr.yandex/crpmpmr68nd85b05chnc/python:3.12-slim AS builder
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -43,7 +43,7 @@ RUN "$UV_VENV/bin/python" -c "import tiktoken; tiktoken.get_encoding('cl100k_bas
 ################################################################################
 # Final — чистый slim, только рантайм: venv + src + libpq5, без компилятора/uv/pip-кэша
 ################################################################################
-FROM python:3.12-slim AS final
+FROM cr.yandex/crpmpmr68nd85b05chnc/python:3.12-slim AS final
 
 ENV LC_ALL=C.UTF-8 \
     LANG=C.UTF-8 \
