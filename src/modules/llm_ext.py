@@ -10,7 +10,7 @@ from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import BaseMessage
 from langchain_core.outputs import ChatResult
 from langchain_openai import ChatOpenAI
-from openai import AuthenticationError, PermissionDeniedError, RateLimitError
+from openai import APITimeoutError, AuthenticationError, PermissionDeniedError, RateLimitError
 
 _KEY_PARAMS = ("openai_api_key", "api_key")
 
@@ -59,7 +59,7 @@ class FallbackChatOpenAI(BaseChatModel):
         """Синхронный вызов для BaseChatModel — делегирует primary с fallback."""
         try:
             return self._primary._generate(messages, stop=stop, run_manager=run_manager, **kwargs)
-        except (AuthenticationError, PermissionDeniedError, RateLimitError) as e:
+        except (AuthenticationError, PermissionDeniedError, RateLimitError, APITimeoutError) as e:
             self._log("warning", f"Primary LLM failed ({e.__class__.__name__}), trying fallback")
         except Exception as e:  # noqa: BLE001
             self._log("error", f"Primary LLM unexpected error: {e}")
@@ -77,7 +77,7 @@ class FallbackChatOpenAI(BaseChatModel):
         """Асинхронный вызов для BaseChatModel — делегирует primary с fallback."""
         try:
             return await self._primary._agenerate(messages, stop=stop, run_manager=run_manager, **kwargs)
-        except (AuthenticationError, PermissionDeniedError, RateLimitError) as e:
+        except (AuthenticationError, PermissionDeniedError, RateLimitError, APITimeoutError) as e:
             self._log("warning", f"Primary LLM async failed ({e.__class__.__name__}), trying fallback")
         except Exception as e:  # noqa: BLE001
             self._log("error", f"Primary LLM unexpected async error: {e}")
@@ -113,7 +113,7 @@ class FallbackChatOpenAI(BaseChatModel):
             if config is not None:
                 return await method(input_value, config=config)
             return await method(input_value)
-        except (AuthenticationError, PermissionDeniedError, RateLimitError) as e:
+        except (AuthenticationError, PermissionDeniedError, RateLimitError, APITimeoutError) as e:
             self._log("warning", f"Primary LLM async failed ({e.__class__.__name__}), trying fallback")
             return await self._afallback_invoke("ainvoke", input_value, config)
         except Exception as e:  # noqa: BLE001
@@ -132,7 +132,7 @@ class FallbackChatOpenAI(BaseChatModel):
             if config is not None:
                 return method(input_value, config=config)
             return method(input_value)
-        except (AuthenticationError, PermissionDeniedError, RateLimitError) as e:
+        except (AuthenticationError, PermissionDeniedError, RateLimitError, APITimeoutError) as e:
             self._log("warning", f"Primary LLM failed ({e.__class__.__name__}), trying fallback")
             return self._fallback_invoke(method_name, input_value, config)
         except Exception as e:  # noqa: BLE001

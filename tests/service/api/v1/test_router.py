@@ -301,9 +301,11 @@ async def test_chat_rate_limit(async_client, monkeypatch, mock_headers):
 
     response = await async_client.post("/api/v1/chat", json=payload, headers=mock_headers)
 
-    assert response.status_code == 200
+    assert response.status_code == 429
     data = response.json()
-    assert "превысили свой лимит" in data["response"]
-    assert "42" in data["response"]
+    assert data["status"] == "error"
+    assert data["code"] == "RATE_LIMIT_EXCEEDED"
+    assert data["retry_after"] == 42
+    assert "42" in data["message"]
 
 
