@@ -40,6 +40,8 @@ HEADERS_WHITE_LIST_TO_LOG = (
 
 
 def _get_decoded_body(raw_body: bytes, message_type: str, logger):
+    if not raw_body:
+        return {}
     decoded_body = {}
     try:
         decoded_body = json.loads(raw_body.decode())
