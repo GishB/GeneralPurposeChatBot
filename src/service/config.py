@@ -98,6 +98,7 @@ class LLMSettings(BaseAppSettings):
     model_name: str = Field(validation_alias="LLM_MODEL_NAME", default="deepseek/deepseek-chat")
     temperature: float = Field(validation_alias="LLM_TEMPERATURE", default=0.1)
     max_retries: int = Field(validation_alias="LLM_MAX_RETRIES", default=5)
+    request_timeout_seconds: int = Field(validation_alias="LLM_REQUEST_TIMEOUT_SECONDS", default=60)
 
     api_key: str = Field(validation_alias="LLM_API_KEY", default="")
     api_base: str = Field(validation_alias="LLM_API_BASE", default="https://openrouter.ai/api/v1")
@@ -138,6 +139,8 @@ class LLMSettings(BaseAppSettings):
     reasoning_effort_summary_critique: str = Field(
         validation_alias="LLM_REASONING_EFFORT_SUMMARY_CRITIQUE", default="low"
     )
+
+    decompose_model_name: str = Field(validation_alias="LLM_DECOMPOSE_MODEL_NAME", default="")
 
     validation_model_name: str = Field(
         validation_alias="LLM_VALIDATION_MODEL_NAME", default="deepseek/deepseek-v4-flash"
@@ -208,6 +211,7 @@ class LLMSettings(BaseAppSettings):
             "openai_api_key": self.api_key,
             "openai_api_base": self.api_base,
             "max_retries": self.max_retries,
+            "request_timeout": self.request_timeout_seconds,
         }
         extra_body = self.openrouter_extra_body
         if extra_body is not None:
@@ -228,8 +232,16 @@ class LLMSettings(BaseAppSettings):
 
     @property
     def reasoning_node_params(self):
-        """Параметры primary-LLM для нод summary/критики (reasoning low)."""
-        return self.base_params_with_reasoning(self.reasoning_effort_summary_critique)
+        """Параметры primary-LLM для ноды декомпозиции вопроса (reasoning low).
+
+        Note:
+            Модель берётся из ``LLM_DECOMPOSE_MODEL_NAME``; при пустом значении —
+            из ``LLM_MODEL_NAME`` (поведение до появления отдельной настройки).
+        """
+        params = self.base_params_with_reasoning(self.reasoning_effort_summary_critique)
+        if self.decompose_model_name:
+            params["model"] = self.decompose_model_name
+        return params
 
     @property
     def validation_params(self):
@@ -240,6 +252,7 @@ class LLMSettings(BaseAppSettings):
             "openai_api_key": self.api_key,
             "openai_api_base": self.api_base,
             "max_retries": self.max_retries,
+            "request_timeout": self.request_timeout_seconds,
         }
         extra_body = self.openrouter_extra_body_no_provider
         if extra_body is not None:
@@ -268,6 +281,7 @@ class LLMSettings(BaseAppSettings):
             "openai_api_key": self.api_key,
             "openai_api_base": self.api_base,
             "max_retries": self.max_retries,
+            "request_timeout": self.request_timeout_seconds,
         }
         extra_body = self._reasoning_extra_body(self.summary_reasoning_effort)
         if extra_body is not None:
@@ -296,6 +310,7 @@ class LLMSettings(BaseAppSettings):
             "openai_api_key": self.api_key,
             "openai_api_base": self.api_base,
             "max_retries": self.max_retries,
+            "request_timeout": self.request_timeout_seconds,
         }
         extra_body = self._reasoning_extra_body(self.critic_reasoning_effort)
         if extra_body is not None:
@@ -330,6 +345,7 @@ class LLMSettings(BaseAppSettings):
             "openai_api_key": self.fallback_llm_api_key or os.getenv("OPENAI_API_KEY", ""),
             "openai_api_base": self.fallback_llm_api_base,
             "max_retries": self.max_retries,
+            "request_timeout": self.request_timeout_seconds,
         }
 
     @property

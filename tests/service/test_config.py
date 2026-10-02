@@ -75,6 +75,37 @@ class TestFallbackParams:
         assert settings.fallback_params_complex is None
 
 
+class TestReasoningNodeParams:
+    def test_defaults_to_base_model(self):
+        settings = LLMSettings()
+
+        assert settings.reasoning_node_params["model"] == settings.model_name
+
+    def test_uses_dedicated_decompose_model(self):
+        settings = LLMSettings(decompose_model_name="gpt://folder-id/qwen3-235b-a22b-fp8")
+
+        assert settings.reasoning_node_params["model"] == "gpt://folder-id/qwen3-235b-a22b-fp8"
+
+
+class TestRequestTimeout:
+    def test_default_timeout_applied_to_all_roles(self):
+        settings = LLMSettings()
+
+        assert settings.base_params["request_timeout"] == 60
+        assert settings.reasoning_node_params["request_timeout"] == 60
+        assert settings.validation_params["request_timeout"] == 60
+        assert settings.summary_params["request_timeout"] == 60
+        assert settings.critic_params["request_timeout"] == 60
+        assert settings.fallback_params["request_timeout"] == 60
+
+    def test_timeout_from_env(self):
+        settings = LLMSettings(request_timeout_seconds=45)
+
+        assert settings.base_params["request_timeout"] == 45
+        assert settings.fallback_params_complex["request_timeout"] == 45
+        assert settings.fallback_params_decompose["request_timeout"] == 45
+
+
 class TestCriticParams:
     def test_uses_dedicated_critic_model(self):
         settings = LLMSettings()

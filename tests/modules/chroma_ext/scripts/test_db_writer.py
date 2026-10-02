@@ -29,7 +29,9 @@ class TestCollectCurrentSources:
         nested.mkdir()
         (nested / "b.docx").write_text("y")
         result = _collect_current_sources(str(tmp_path))
-        assert result == {str(tmp_path / "a.docx"), str(tmp_path / "sub" / "b.docx")}
+        # Контракт — относительные пути: именно они пишутся в metadata["source"]
+        # (data_reader.load_docx_with_metadata) и сравниваются при удалении осиротевших.
+        assert result == {"a.docx", "sub/b.docx"}
 
 
 class TestSyncDocxDirectoryToCollection:
